@@ -31,6 +31,7 @@ public class SALTauleapSEIR implements SEIR_simulator {
 	Exponential exponential;
 
 	boolean useExposed;
+    boolean isDeterministic;
 
 	/**
 	 * Constructor
@@ -43,7 +44,7 @@ public class SALTauleapSEIR implements SEIR_simulator {
 	public SALTauleapSEIR(SEIRState state0,
 			double expose, double infect, Double[] recover,
 			boolean useExposed,
-			double alpha, RandomEngine engine) {
+			double alpha, RandomEngine engine, Boolean isDeterministic) {
 		super();
 		this.state = state0.copy();
 		this.exposeRate = expose;
@@ -52,6 +53,7 @@ public class SALTauleapSEIR implements SEIR_simulator {
 		this.useExposed = useExposed;
 		this.alpha = alpha;
 		this.engine = engine;
+        this.isDeterministic = isDeterministic;
 
 		this.poissonian = new Poisson (1, engine);
 		this.exponential = new Exponential (1, engine);
@@ -102,13 +104,15 @@ public class SALTauleapSEIR implements SEIR_simulator {
 			double a2_infect = 0;
 			double a2_recover = 0;
 			*/
+            boolean infectIsCrit = false;
+            boolean recoverIsCrit = false;
+            double dtCrit = dt - t;
+            int critReactionToFire = 0;
 
+            if (!isDeterministic){
 			// Determine which reactions are "critical"
 			// and calculate next reaction time:
-			double dtCrit = dt - t;
-			int critReactionToFire = 0;
 
-			boolean infectIsCrit = false;
 			double lambda_infect = a_infect*dtCrit + 0.5*a2_infect*dtCrit*dtCrit;
 			if ((alpha>0) && (state.S < lambda_infect + alpha*Math.sqrt(lambda_infect))) {
 
@@ -123,7 +127,6 @@ public class SALTauleapSEIR implements SEIR_simulator {
 				}
 			}
 
-			boolean recoverIsCrit = false;
 			double lambda_recover = a_recover*dtCrit + 0.5*a2_recover*dtCrit*dtCrit;
 			if ((alpha>0) && (state.I < lambda_recover + alpha*Math.sqrt(lambda_recover))) {
 
@@ -144,7 +147,7 @@ public class SALTauleapSEIR implements SEIR_simulator {
 
 			// Update time:
 			t += dtCrit;
-
+            }
 			// tau-leap non-critical reactions:
 			if (infectIsCrit == false) {
 				int q = poissonian.nextInt(a_infect*dtCrit + 0.5*a2_infect*dtCrit*dtCrit);
@@ -494,7 +497,7 @@ public class SALTauleapSEIR implements SEIR_simulator {
 		RandomEngine engine = new MersenneTwister((int) Randomizer.getSeed());
 
 		// Create SALTauleapSEIR instance:
-		SALTauleapSEIR hybridTauleapSEIR = new SALTauleapSEIR(x0, expose, infect, recover, false, alpha, engine);
+		SALTauleapSEIR hybridTauleapSEIR = new SALTauleapSEIR(x0, expose, infect, recover, false, alpha, engine, false);
 
 		// Allocate and zero critical steps list:
 		List<Integer> criticalTrajectories = new ArrayList<Integer>();
