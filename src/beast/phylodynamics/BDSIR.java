@@ -86,7 +86,7 @@ public class BDSIR extends BirthDeathSkylineModel {
 
         
         int cumS = S0 - 1 ;
-        int dim = dS.length + 1 ;
+        int dim = dS.length;
         double b = birth[0]/S0 ;
         double time; 
 

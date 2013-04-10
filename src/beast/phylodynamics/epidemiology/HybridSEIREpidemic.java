@@ -118,7 +118,7 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
         if (simulationType.get().equals("hybrid"))
             hybridTauleapSEIR = new HybridTauleapSEIR(x0, expose, infect, recover[0], false, alpha);
         else
-            hybridTauleapSEIR = new SALTauleapSEIR(x0, expose, infect, recover, false, alpha, new MersenneTwister((int)Randomizer.getSeed()));
+            hybridTauleapSEIR = new SALTauleapSEIR(x0, expose, infect, recover, false, alpha, new MersenneTwister((int)Randomizer.getSeed()), false);
 
         hybridTauleapSEIR.setState(x0);
 //        List<SEIRState> trajectory = null;
@@ -187,13 +187,13 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
             return false;
         }
 
-        dS = new Integer[Nsamples];
-        dE = new Integer[Nsamples];
-        dR = new Integer[Nsamples];
+        dS = new Integer[Nsamples-1];
+        dE = new Integer[Nsamples-1];
+        dR = new Integer[Nsamples-1];
 
         SEIRState former = trajectory.get(0);
 
-        for (int i = 0; i < Nsamples; i++) {
+        for (int i = 0; i < Nsamples-1; i++) {
             SEIRState current = trajectory.get(i+1);
 
             dS[i] = former.S - current.S;
