@@ -134,7 +134,7 @@ public class CompoundSIROperator extends Operator {
             return Double.NEGATIVE_INFINITY;
         }
 
-        for (int i =0; i < m; i++){
+        for (int i =0; i < m-1; i++){
             dS_input.get().setValue(i, current.dS[i]);
             dR_input.get().setValue(i, current.dR[i]);
         }
