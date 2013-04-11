@@ -37,7 +37,7 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
 
     public Input<Integer> Nt = new Input<Integer>("Nt", "Number of timesteps in trajectory simulation", 10001);
     public Input<Integer> Nsamples = new Input<Integer>("Nsamples", "Number of samples = dimension of dS", Validate.REQUIRED);
-    public Input<Double> alpha = new Input<Double>("alpha", "threshold parameter for the transition to the SSA", Validate.REQUIRED);
+    public Input<Double> alpha = new Input<Double>("alpha", "threshold parameter for the transition to the SSA", 0.);
 
     public Input<RealParameter> exposeRate = new Input<RealParameter>("expose", "The rate at which individuals become exposed");
     public Input<Valuable> birthRateScalar = new Input<Valuable>("birth", "BirthRate = BirthRateVector * birthRateScalar, birthrate can change over time", Validate.REQUIRED);
@@ -52,6 +52,7 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
 
 
     public Input<Boolean> useExposedBoolean = new Input<Boolean>("useExposed", "Boolean, system is SIR if false, beast.epidemiology.SEIR if true", false);
+    public Input<Boolean> isDeterministic = new Input<Boolean>("isDeterministic", "Should deterministic model be used? Default: false, use stochastic model", false);
 
     public Input<String> simulationType = new Input<String>("simulationType", "which method to use for simulation: hybrid or SAL?", "hybrid", new String[]{"SAL", "hybrid"});
 
@@ -64,15 +65,15 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
     int r0 = 0;
     Boolean useExposed;
 
-    public Integer[] dS;
-    public Integer[] dE;
-    public Integer[] dR;
+    public Double[] dS;
+    public Double[] dE;
+    public Double[] dR;
     double tau;
     public double[] times;
 
-    Integer[] store_dS;
-    Integer[] store_dE;
-    Integer[] store_dR;
+    Double[] store_dS;
+    Double[] store_dE;
+    Double[] store_dR;
     double store_tau;
     int breachCount;
     int noBreachCount;
@@ -118,15 +119,15 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
         if (simulationType.get().equals("hybrid"))
             hybridTauleapSEIR = new HybridTauleapSEIR(x0, expose, infect, recover[0], false, alpha);
         else
-            hybridTauleapSEIR = new SALTauleapSEIR(x0, expose, infect, recover, false, alpha, new MersenneTwister((int)Randomizer.getSeed()), false);
+            hybridTauleapSEIR = new SALTauleapSEIR(x0, expose, infect, recover, false, alpha, new MersenneTwister((int)Randomizer.getSeed()), isDeterministic.get());
 
         hybridTauleapSEIR.setState(x0);
 //        List<SEIRState> trajectory = null;
 
-        dS = new Integer[Nsamples-1];
-        Arrays.fill(dS, 0);
-        dE = new Integer[Nsamples-1];
-        dR = new Integer[Nsamples-1];
+        dS = new Double[Nsamples-1];
+        Arrays.fill(dS, 0.);
+        dE = new Double[Nsamples-1];
+        dR = new Double[Nsamples-1];
 
 
     }
@@ -187,9 +188,9 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
             return false;
         }
 
-        dS = new Integer[Nsamples-1];
-        dE = new Integer[Nsamples-1];
-        dR = new Integer[Nsamples-1];
+        dS = new Double[Nsamples-1];
+        dE = new Double[Nsamples-1];
+        dR = new Double[Nsamples-1];
 
         SEIRState former = trajectory.get(0);
 
@@ -231,9 +232,9 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
         super.restore();
         if (store_dS != null){
 
-            final Integer[] tmpS;
-            final Integer[] tmpE;
-            final Integer[] tmpR;
+            final Double[] tmpS;
+            final Double[] tmpE;
+            final Double[] tmpR;
 
             tmpS =  store_dS;
             tmpE =  store_dE;
@@ -290,15 +291,15 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
 
     }
 
-    public Integer[] get_dS(){
+    public Double[] get_dS(){
         return dS;
     }
 
-    public Integer[] get_dE(){
+    public Double[] get_dE(){
         return dE;
     }
 
-    public Integer[] get_dR(){
+    public Double[] get_dR(){
         return dR;
     }
 

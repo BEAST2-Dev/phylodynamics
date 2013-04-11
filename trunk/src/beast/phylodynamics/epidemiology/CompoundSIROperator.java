@@ -26,10 +26,10 @@ public class CompoundSIROperator extends Operator {
     public Input<Valuable> S0_input =
             new Input<Valuable>("S0", "The numbers of susceptible individuals", Input.Validate.REQUIRED);
 
-    public Input<IntegerParameter> dS_input =
-            new Input<IntegerParameter>("dS", "dS vector containing the changes in numbers of susceptibles per location", Input.Validate.REQUIRED);
-    public Input<IntegerParameter> dR_input =
-            new Input<IntegerParameter>("dR", "dR vector containing the changes in numbers of susceptibles per location", Input.Validate.REQUIRED);
+    public Input<RealParameter> dS_input =
+            new Input<RealParameter>("dS", "dS vector containing the changes in numbers of susceptibles per location", Input.Validate.REQUIRED);
+    public Input<RealParameter> dR_input =
+            new Input<RealParameter>("dR", "dR vector containing the changes in numbers of susceptibles per location", Input.Validate.REQUIRED);
 
     public Input<Valuable> birth =
             new Input<Valuable>("birth", "birth rate vector with rate per location",  Input.Validate.REQUIRED);
@@ -99,8 +99,8 @@ public class CompoundSIROperator extends Operator {
         if ( !current.init(b, 0., d, s, T, ntaxa, 100, m, current.times))
             throw new RuntimeException("Could not find suitable trajectory. Please try different epi parameters!");
 
-        dS_input.get().assignFromWithoutID(new IntegerParameter(current.dS));
-        dR_input.get().assignFromWithoutID(new IntegerParameter(current.dR));
+        dS_input.get().assignFromWithoutID(new RealParameter(current.dS));
+        dR_input.get().assignFromWithoutID(new RealParameter(current.dR));
     }
 
 
