@@ -3,7 +3,7 @@ package beast.phylodynamics;
 import beast.core.Input;
 import beast.core.Description;
 import beast.core.Valuable;
-import beast.core.parameter.IntegerParameter;
+import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Tree;
 import beast.evolution.speciation.BirthDeathSkylineModel;
 
@@ -21,18 +21,18 @@ public class BDSIR extends BirthDeathSkylineModel {
     public Input<Valuable> S0_input =
             new Input<Valuable>("S0", "The numbers of susceptible individuals");
 
-    public Input<IntegerParameter> m_dS =
-            new Input<IntegerParameter>("dS", "dS vector containing the changes in numbers of susceptibles per location", Input.Validate.REQUIRED);
-    public Input<IntegerParameter> m_dE =
-            new Input<IntegerParameter>("dE", "dE vector containing the changes in numbers of susceptibles per location");
-    public Input<IntegerParameter> m_dR =
-            new Input<IntegerParameter>("dR", "dR vector containing the changes in numbers of susceptibles per location", Input.Validate.REQUIRED);
+    public Input<RealParameter> m_dS =
+            new Input<RealParameter>("dS", "dS vector containing the changes in numbers of susceptibles per location", Input.Validate.REQUIRED);
+    public Input<RealParameter> m_dE =
+            new Input<RealParameter>("dE", "dE vector containing the changes in numbers of susceptibles per location");
+    public Input<RealParameter> m_dR =
+            new Input<RealParameter>("dR", "dR vector containing the changes in numbers of susceptibles per location", Input.Validate.REQUIRED);
 
-    Integer S0;
+    Double S0;
     Double bS0;
-    Integer[] dS;
-    Integer[] dE;
-    Integer[] dR;
+    Double[] dS;
+    Double[] dE;
+    Double[] dR;
 
     Boolean recomputeSIR;
     double T;
@@ -46,7 +46,7 @@ public class BDSIR extends BirthDeathSkylineModel {
     @Override
     public void initAndValidate() throws Exception {
 
-        S0 = (int) (S0_input.get().getArrayValue());
+        S0 =  (S0_input.get().getArrayValue());
 
         dS = m_dS.get().getValues();
 
@@ -75,24 +75,24 @@ public class BDSIR extends BirthDeathSkylineModel {
         T = tree.getRoot().getHeight() + orig_root.get().getValue();
         ntaxa = tree.getLeafNodeCount();
 
-        S0 = (int) (S0_input.get().getArrayValue());
+        S0 = (S0_input.get().getArrayValue());
 
         dS = m_dS.get().getValues();
 
-        dE = (m_dE.get() !=null)? m_dE.get().getValues(): (new Integer[dS.length]);
-        if (dE[0]==null) Arrays.fill(dE,0);
+        dE = (m_dE.get() !=null)? m_dE.get().getValues(): (new Double[dS.length]);
+        if (dE[0]==null) Arrays.fill(dE,0.);
         
         dR = m_dR.get().getValues();
 
         
-        int cumS = S0 - 1 ;
+        double cumS = S0 - 1 ;
         int dim = dS.length;
         double b = birth[0]/S0 ;
         double time; 
 
         birth = new Double[dim];
-        int I = 1;
-        int R = 0;
+        double I = 1.;
+        double R = 0.;
 
         birth[0] = b * cumS;
         for (int i = 0; i < dim-1; i++){
@@ -104,7 +104,7 @@ public class BDSIR extends BirthDeathSkylineModel {
             R += dR[i];
             time = (i+1)*T/(dim-1);
 
-            if ( I<=0 || I < lineageCountAtTime(T-time, tree))
+            if ( I<=0. || Math.round(I) < lineageCountAtTime(T-time, tree))
                 return Double.NEGATIVE_INFINITY;
 
         }

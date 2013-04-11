@@ -51,9 +51,9 @@ public class SALTauleapSEIR implements SEIR_simulator {
 		this.infectRate = infect;
 		this.recoverRate = recover;
 		this.useExposed = useExposed;
-		this.alpha = alpha;
-		this.engine = engine;
         this.isDeterministic = isDeterministic;
+		this.alpha = isDeterministic? 0. : alpha;
+		this.engine = engine;
 
 		this.poissonian = new Poisson (1, engine);
 		this.exponential = new Exponential (1, engine);
@@ -64,8 +64,8 @@ public class SALTauleapSEIR implements SEIR_simulator {
         this.exposeRate = expose;
         this.infectRate = infect;
         this.recoverRate = recover;
-        this.alpha = alpha;
-           
+        this.alpha = isDeterministic? 0. : alpha;
+
     }
 
 
@@ -109,7 +109,6 @@ public class SALTauleapSEIR implements SEIR_simulator {
             double dtCrit = dt - t;
             int critReactionToFire = 0;
 
-            if (!isDeterministic){
 			// Determine which reactions are "critical"
 			// and calculate next reaction time:
 
@@ -147,16 +146,18 @@ public class SALTauleapSEIR implements SEIR_simulator {
 
 			// Update time:
 			t += dtCrit;
-            }
+            
 			// tau-leap non-critical reactions:
 			if (infectIsCrit == false) {
-				int q = poissonian.nextInt(a_infect*dtCrit + 0.5*a2_infect*dtCrit*dtCrit);
+				double q = isDeterministic? (a_infect*dtCrit) // todo!
+                        :poissonian.nextInt(a_infect*dtCrit + 0.5*a2_infect*dtCrit*dtCrit);
 				state.S -= q;
 				state.I += q;
 			}
 
 			if (recoverIsCrit == false) {
-				int q = poissonian.nextInt(a_recover*dtCrit + 0.5*a2_recover*dtCrit*dtCrit);
+				double q = isDeterministic? (a_recover*dtCrit) // todo!
+                        :poissonian.nextInt(a_recover*dtCrit + 0.5*a2_recover*dtCrit*dtCrit);
 				state.I -= q;
 				state.R += q;
 			}
