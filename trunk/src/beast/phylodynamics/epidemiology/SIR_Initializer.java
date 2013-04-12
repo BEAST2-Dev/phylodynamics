@@ -1,0 +1,167 @@
+package beast.phylodynamics.epidemiology;
+
+
+import beast.core.*;
+import beast.core.parameter.IntegerParameter;
+import beast.core.parameter.RealParameter;
+import beast.evolution.tree.Tree;
+import beast.util.Randomizer;
+import beast.math.statistic.RPNcalculator;
+
+import java.util.List;
+import java.util.ArrayList;
+
+
+/**
+ * @author dkuh004
+ *         Date: Apr 12, 2013
+ *         Time: 10:46:37 AM
+ */
+public class SIR_Initializer  extends Plugin implements StateNodeInitialiser {
+
+
+
+    public Input<HybridSEIREpidemic> SIR =
+            new Input<HybridSEIREpidemic>("SIR", "SIR trajectory calculation node - simulates dS", Input.Validate.REQUIRED);
+
+    public Input<Valuable> S0_input =
+            new Input<Valuable>("S0", "The numbers of susceptible individuals", Input.Validate.REQUIRED);
+
+    public Input<RealParameter> dS_input =
+            new Input<RealParameter>("dS", "dS vector containing the changes in numbers of susceptibles per location", Input.Validate.REQUIRED);
+    public Input<RealParameter> dR_input =
+            new Input<RealParameter>("dR", "dR vector containing the changes in numbers of susceptibles per location", Input.Validate.REQUIRED);
+
+    public Input<Valuable> birth =
+            new Input<Valuable>("birth", "birth rate vector with rate per location",  Input.Validate.REQUIRED);
+    public Input<Valuable> death =
+            new Input<Valuable>("death", "death rate vector with rate per location",  Input.Validate.REQUIRED);
+    public Input<Valuable> sampling =
+            new Input<Valuable>("sampling", "sampling rate vector with rate per location",  Input.Validate.REQUIRED);
+
+    public Input<Tree> m_tree =
+            new Input<Tree>("tree", "The phylogenetic tree being estimated",  Input.Validate.REQUIRED);
+    public Input<RealParameter> orig_root =
+            new Input<RealParameter>("orig_root", "The origin of infection x0", Input.Validate.REQUIRED);
+
+    public Input<RealParameter> R0 =
+            new Input<RealParameter>("R0", "The basic reproduction number");
+    public Input<RealParameter> becomeUninfectiousRate =
+            new Input<RealParameter>("becomeUninfectiousRate", "Rate at which individuals become uninfectious (throuch recovery or sampling)");
+    public Input<RealParameter> samplingProportion =
+            new Input<RealParameter>("samplingProportion", "The samplingProportion = samplingRate / becomeUninfectiousRate");
+
+
+
+    int m;
+    Integer S0;
+    int ntaxa;
+
+    Tree tree;
+    double T;
+    HybridSEIREpidemic current;
+
+    Double b;
+    Double[] d;
+    Double[] s;
+    Boolean birthChanges;
+    Boolean deathChanges;
+    Boolean samplingChanges;
+
+    double scaler;
+
+
+    @Override
+    public void initAndValidate() throws Exception{
+         scaler = 1.;
+    }
+
+    @Override
+    public void initStateNodes() throws Exception {
+
+
+        S0 = (int) (S0_input.get().getArrayValue());
+
+        if (birth.get() != null && death.get() != null && sampling.get() != null){
+
+            b = birth.get().getArrayValue() *(1.+scaler);
+
+            int dim = death.get().getDimension();
+            if (dim != sampling.get().getDimension()) throw new RuntimeException("Error: Death and sampling must have equalt dimensions!");
+            d = new Double[dim];
+            s = new Double[dim];
+
+            for (int i = 0; i<dim; i++){
+                d[i] = death.get().getArrayValue(i)  *(1.-scaler);
+                s[i] = sampling.get().getArrayValue(i) ;
+            }
+        }
+
+        else{
+            throw new RuntimeException("Either specify birthRate, deathRate and samplingRate OR specify R0, becomeUninfectiousRate and samplingProportion!");
+        }
+
+        if (birth.get() instanceof RPNcalculator && (R0.get() == null || becomeUninfectiousRate.get()==null || samplingProportion.get()==null))
+            throw new RuntimeException("R0, becomeUninfectiousRate and samplingProportion need to be specified");
+
+
+
+        m = SIR.get().Nsamples.get();
+
+        tree = m_tree.get();
+        T = tree.getRoot().getHeight() + orig_root.get().getValue();
+
+        ntaxa = tree.getLeafNodeCount();
+
+        // initialize trajectory
+        current =  SIR.get();
+//        if ( !current.init(b, 0., d, s, T, ntaxa, 100, m, current.times))
+//            throw new RuntimeException("Could not find suitable trajectory. Please try different epi parameters!");
+
+        if (!current.init(b, 0., d, s, T, ntaxa, 100, m, current.times)){
+
+            int count = 0;
+
+            do  {
+
+                scaler = Randomizer.nextDouble() ; // if first initialization didn't work, try tweaking the rates a little
+                b*= (1.+scaler);
+                d[0]*= (1.-scaler);
+                count++;
+
+            } while (count<100 && !current.init(b, 0., d, s, T, ntaxa, 100, m, current.times));
+        }
+
+        dS_input.get().assignFromWithoutID(new RealParameter(current.dS));
+        dR_input.get().assignFromWithoutID(new RealParameter(current.dR));
+
+        if (R0.get()!=null) R0.get().setValue(0,b/(d[0]+s[0]));
+        else ((RealParameter) birth.get()).setValue(0,b);
+
+        if (becomeUninfectiousRate.get()!=null) becomeUninfectiousRate.get().setValue(0,(d[0]+s[0]));
+        else ((RealParameter) death.get()).setValue(0,d[0]);
+
+        if (samplingProportion.get()!=null) samplingProportion.get().setValue(0,s[0]/(d[0]+s[0]));
+        else ((RealParameter) sampling.get()).setValue(0,s[0]);
+
+
+        scaler = Randomizer.nextDouble() ; // if first initialization didn't work, try tweaking the rates a little
+
+    }
+
+
+    /**
+     * @return list of StateNodes that are initialised
+     */
+    @Override
+    public List<StateNode> getInitialisedStateNodes() {
+
+        List<StateNode> statenodes = new ArrayList<StateNode>();
+
+        statenodes.add(dS_input.get());
+        statenodes.add(dR_input.get());
+
+        return statenodes;
+    }
+
+}
