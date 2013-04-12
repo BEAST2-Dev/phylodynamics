@@ -149,14 +149,14 @@ public class SALTauleapSEIR implements SEIR_simulator {
             
 			// tau-leap non-critical reactions:
 			if (infectIsCrit == false) {
-				double q = isDeterministic? (a_infect*dtCrit) // todo!
+				double q = isDeterministic? (a_infect*dtCrit)
                         :poissonian.nextInt(a_infect*dtCrit + 0.5*a2_infect*dtCrit*dtCrit);
 				state.S -= q;
 				state.I += q;
 			}
 
 			if (recoverIsCrit == false) {
-				double q = isDeterministic? (a_recover*dtCrit) // todo!
+				double q = isDeterministic? (a_recover*dtCrit)
                         :poissonian.nextInt(a_recover*dtCrit + 0.5*a2_recover*dtCrit*dtCrit);
 				state.I -= q;
 				state.R += q;
