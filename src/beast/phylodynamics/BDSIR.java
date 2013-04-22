@@ -28,6 +28,8 @@ public class BDSIR extends BirthDeathSkylineModel {
     public Input<RealParameter> m_dR =
             new Input<RealParameter>("dR", "dR vector containing the changes in numbers of susceptibles per location", Input.Validate.REQUIRED);
 
+    public Input<Boolean> checkTreeConsistent = new Input<Boolean>("checkTreeConsistent", "check if trajectory is consistent with number of lineages in tree? default true", true);
+
     Double S0;
     Double bS0;
     Double[] dS;
@@ -104,7 +106,7 @@ public class BDSIR extends BirthDeathSkylineModel {
             R += dR[i];
             time = (i+1)*T/(dim-1);
 
-            if ( I<=0. || Math.round(I) < lineageCountAtTime(T-time, tree))
+            if ( checkTreeConsistent.get() && (I<=0. || I < lineageCountAtTime(T-time, tree)))
                 return Double.NEGATIVE_INFINITY;
 
         }
