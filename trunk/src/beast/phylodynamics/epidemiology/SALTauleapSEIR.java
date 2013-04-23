@@ -444,7 +444,7 @@ public class SALTauleapSEIR implements SEIR_simulator {
 
 			// Sample if necessary:
 			if (tidx % stepsPerSample == 0) {
-                if ((state.I < 1) && (!useExposed || (state.E == 0)))
+                if ((Math.round(state.I) < 1) && (!useExposed || (state.E == 0)))
 //                if (trajectory.get(trajectory.size()-1).S == state.S ) zeroCount++;
 //                if (check && zeroCount > Nsamples/2.)
                     throw new RuntimeException("Abort simulation. No infecteds left.");
@@ -454,7 +454,7 @@ public class SALTauleapSEIR implements SEIR_simulator {
 			}
 		}
 
-        if ((state.I < 1) && (!useExposed || (state.E == 0)))
+        if ((Math.round(state.I) < 1) && (!useExposed || (state.E == 0)))
             throw new RuntimeException("Abort simulation. No infecteds left.");
 
 		return trajectory;
