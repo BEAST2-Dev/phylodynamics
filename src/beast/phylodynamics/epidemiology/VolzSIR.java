@@ -4,8 +4,10 @@ import beast.core.CalculationNode;
 import beast.core.Description;
 import beast.core.Input;
 import beast.core.Input.Validate;
+import beast.core.Loggable;
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.coalescent.PopulationFunction;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -14,7 +16,7 @@ import java.util.List;
  * @author Alexei Drummond
  */
 @Description("Population function based on Volz 1999 `coalescent' likelihood.")
-public class VolzSIR extends PopulationFunction.Abstract {
+public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
     public Input<RealParameter> n_S_Parameter = new Input<RealParameter>("n_S0",
             "the number of susceptibles at time of origin (defaults to 1000). ");
     public Input<RealParameter> betaParameter = new Input<RealParameter>("beta",
@@ -29,12 +31,16 @@ public class VolzSIR extends PopulationFunction.Abstract {
     public Input<Double> finishingThresholdInput = new Input<Double>("finishingThreshold",
             "Integration will finish when infected pop drops below this.", 1.0);
     
+    public Input<Integer> statesToLogInput = new Input<Integer>("statesToLog",
+            "Number of states to log. (Default 100.)", 100);
+    
     //
     // Private stuff
     //
     
     private boolean dirty;
     private List<Double> effectivePopSize;
+    private List<Double> NStraj, NItraj;
     
     //
     // Public stuff
@@ -64,6 +70,8 @@ public class VolzSIR extends PopulationFunction.Abstract {
         }
 
         effectivePopSize = new ArrayList<Double>();
+        NStraj = new ArrayList<Double>();
+        NItraj = new ArrayList<Double>();
         
         dirty = true;
     }
@@ -85,12 +93,16 @@ public class VolzSIR extends PopulationFunction.Abstract {
         
         // Clear old trajectory
         effectivePopSize.clear();
+        NStraj.clear();
+        NItraj.clear();
         
         // Set up initial conditions:
         double NS = NS0;
         double NI = 1.0;
 
         effectivePopSize.add(NI/(2.0*beta*NS));
+        NStraj.add(NS);
+        NItraj.add(NI);
 
         // Evaluate derivatives:
         double dNSdt, dNIdt = 0.0;
@@ -109,6 +121,8 @@ public class VolzSIR extends PopulationFunction.Abstract {
             NI = 2.0*NImid - NI;
             
             effectivePopSize.add(NI/(2.0*beta*NS));
+            NStraj.add(NS);
+            NItraj.add(NI);
         } while (dNIdt>0 || NI>threshNI);
         
         dirty = false;
@@ -187,5 +201,43 @@ public class VolzSIR extends PopulationFunction.Abstract {
     public void restore() {
         dirty = true;
         super.restore();
+    }
+    
+    /*
+     * Loggable interface
+     */
+
+    @Override
+    public void init(PrintStream out) throws Exception {
+        for (int i=0; i<statesToLogInput.get(); i++) {
+            out.format("S%d\t",i);
+            out.format("I%d\t",i);
+            out.format("t%d\t",i);
+        }
+    }
+
+    @Override
+    public void log(int nSample, PrintStream out) {
+        double dt = integrationStepInput.get();
+        double tend = NStraj.size()*dt;
+        
+        double delta = tend/(statesToLogInput.get()-1);
+        
+        for (int i=0; i<statesToLogInput.get(); i++) {
+            
+            double t = delta*i;
+            int tidx = (int)Math.round(t/dt);
+            
+            if (tidx>=NStraj.size())
+                tidx = NStraj.size()-1;
+            
+            out.format("%g\t", NStraj.get(tidx));
+            out.format("%g\t", NItraj.get(tidx));
+            out.format("%g\t", t);
+        }
+    }
+
+    @Override
+    public void close(PrintStream out) {
     }
 }

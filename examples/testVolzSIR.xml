@@ -100,6 +100,7 @@
             <log idref="coalescent"/>
             <!--parameter idref="treeModel.rootHeight"/-->
             <log idref="posterior"/>
+            <log idref="VolzSIR"/>
         </logger>
         <logger logEvery="10000" fileName="testVolzSIR.trees">
             <log idref="tree"/>
