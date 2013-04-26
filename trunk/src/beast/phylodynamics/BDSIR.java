@@ -52,7 +52,7 @@ public class BDSIR extends BirthDeathSkylineModel {
 
         dS = m_dS.get().getValues();
 
-        birthChanges = intervalNumber.get() - 1; //true; // must be true now since it is multiplied with S_i in every interval
+        birthChanges = intervalNumber.get() - 1; 
         super.initAndValidate();
 
         if (transform){
