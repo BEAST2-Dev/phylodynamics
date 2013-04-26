@@ -15,11 +15,11 @@ import java.util.List;
  */
 @Description("Population function based on Volz 1999 `coalescent' likelihood.")
 public class VolzSIR extends PopulationFunction.Abstract {
-    public Input<RealParameter> n_S_Parameter = new Input<RealParameter>("n_S(0)",
+    public Input<RealParameter> n_S_Parameter = new Input<RealParameter>("n_S0",
             "the number of susceptibles at time of origin (defaults to 1000). ");
     public Input<RealParameter> betaParameter = new Input<RealParameter>("beta",
             "the mass action rate of infection.");
-    public Input<RealParameter> gammaParameter = new Input<RealParameter>("recoveryRate",
+    public Input<RealParameter> gammaParameter = new Input<RealParameter>("gamma",
             "the per-infected rate of recovery.");
     public Input<RealParameter> originParameter = new Input<RealParameter>("origin",
             "the time before the root that the first infection occurred.");
@@ -106,7 +106,7 @@ public class VolzSIR extends PopulationFunction.Abstract {
                 dNIdt = beta*NSmid*NImid - gamma*NImid;
                 
                 NSmid = NS + 0.5*dt*dNSdt;
-                NImid = NI + 0.5*dt*dNSdt;
+                NImid = NI + 0.5*dt*dNIdt;
             }
             NS = 2.0*NSmid - NS;
             NI = 2.0*NImid - NI;
@@ -154,10 +154,24 @@ public class VolzSIR extends PopulationFunction.Abstract {
         // Choose which index into integration lattice to use:
         int tidx = (int)Math.floor(tForward/integrationStepInput.get());
 
-        if (tidx<NItraj.size())
-            return NItraj.get(tidx)/(2.0*beta*NStraj.get(tidx));
-        else
-            return 0.0;
+        // Use last final state of trajectory if t outside the bounds of the
+        // simulation.  This is a CLUDEGE to deal with trees which don't fit
+        // the trajectories at all.
+        if (tidx>=NItraj.size())
+            tidx = NItraj.size()-1;
+
+        return NItraj.get(tidx)/(2.0*beta*NStraj.get(tidx));
+        
+//        if (tidx<NItraj.size())
+//            return NItraj.get(tidx)/(2.0*beta*NStraj.get(tidx));
+//        else
+//            return 0.0;
+    }
+    
+        
+    @Override
+    public double getIntegral(double start, double finish) {
+        return getNumericalIntegral(start, finish);
     }
 
     @Override
