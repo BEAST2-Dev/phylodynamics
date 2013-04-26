@@ -34,7 +34,7 @@ public class VolzSIR extends PopulationFunction.Abstract {
     //
     
     private boolean dirty;
-    private List<Double> NStraj, NItraj;
+    private List<Double> effectivePopSize;
     
     //
     // Public stuff
@@ -62,9 +62,8 @@ public class VolzSIR extends PopulationFunction.Abstract {
                     Math.max(1.0, n_S_Parameter.get().getLower()),
                     n_S_Parameter.get().getUpper());
         }
-        
-        NStraj = new ArrayList<Double>();
-        NItraj = new ArrayList<Double>();
+
+        effectivePopSize = new ArrayList<Double>();
         
         dirty = true;
     }
@@ -85,15 +84,13 @@ public class VolzSIR extends PopulationFunction.Abstract {
         double threshNI = finishingThresholdInput.get();
         
         // Clear old trajectory
-        NStraj.clear();
-        NItraj.clear();
+        effectivePopSize.clear();
         
         // Set up initial conditions:
         double NS = NS0;
         double NI = 1.0;
 
-        NStraj.add(NS);
-        NItraj.add(NI);
+        effectivePopSize.add(NI/(2.0*beta*NS));
 
         // Evaluate derivatives:
         double dNSdt, dNIdt = 0.0;
@@ -111,8 +108,7 @@ public class VolzSIR extends PopulationFunction.Abstract {
             NS = 2.0*NSmid - NS;
             NI = 2.0*NImid - NI;
             
-            NStraj.add(NS);
-            NItraj.add(NI);            
+            effectivePopSize.add(NI/(2.0*beta*NS));
         } while (dNIdt>0 || NI>threshNI);
         
         dirty = false;
@@ -144,28 +140,19 @@ public class VolzSIR extends PopulationFunction.Abstract {
     public double getPopSize(double t) {
         update();
         
-        double beta = betaParameter.get().getValue();
+        // Choose which index into integration lattice to use:        
         double tForward = originParameter.get().getValue() - t;
-        
-        // Is this sensible?
-        if (tForward<0.0)
-            return 1.0/(2.0*beta*n_S_Parameter.get().getValue());
-        
-        // Choose which index into integration lattice to use:
         int tidx = (int)Math.floor(tForward/integrationStepInput.get());
 
-        // Use last final state of trajectory if t outside the bounds of the
+        // Use initial or final state of trajectory if t outside the bounds of the
         // simulation.  This is a CLUDEGE to deal with trees which don't fit
         // the trajectories at all.
-        if (tidx>=NItraj.size())
-            tidx = NItraj.size()-1;
+        if (tidx>=effectivePopSize.size())
+            tidx = effectivePopSize.size()-1;
+        else if (tidx<0)
+            tidx = 0;
 
-        return NItraj.get(tidx)/(2.0*beta*NStraj.get(tidx));
-        
-//        if (tidx<NItraj.size())
-//            return NItraj.get(tidx)/(2.0*beta*NStraj.get(tidx));
-//        else
-//            return 0.0;
+        return effectivePopSize.get(tidx);
     }
     
         
