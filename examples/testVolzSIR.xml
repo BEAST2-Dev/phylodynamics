@@ -27,36 +27,36 @@
     </data>
 
     <!-- The HKY substitution model (Hasegawa, Kishino & Yano, 1985)             -->
+    <!--
     <input spec='HKY' id="hky">
         <parameter name='kappa' idref='hky.kappa'/>
         <input id='freqs' name='frequencies' spec='Frequencies'>
             <input name='data' idref='alignment'/>
         </input>
     </input>
+    -->
 
     <!-- site model                                                              -->
+    <!--
     <input spec='SiteModel' id="siteModel">
-        <!--<parameter name='mutationRate'>1.0</parameter>-->
         <input name='substModel' idref='hky'/>
     </input>
+    -->
 
+    <!--
     <input spec='TreeLikelihood' id="treeLikelihood">
         <input name='data' idref="alignment"/>
         <input name='tree' idref="tree"/>
         <input name='siteModel' idref="siteModel"/>
     </input>
-
+    -->
 
     <input spec='beast.util.ClusterTree' id='tree' clusterType='upgma'>
         <input name='taxa' idref='alignment'/>
     </input>
 
-    <input spec='RealParameter' id="hky.kappa">1.0</input>
-    <input spec='RealParameter' id="popSize">1.0</input>
-    
     <run spec="MCMC" id="mcmc" chainLength="1000000"> <!--autoOptimize="true"-->
         <state>
-            <input name='stateNode' idref='hky.kappa'/>
             <input name='stateNode' idref='tree'/>
         </state>
 
@@ -68,17 +68,14 @@
                 <populationModel spec="VolzSIR" id='VolzSIR'
                                  integrationStep="0.1">
                     <n_S0 spec="RealParameter" id="volz.n_S0" value="1000.0"/>
-                    <beta spec="RealParameter" id="volz.beta" value="0.001"/>
-                    <gamma spec="RealParameter" id="volz.gamma" value="0.1"/>
-                    <origin spec="RealParameter" id="volz.t0" value="100.0"/>
+                    <beta spec="RealParameter" id="volz.beta" value="0.00075"/>
+                    <gamma spec="RealParameter" id="volz.gamma" value="0.3"/>
+                    <origin spec="RealParameter" id="volz.t0" value="30.0"/>
                 </populationModel>
             </distribution>
-            <distribution id='likelihood' idref="treeLikelihood"/>
+            <!--<distribution id='likelihood' idref="treeLikelihood"/>-->
         </distribution>
 
-        <operator id='kappaScaler' spec='ScaleOperator' scaleFactor="0.5" weight="1">
-            <parameter idref="hky.kappa"/>
-        </operator>
         <operator id='treeScaler' spec='ScaleOperator' scaleFactor="0.5" weight="1">
             <tree idref="tree"/>
         </operator>
@@ -101,20 +98,16 @@
         <logger logEvery="10000" fileName="testVolzSIR.log">
    	        <model idref='posterior'/>
             <log idref="coalescent"/>
-            <log idref="likelihood"/>
             <!--parameter idref="treeModel.rootHeight"/-->
-            <log idref="hky.kappa"/>
             <log idref="posterior"/>
         </logger>
         <logger logEvery="10000" fileName="testVolzSIR.trees">
             <log idref="tree"/>
         </logger>
-        <logger logEvery="10000">
+        <logger logEvery="1">
 	        <model idref='posterior'/>
             <log idref="coalescent"/>
-            <log idref="likelihood"/>
             <!--parameter idref="treeModel.rootHeight"/-->
-            <log idref="hky.kappa"/>
             <log idref="posterior"/>
         </logger>
     </run>
