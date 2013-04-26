@@ -10,7 +10,7 @@ import beast.evolution.speciation.BirthDeathSkylineModel;
 import java.util.Arrays;
 
 /**
- * @author Denise KŸhnert
+ * @author Denise Kuhnert
  *
  */
 
