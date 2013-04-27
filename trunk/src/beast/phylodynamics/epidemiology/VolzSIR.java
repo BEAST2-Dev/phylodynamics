@@ -6,11 +6,14 @@ import beast.core.Input.Validate;
 import beast.core.Loggable;
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.coalescent.PopulationFunction;
+import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Alexei Drummond
@@ -45,7 +48,9 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
     private boolean dirty;
     private List<Double> effectivePopSizeTraj, intensityTraj;
     private List<Double> NStraj, NItraj;
-    private double t0;
+    private double tIntensityTrajStart;
+    
+    private double dt;
     
     //
     // Public stuff
@@ -79,7 +84,11 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
         NStraj = new ArrayList<Double>();
         NItraj = new ArrayList<Double>();
         
+        dt = integrationStepInput.get();
+        
         dirty = true;
+        update();
+        
     }
     
     /**
@@ -94,7 +103,6 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
         double gamma = gammaParameter.get().getValue();
         double NS0 = n_S_Parameter.get().getValue();
         
-        double dt = integrationStepInput.get();
         double threshNI = finishingThresholdInput.get();
         
         // Clear old trajectory
@@ -142,14 +150,15 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
         
         double intensity = 0.0;
         intensityTraj.add(intensity);
-        for (int i=1; i<effectivePopSizeTraj.size(); i++) {
-            intensity += 1.0/effectivePopSizeTraj.get(i);
+        for (int i=0; i<effectivePopSizeTraj.size(); i++) {
+            intensity += dt/effectivePopSizeTraj.get(i);
             intensityTraj.add(intensity);
         }
         
-        // Start of integral is end of forward-time integration.
-        t0 = originParameter.get().getValue() - dt*intensityTraj.size();
-        
+        // Start of integral is 0.5*dt from end of forward-time integration.
+        tIntensityTrajStart = originParameter.get().getValue()
+                - dt*(effectivePopSizeTraj.size()-1) - 0.5*dt;
+
         dirty = false;
     }
     
@@ -181,7 +190,7 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
         update();
         
         // Choose which index into integration lattice to use:        
-        int tidx = (int)Math.floor((t-t0)/integrationStepInput.get());
+        int tidx = (int)Math.floor((t-tIntensityTrajStart)/dt);
 
         // Use initial or final state of trajectory if t outside the bounds of the
         // simulation.  This is a CLUDEGE to deal with trees which don't fit
@@ -196,32 +205,41 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
     
     @Override
     public double getIntegral(double start, double finish) {
+        
+        if (start == finish)
+                return 0.0;
+        
         if (oldMethodInput.get())
             return getNumericalIntegral(start, finish);
-        else {
-            if (start == finish)
-                return 0.0;
-            
+        else
             return super.getIntegral(start, finish);
-        }
     }
 
+    /**
+     * Uses pre-calculated intensity values to estimate the intensity
+     * at time t. For times within the domain of the calculated values,
+     * linear interpolation is used.  For times outside this range, the
+     * initial or final effectivePopSizeTraj value is used to extrapolate.
+     * 
+     * @param t
+     * @return 
+     */
     @Override
     public double getIntensity(double t) {
         update();
         
-        if (t<t0) {
-            return -(t0-t)/effectivePopSizeTraj.get(0);
+        if (t<tIntensityTrajStart) {
+            return -(tIntensityTrajStart-t)/effectivePopSizeTraj.get(0);
         } else {
-            if (t>originParameter.get().getValue()) {
+            if (t>originParameter.get().getValue()+0.5*dt) {
                 return intensityTraj.get(intensityTraj.size()-1)
-                        + (t-originParameter.get().getValue())
+                        + (t-(originParameter.get().getValue()+0.5*dt))
                         /effectivePopSizeTraj.get(effectivePopSizeTraj.size()-1);
             } else {
-                int idx = (int)Math.floor((t-t0)/integrationStepInput.get());
-                double delta = t - integrationStepInput.get()*idx;
-                return intensityTraj.get(idx)
-                        + delta/effectivePopSizeTraj.get(idx);
+                int idx = (int)Math.floor((t-tIntensityTrajStart)/dt);
+                double alpha = (t - tIntensityTrajStart - dt*idx)/dt;
+                return intensityTraj.get(idx)*(1.0-alpha)
+                        + intensityTraj.get(idx+1)*alpha;
             }
         }
     }
@@ -263,7 +281,6 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
 
     @Override
     public void log(int nSample, PrintStream out) {
-        double dt = integrationStepInput.get();
         double tend = NStraj.size()*dt;
         
         double delta = tend/(statesToLogInput.get()-1);
