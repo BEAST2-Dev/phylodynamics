@@ -98,9 +98,9 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
         double threshNI = finishingThresholdInput.get();
         
         // Clear old trajectory
-        effectivePopSizeTraj.clear();
         NStraj.clear();
         NItraj.clear();
+        effectivePopSizeTraj.clear();
         
         // Set up initial conditions:
         double NS = NS0;
@@ -138,6 +138,8 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
         Collections.reverse(effectivePopSizeTraj);
         
         // Estimate intensity on integration lattice:
+        intensityTraj.clear();
+        
         double intensity = 0.0;
         intensityTraj.add(intensity);
         for (int i=1; i<effectivePopSizeTraj.size(); i++) {
@@ -196,8 +198,12 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
     public double getIntegral(double start, double finish) {
         if (oldMethodInput.get())
             return getNumericalIntegral(start, finish);
-        else
+        else {
+            if (start == finish)
+                return 0.0;
+            
             return super.getIntegral(start, finish);
+        }
     }
 
     @Override
