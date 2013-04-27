@@ -1,6 +1,5 @@
 package beast.phylodynamics.epidemiology;
 
-import beast.core.CalculationNode;
 import beast.core.Description;
 import beast.core.Input;
 import beast.core.Input.Validate;
@@ -10,6 +9,7 @@ import beast.evolution.tree.coalescent.PopulationFunction;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -34,13 +34,18 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
     public Input<Integer> statesToLogInput = new Input<Integer>("statesToLog",
             "Number of states to log. (Default 100.)", 100);
     
+    public Input<Boolean> oldMethodInput = new Input<Boolean>(
+            "oldMethod",
+            "Use old (slow) method to evaluate intensity.  Default false.", false);
+    
     //
     // Private stuff
     //
     
     private boolean dirty;
-    private List<Double> effectivePopSize;
+    private List<Double> effectivePopSizeTraj, intensityTraj;
     private List<Double> NStraj, NItraj;
+    private double t0;
     
     //
     // Public stuff
@@ -69,7 +74,8 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
                     n_S_Parameter.get().getUpper());
         }
 
-        effectivePopSize = new ArrayList<Double>();
+        effectivePopSizeTraj = new ArrayList<Double>();
+        intensityTraj = new ArrayList<Double>();
         NStraj = new ArrayList<Double>();
         NItraj = new ArrayList<Double>();
         
@@ -92,19 +98,20 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
         double threshNI = finishingThresholdInput.get();
         
         // Clear old trajectory
-        effectivePopSize.clear();
+        effectivePopSizeTraj.clear();
         NStraj.clear();
         NItraj.clear();
         
         // Set up initial conditions:
         double NS = NS0;
         double NI = 1.0;
-
-        effectivePopSize.add(NI/(2.0*beta*NS));
+        double effectivePopSize = NI/(2.0*beta*NS);
+        
         NStraj.add(NS);
         NItraj.add(NI);
+        effectivePopSizeTraj.add(effectivePopSize);
 
-        // Evaluate derivatives:
+        // Integrate trajectory:
         double dNSdt, dNIdt = 0.0;
         do {
             
@@ -120,10 +127,26 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
             NS = 2.0*NSmid - NS;
             NI = 2.0*NImid - NI;
             
-            effectivePopSize.add(NI/(2.0*beta*NS));
+            effectivePopSize = NI/(2.0*beta*NS);
+            
             NStraj.add(NS);
-            NItraj.add(NI);
+            NItraj.add(NI);            
+            effectivePopSizeTraj.add(effectivePopSize);
         } while (dNIdt>0 || NI>threshNI);
+        
+        // Switch effective pop size to reverse time:
+        Collections.reverse(effectivePopSizeTraj);
+        
+        // Estimate intensity on integration lattice:
+        double intensity = 0.0;
+        intensityTraj.add(intensity);
+        for (int i=1; i<effectivePopSizeTraj.size(); i++) {
+            intensity += 1.0/effectivePopSizeTraj.get(i);
+            intensityTraj.add(intensity);
+        }
+        
+        // Start of integral is end of forward-time integration.
+        t0 = originParameter.get().getValue() - dt*intensityTraj.size();
         
         dirty = false;
     }
@@ -145,7 +168,8 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
 
     /**
      * "Effective" population size for calculating coalescent likelihood
-     * under Volz's model.
+     * under Volz's model.  This is only used if numerical integration
+     * of the intensity is employed.
      * 
      * @param t
      * @return NI(t)/(2*beta*NS(t))
@@ -155,30 +179,45 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
         update();
         
         // Choose which index into integration lattice to use:        
-        double tForward = originParameter.get().getValue() - t;
-        int tidx = (int)Math.floor(tForward/integrationStepInput.get());
+        int tidx = (int)Math.floor((t-t0)/integrationStepInput.get());
 
         // Use initial or final state of trajectory if t outside the bounds of the
         // simulation.  This is a CLUDEGE to deal with trees which don't fit
         // the trajectories at all.
-        if (tidx>=effectivePopSize.size())
-            tidx = effectivePopSize.size()-1;
+        if (tidx>=effectivePopSizeTraj.size())
+            tidx = effectivePopSizeTraj.size()-1;
         else if (tidx<0)
             tidx = 0;
 
-        return effectivePopSize.get(tidx);
+        return effectivePopSizeTraj.get(tidx);
     }
     
-        
     @Override
     public double getIntegral(double start, double finish) {
-        return getNumericalIntegral(start, finish);
+        if (oldMethodInput.get())
+            return getNumericalIntegral(start, finish);
+        else
+            return super.getIntegral(start, finish);
     }
 
     @Override
     public double getIntensity(double t) {
-        throw new UnsupportedOperationException("Not supported yet.");
-        // only needed if not using numerical integration
+        update();
+        
+        if (t<t0) {
+            return -(t0-t)/effectivePopSizeTraj.get(0);
+        } else {
+            if (t>originParameter.get().getValue()) {
+                return intensityTraj.get(intensityTraj.size()-1)
+                        + (t-originParameter.get().getValue())
+                        /effectivePopSizeTraj.get(effectivePopSizeTraj.size()-1);
+            } else {
+                int idx = (int)Math.floor((t-t0)/integrationStepInput.get());
+                double delta = t - integrationStepInput.get()*idx;
+                return intensityTraj.get(idx)
+                        + delta/effectivePopSizeTraj.get(idx);
+            }
+        }
     }
 
     @Override
