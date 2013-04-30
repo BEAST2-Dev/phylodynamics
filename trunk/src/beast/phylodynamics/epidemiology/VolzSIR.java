@@ -196,7 +196,7 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
         // simulation.  This is a CLUDEGE to deal with trees which don't fit
         // the trajectories at all.
         if (tidx>=effectivePopSizeTraj.size())
-            tidx = effectivePopSizeTraj.size()-1;
+            return 1e-10 / (tidx-(effectivePopSizeTraj.size()-1));//tidx = effectivePopSizeTraj.size()-1;
         else if (tidx<0)
             tidx = 0;
 
@@ -232,9 +232,9 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
             return -(tIntensityTrajStart-t)/effectivePopSizeTraj.get(0);
         } else {
             if (t>originParameter.get().getValue()+0.5*dt) {
-                return intensityTraj.get(intensityTraj.size()-1)
-                        + (t-(originParameter.get().getValue()+0.5*dt))
-                        /effectivePopSizeTraj.get(effectivePopSizeTraj.size()-1);
+                return (t - originParameter.get().getValue()+0.5*dt)  * 1e10;//intensityTraj.get(intensityTraj.size()-1)
+//                        + (t-(originParameter.get().getValue()+0.5*dt))
+//                        /effectivePopSizeTraj.get(effectivePopSizeTraj.size()-1);
             } else {
                 int idx = (int)Math.floor((t-tIntensityTrajStart)/dt);
                 double alpha = (t - tIntensityTrajStart - dt*idx)/dt;
