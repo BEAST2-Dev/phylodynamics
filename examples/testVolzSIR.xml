@@ -66,7 +66,7 @@
                      <tree idref="tree"/>
                 </treeIntervals>
                 <populationModel spec="VolzSIR" id='VolzSIR'
-                                 integrationStep="0.1"
+                                 integrationStepCount="1000"
                                  oldMethod="false">
                     <n_S0 spec="RealParameter" id="volz.n_S0" value="1000.0"/>
                     <beta spec="RealParameter" id="volz.beta" value="0.00075"/>
