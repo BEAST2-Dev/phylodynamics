@@ -29,8 +29,10 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
     public Input<RealParameter> originParameter = new Input<RealParameter>("origin",
             "the time before the root that the first infection occurred.");
 
-    public Input<Double> integrationStepInput = new Input<Double>("integrationStep",
-            "length of integration time step.", Validate.REQUIRED);
+    //public Input<Double> integrationStepInput = new Input<Double>("integrationStep",
+    //        "length of integration time step.", Validate.REQUIRED);
+    public Input <Integer> integrationStepCount = new Input<Integer>("integrationStepCount",
+            "number of integration time steps to use.", Validate.REQUIRED);
     public Input<Double> finishingThresholdInput = new Input<Double>("finishingThreshold",
             "Integration will finish when infected pop drops below this.", 1.0);
     
@@ -51,6 +53,7 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
     private double tIntensityTrajStart;
     
     private double dt;
+    private int Nt;
     
     //
     // Public stuff
@@ -84,7 +87,8 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
         NStraj = new ArrayList<Double>();
         NItraj = new ArrayList<Double>();
         
-        dt = integrationStepInput.get();
+        Nt = integrationStepCount.get();
+        //dt = integrationStepInput.get();
         
         dirty = true;
         update();
@@ -104,6 +108,17 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
         double NS0 = n_S_Parameter.get().getValue();
         
         double threshNI = finishingThresholdInput.get();
+        
+
+        if (gamma<beta*NS0) {
+            // Estimate length of epidemic:
+            double elEstimate = Math.log(NS0)*(1.0/(beta*NS0 - gamma) + 1.0/gamma);
+        
+            // Use estimate to choose step size:
+            dt = elEstimate/Nt;
+        } else
+            // Insurance against outrageous parameter combinations.
+            dt = 0.1;
         
         // Clear old trajectory
         NStraj.clear();
@@ -196,9 +211,9 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
         // simulation.  This is a CLUDEGE to deal with trees which don't fit
         // the trajectories at all.
         if (tidx>=effectivePopSizeTraj.size())
-            return 1e-10 / (tidx-(effectivePopSizeTraj.size()-1));//tidx = effectivePopSizeTraj.size()-1;
+            return 1e-10*effectivePopSizeTraj.get(effectivePopSizeTraj.size()-1);
         else if (tidx<0)
-            tidx = 0;
+            return effectivePopSizeTraj.get(0);
 
         return effectivePopSizeTraj.get(tidx);
     }
@@ -232,7 +247,8 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
             return -(tIntensityTrajStart-t)/effectivePopSizeTraj.get(0);
         } else {
             if (t>originParameter.get().getValue()+0.5*dt) {
-                return (t - originParameter.get().getValue()+0.5*dt)  * 1e10;//intensityTraj.get(intensityTraj.size()-1)
+                return intensityTraj.get(intensityTraj.size()-1)
+                        + (t - originParameter.get().getValue()+0.5*dt)  * 1e10;//intensityTraj.get(intensityTraj.size()-1)
 //                        + (t-(originParameter.get().getValue()+0.5*dt))
 //                        /effectivePopSizeTraj.get(effectivePopSizeTraj.size()-1);
             } else {
@@ -272,6 +288,7 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
 
     @Override
     public void init(PrintStream out) throws Exception {
+        out.print("dt\t");
         for (int i=0; i<statesToLogInput.get(); i++) {
             out.format("S%d\t",i);
             out.format("I%d\t",i);
@@ -281,6 +298,9 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
 
     @Override
     public void log(int nSample, PrintStream out) {
+        
+        out.format("%g\t",dt);
+        
         double tend = NStraj.size()*dt;
         
         double delta = tend/(statesToLogInput.get()-1);
