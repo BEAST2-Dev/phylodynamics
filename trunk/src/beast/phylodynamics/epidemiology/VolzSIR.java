@@ -9,7 +9,7 @@ import beast.evolution.tree.coalescent.PopulationFunction;
 import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.MaxIterationsExceededException;
 import org.apache.commons.math.analysis.UnivariateRealFunction;
-import org.apache.commons.math.analysis.solvers.BisectionSolver;
+import org.apache.commons.math.analysis.solvers.BrentSolver;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -274,9 +274,9 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
             }
         };
 
-        BisectionSolver solver = new BisectionSolver();
+        BrentSolver solver = new BrentSolver();
         try {
-            return solver.solve(intensityFunction, 0, originParameter.get().getValue());
+            return solver.solve(intensityFunction, 0, n_S_Parameter.get().getValue() / betaParameter.get().getValue());
         } catch (MaxIterationsExceededException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             throw new RuntimeException("Max iterations (" + e.getMaxIterations() + ") exceeded:" + e.getMessage());
