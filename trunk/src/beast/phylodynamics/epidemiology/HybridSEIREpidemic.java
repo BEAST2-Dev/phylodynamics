@@ -32,8 +32,8 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
 
     public Input<Tree> m_tree =
             new Input<Tree>("tree", "The phylogenetic tree on which to condition the trajectory",  Input.Validate.REQUIRED);
-    public Input<RealParameter> orig_root =
-            new Input<RealParameter>("orig_root", "The origin of infection x0", Input.Validate.REQUIRED);
+    public Input<RealParameter> origin =
+            new Input<RealParameter>("origin", "The origin of infection x0", Input.Validate.REQUIRED);
 
     public Input<Integer> Nt = new Input<Integer>("Nt", "Number of timesteps in trajectory simulation", 10001);
     public Input<Integer> Nsamples = new Input<Integer>("Nsamples", "Number of samples = dimension of dS", Validate.REQUIRED);

@@ -63,7 +63,7 @@ public class BDSIR extends BirthDeathSkylineModel {
                 throw new RuntimeException("Birth, death and sampling rate have to be 1-dimensional!");
         }
 
-        T = m_tree.get().getRoot().getHeight() + orig_root.get().getValue();
+        T = origin.get().getValue();
         ntaxa = m_tree.get().getLeafNodeCount();
 
     }
@@ -74,7 +74,7 @@ public class BDSIR extends BirthDeathSkylineModel {
 
         super.updateRatesAndTimes(tree);
 
-        T = tree.getRoot().getHeight() + orig_root.get().getValue();
+        T = origin.get().getValue();
         ntaxa = tree.getLeafNodeCount();
 
         S0 = (S0_input.get().getArrayValue());

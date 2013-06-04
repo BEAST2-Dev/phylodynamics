@@ -39,8 +39,8 @@ public class HybridTrajectorySingleLocationSimulator extends Operator {
 
     public Input<Tree> m_tree =
             new Input<Tree>("tree", "The phylogenetic tree being estimated",  Input.Validate.REQUIRED);
-    public Input<RealParameter> orig_root =
-            new Input<RealParameter>("orig_root", "The origin of infection x0", Input.Validate.REQUIRED);
+    public Input<RealParameter> origin =
+            new Input<RealParameter>("origin", "The origin of infection (> treeheight)", Input.Validate.REQUIRED);
 
     int m;
     Integer S0;
@@ -87,7 +87,7 @@ public class HybridTrajectorySingleLocationSimulator extends Operator {
         m = SIR.get().Nsamples.get();
 
         tree = m_tree.get();
-        T = tree.getRoot().getHeight() + orig_root.get().getValue();
+        T = origin.get().getValue();
 
         ntaxa = tree.getLeafNodeCount();
 
@@ -121,7 +121,7 @@ public class HybridTrajectorySingleLocationSimulator extends Operator {
             s[i] = sampling.get().getArrayValue(i);
         }
 
-        T = m_tree.get().getRoot().getHeight() + orig_root.get().getValue();
+        T =  origin.get().getValue();
 
         // simulate trajectory
         current =  SIR.get();
