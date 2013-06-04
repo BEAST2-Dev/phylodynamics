@@ -21,7 +21,7 @@ import java.util.List;
  * @author Timothy Vaughan
  * @author Alexei Drummond
  */
-@Description("Population function based on Volz 1999 `coalescent' likelihood.")
+@Description("Population function based on Volz 2009 `coalescent' likelihood.")
 public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
     public Input<RealParameter> n_S_Parameter = new Input<RealParameter>("n_S0",
             "the number of susceptibles at time of origin (defaults to 1000). ");
@@ -219,6 +219,30 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
             return effectivePopSizeTraj.get(0);
 
         return effectivePopSizeTraj.get(tidx);
+    }
+
+    /**
+     * @param t the time
+     * @return the number of susceptibles at the given time
+     */
+    public double getNS(double t) {
+
+        // Choose which index to use (note these are around the other way to effective population size!)
+        int tidx = NStraj.size() - (int) Math.floor((t - tIntensityTrajStart) / dt) - 1;
+
+        return NStraj.get(tidx);
+    }
+
+    /**
+     * @param t the time
+     * @return the number of susceptibles at the given time
+     */
+    public double getNI(double t) {
+
+        // Choose which index to use (note these are around the other way to effective population size!)
+        int tidx = NItraj.size() - (int) Math.floor((t - tIntensityTrajStart) / dt) - 1;
+
+        return NItraj.get(tidx);
     }
 
     @Override
