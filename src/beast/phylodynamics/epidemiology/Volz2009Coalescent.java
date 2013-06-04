@@ -4,6 +4,7 @@ import beast.core.Description;
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.TreeDistribution;
+import beast.evolution.tree.coalescent.IntervalType;
 import beast.evolution.tree.coalescent.TreeIntervals;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.exception.MaxCountExceededException;
@@ -64,16 +65,21 @@ public class Volz2009Coalescent extends TreeDistribution {
         for (int i = 0; i < intervals.getIntervalCount(); i++) {
             double t = intervals.getInterval(i) + s;
 
-            integrator.integrate(a, s, A, t, B);
+            System.out.println("Interval " + i + " = " + intervals.getInterval(i) + "(" + intervals.getIntervalType(i) + ")");
 
-            // compute derivatives at time t (end of this coalescent interval)
-            double[] adot = new double[1];
-            a.computeDerivatives(t, B, adot);
+            if (intervals.getIntervalType(i) == IntervalType.COALESCENT) {
 
-            logL += Math.log(-adot[0]);
+                integrator.integrate(a, s, A, t, B);
 
-            A[0] = B[0];
-            s = t;
+                // compute derivatives at time t (end of this coalescent interval)
+                double[] adot = new double[1];
+                a.computeDerivatives(t, B, adot);
+
+                logL += Math.log(-adot[0]);
+
+                A[0] = B[0];
+                s = t;
+            }
         }
 
         A[0] = n;

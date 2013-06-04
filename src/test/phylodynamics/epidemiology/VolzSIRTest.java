@@ -43,6 +43,7 @@ public class VolzSIRTest extends BEASTTestCase {
         coal.initByName("treeIntervals", treeIntervals, "populationModel", cp);
 
         double logL = coal.calculateLogP();
+        System.out.println("Coalescent(VolzSIR).logL=" + logL);
 
         Volz2009Coalescent volzCoalescent = new Volz2009Coalescent();
         volzCoalescent.initByName(
