@@ -37,11 +37,11 @@ public class Volz2009Coalescent extends TreeDistribution {
         }
 
         volzSIR = new VolzSIR();
-        initByName(
+        volzSIR.initByName(
                 "n_S0", S0_input.get(),
                 "beta", beta_input.get(),
                 "gamma", delta_input.get(),
-                "origin", T_input,
+                "origin", T_input.get(),
                 "integrationStepCount", integrationStepCount);
 
         calculateLogP();
@@ -51,7 +51,7 @@ public class Volz2009Coalescent extends TreeDistribution {
 
         FirstOrderIntegrator integrator = new ClassicalRungeKuttaIntegrator(0.01);
 
-        int n = m_tree.get().getLeafNodeCount();
+        int n = treeIntervals.get().getIntervalCount() + 1;
 
         A a = new A();
 
