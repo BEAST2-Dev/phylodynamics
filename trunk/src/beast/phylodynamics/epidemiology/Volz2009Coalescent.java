@@ -27,7 +27,6 @@ public class Volz2009Coalescent extends TreeDistribution {
     VolzSIR volzSIR;
 
     int integrationStepCount = 1000;
-    double[] A = new double[integrationStepCount];
 
     @Override
     public void initAndValidate() throws Exception {
@@ -60,7 +59,7 @@ public class Volz2009Coalescent extends TreeDistribution {
 
         double logL = 0;
 
-        A[0] = n;
+        double[] A = new double[]{n};
         double s = 0.0;
         for (int i = 0; i < intervals.getIntervalCount(); i++) {
             double t = intervals.getInterval(i) + s;
