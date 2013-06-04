@@ -49,7 +49,7 @@ public class Volz2009Coalescent extends TreeDistribution {
 
     public double calculateLogP() throws Exception {
 
-        FirstOrderIntegrator integrator = new ClassicalRungeKuttaIntegrator(0.01);
+        FirstOrderIntegrator integrator = new ClassicalRungeKuttaIntegrator(0.001);
 
         int n = treeIntervals.get().getIntervalCount() + 1;
 
@@ -64,8 +64,6 @@ public class Volz2009Coalescent extends TreeDistribution {
         double s = 0.0;
         for (int i = 0; i < intervals.getIntervalCount(); i++) {
             double t = intervals.getInterval(i) + s;
-
-            System.out.println("Interval " + i + " = " + intervals.getInterval(i) + "(" + intervals.getIntervalType(i) + ")");
 
             if (intervals.getIntervalType(i) == IntervalType.COALESCENT) {
 
@@ -83,8 +81,10 @@ public class Volz2009Coalescent extends TreeDistribution {
         }
 
         A[0] = n;
-        integrator.integrate(a, 0, A, T_input.get().getValue(), B);
 
+        double T = T_input.get().getValue();
+
+        integrator.integrate(a, 0, A, T, B);
 
         logL -= (n - 1) * Math.log(n - B[0]);
 
@@ -110,7 +110,7 @@ public class Volz2009Coalescent extends TreeDistribution {
 
             // A
             // f_SI = beta * S * I
-            Adot[0] = beta * S * A[0] * A[0] / I;
+            Adot[0] = -beta * S * A[0] * A[0] / I;
         }
     }
 }
