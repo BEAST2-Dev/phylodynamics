@@ -118,7 +118,7 @@ public class SIR_Initializer  extends Plugin implements StateNodeInitialiser {
 //        if ( !current.init(b, 0., d, s, T, ntaxa, 100, m, current.times))
 //            throw new RuntimeException("Could not find suitable trajectory. Please try different epi parameters!");
 
-        if (!current.init(b, 0., d, s, T, ntaxa, 100, m, current.times)){
+        if (!current.initTraj(b, 0., d, s, T, ntaxa, 100, m, current.times)){
 
             int count = 0;
 
@@ -129,7 +129,7 @@ public class SIR_Initializer  extends Plugin implements StateNodeInitialiser {
                 d[0]*= (1.-scaler);
                 count++;
 
-            } while (count<100 && !current.init(b, 0., d, s, T, ntaxa, 100, m, current.times));
+            } while (count<100 && !current.initTraj(b, 0., d, s, T, ntaxa, 100, m, current.times));
         }
 
         dS_input.get().assignFromWithoutID(new RealParameter(current.dS));
