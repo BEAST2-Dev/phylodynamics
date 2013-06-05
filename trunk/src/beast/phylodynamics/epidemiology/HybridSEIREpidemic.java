@@ -257,7 +257,7 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
 
 
     //
-    public Boolean init(Double birth,Double expose, Double[] death, Double[] psi, double T, int ntaxa, int maxLoop, int intervals, double[] times){
+    public Boolean initTraj(Double birth,Double expose, Double[] death, Double[] psi, double T, int ntaxa, int maxLoop, int intervals, double[] times){
 
         return refresh((int) S0.get().getArrayValue(), useExposed ? E0.get().getValue(): 0, birth, useExposed?expose:0., death, psi, T, ntaxa, maxLoop, intervals, times);
 
