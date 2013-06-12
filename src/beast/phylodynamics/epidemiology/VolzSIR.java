@@ -68,7 +68,6 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
     private double tIntensityTrajStart;
     private ContinuousOutputModel integrationResults;
     private double dt;
-    private int Nt;
 
     //
     // Public stuff
@@ -100,7 +99,6 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
         effectivePopSizeTraj = new ArrayList<Double>();
         intensityTraj = new ArrayList<Double>();
 
-        Nt = storedStateCount.get();
         NStraj = new ArrayList<Double>();
         NItraj = new ArrayList<Double>();
 
@@ -191,8 +189,10 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
         y0[1] = 1.0;
         double [] y = new double[2];
         
+        // Integrate SIR model ODEs:
         integrator.integrate(ode, 0, y0, maxSimLengthInput.get(), y);
         
+        // Obtain integration results at discrete locations
         dt = integrationResults.getFinalTime()/storedStateCount.get();
         NStraj.clear();
         NItraj.clear();
@@ -297,8 +297,9 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
     @Override
     public double getIntegral(double start, double finish) {
 
-//        if (finish-start<1e-15)
-//            return 0.0;
+        // Approximation for the case of very small intervals:
+        if (finish-start<1e-15)
+            return (finish-start)/getPopSize(0.5*(start+finish));
 
         if (oldMethodInput.get())
             return getNumericalIntegral(start, finish);
