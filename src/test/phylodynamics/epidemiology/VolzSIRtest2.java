@@ -14,6 +14,7 @@ import beast.phylodynamics.BDSIR;
 
 import java.io.PrintWriter;
 import java.io.FileWriter;
+import java.io.PrintStream;
 
 /**
  * Created by IntelliJ IDEA.
@@ -21,7 +22,7 @@ import java.io.FileWriter;
  * Date: Jun 4, 2013
  * Time: 4:36:41 PM
  */
-public class volzSIRtest2 extends TestCase  {
+public class VolzSIRtest2 extends TestCase  {
 
 
     @Test
@@ -56,7 +57,7 @@ public class volzSIRtest2 extends TestCase  {
 //        for (int j=0;j<1;j++){
 
 
-            writer = new PrintWriter(new FileWriter("/Users/Denise/Documents/Projects/BDSIR/coalComp/vary_beta_"+ j +".txt"));
+            writer = new PrintWriter(new FileWriter("vary_beta_"+ j +".txt"));
             writer.println("#tree = " + trees[j]);
             writer.println("#tips = " + tips[j]);
 
@@ -80,7 +81,7 @@ public class volzSIRtest2 extends TestCase  {
             writer.println("beta\tvolzSIR\tvolz2009\tBDSIR");
 
             for (int i=1; i<=steps; i++){
-
+                
                 current = lower + i*step;
 
 //            writer.println("beta = " + current);
@@ -110,6 +111,10 @@ public class volzSIRtest2 extends TestCase  {
                 vvc.setInputValue("integrationStepCount", 1000);
 
                 vvc.initAndValidate();
+                
+//                if ((j==0) && (i==46)) {
+//                    vvc.dumpIntensities(tree, 1000, new PrintStream("intensities.txt"));
+//                }
 
                 HybridSEIREpidemic sir = new HybridSEIREpidemic();
                 sir.initByName(
@@ -143,9 +148,9 @@ public class volzSIRtest2 extends TestCase  {
                 bdsir.initAndValidate();
 
                 coal = new Coalescent();
-                coal.initByName("treeIntervals", treeIntervals, "populationModel", vvc);
-
-
+                coal.initByName("treeIntervals", treeIntervals,
+                        "populationModel", vvc);
+                
                 double logLvvc =  coal.calculateLogP();
 //            writer.println("volzSIR (Tim)  logL = " + logLvvc);
                 writer.print((Double.isInfinite(logLvvc)?"NA":logLvvc) + "\t");
@@ -212,7 +217,7 @@ public class volzSIRtest2 extends TestCase  {
 //        for (int j=0;j<1;j++){
 
 
-            writer = new PrintWriter(new FileWriter("/Users/Denise/Documents/Projects/BDSIR/coalComp/vary_gamma_"+ j +".txt"));
+            writer = new PrintWriter(new FileWriter("vary_gamma_"+ j +".txt"));
             writer.println("#tree = " + trees[j]);
             writer.println("#tips = " + tips[j]);
 
@@ -360,7 +365,7 @@ public class volzSIRtest2 extends TestCase  {
 //        for (int j=0;j<1;j++){
 
 
-            writer = new PrintWriter(new FileWriter("/Users/Denise/Documents/Projects/BDSIR/coalComp/vary_S_"+ j +".txt"));
+            writer = new PrintWriter(new FileWriter("vary_S_"+ j +".txt"));
             writer.println("#tree = " + trees[j]);
             writer.println("#tips = " + tips[j]);
 
