@@ -100,14 +100,14 @@ public class LikelihoodCrossSections {
                     HybridSEIREpidemic sir = new HybridSEIREpidemic();
                     sir.initByName(
                             "tree", tree,
-                            "birth", new RealParameter(String.valueOf(paramCurrent[0])),
-                            "death", new RealParameter(String.valueOf(paramCurrent[1])),
+                            "birth", new RealParameter("0.005"), //new RealParameter(String.valueOf(paramCurrent[0])),
+                            "death", new RealParameter("2"), //new RealParameter(String.valueOf(paramCurrent[1])),
                             "sampling", "0",
                             "origin", new RealParameter("2.5"),
                             "S0", new RealParameter(String.valueOf(paramCurrent[2])),
                             "Nt", "10001",
                             "Nsamples", "101",
-                            "simulationType", "SAL", "isDeterministic", "true");
+                            "simulationType", "SAL", "isDeterministic", false);
 
                     sir.initTraj(paramCurrent[0], 0., new Double[]{paramCurrent[1]}, new Double[]{0.}, 2.5, tree.getLeafNodeCount(), 100, 1000, sir.times);
 

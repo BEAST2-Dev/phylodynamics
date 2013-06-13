@@ -20,4 +20,9 @@ public class SEIRState {
     public SEIRState copy() {
     	return new SEIRState(S, E, I, R, time);
     }
+    
+    @Override
+    public String toString() {
+        return String.format("[S:%g, E:%g, I:%g, R:%g, t:%g]", S, E, I, R, time);
+    }
 }

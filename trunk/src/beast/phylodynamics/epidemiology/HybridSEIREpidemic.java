@@ -12,9 +12,7 @@ import beast.core.Valuable;
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.core.parameter.BooleanParameter;
-import beast.util.Randomizer;
 import beast.evolution.tree.Tree;
-import cern.jet.random.engine.MersenneTwister;
 
 /**
  * @author dkuh004
@@ -119,7 +117,7 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
         if (simulationType.get().equals("hybrid"))
             hybridTauleapSEIR = new HybridTauleapSEIR(x0, expose, infect, recover[0], false, alpha);
         else
-            hybridTauleapSEIR = new SALTauleapSEIR(x0, expose, infect, recover, false, alpha, new MersenneTwister((int)Randomizer.getSeed()), isDeterministic.get());
+            hybridTauleapSEIR = new SALTauleapSEIR(x0, expose, infect, recover, false, alpha, isDeterministic.get());
 
         hybridTauleapSEIR.setState(x0);
 //        List<SEIRState> trajectory = null;

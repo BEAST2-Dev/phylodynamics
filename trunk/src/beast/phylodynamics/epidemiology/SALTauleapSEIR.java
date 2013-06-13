@@ -3,17 +3,10 @@ package beast.phylodynamics.epidemiology;
 import java.util.ArrayList;
 import java.util.List;
 
-import cern.jet.random.Poisson;
-import cern.jet.random.Exponential;
-import cern.jet.random.engine.MersenneTwister;
-import cern.jet.random.engine.RandomEngine;
 import beast.util.Randomizer;
-import beast.phylodynamics.epidemiology.SEIR_simulator;
-import beast.phylodynamics.epidemiology.SEIRState;
 import beast.phylodynamics.util.Stuff;
 
 //import sun.plugin.dom.exception.InvalidStateException;
-
 /**
  * Class implementing Sehl et al.'s SAL tau-leaping algorithm
  *
@@ -21,464 +14,453 @@ import beast.phylodynamics.util.Stuff;
  */
 public class SALTauleapSEIR implements SEIR_simulator {
 
-	SEIRState state;
-	double exposeRate, infectRate;
+    SEIRState state;
+    double exposeRate, infectRate;
     Double[] recoverRate;
-	double alpha;
-
-	RandomEngine engine;
-	Poisson poissonian;
-	Exponential exponential;
-
-	boolean useExposed;
+    double alpha;
+    boolean useExposed;
     boolean isDeterministic;
 
-	/**
-	 * Constructor
-	 *
-	 * @param state0	initial state of system
-	 * @param infect	infection rate
-	 * @param recover	recovery rate
-	 * @param alpha		threshold for determining critical reactions
-	 */
-	public SALTauleapSEIR(SEIRState state0,
-			double expose, double infect, Double[] recover,
-			boolean useExposed,
-			double alpha, RandomEngine engine, Boolean isDeterministic) {
-		super();
-		this.state = state0.copy();
-		this.exposeRate = expose;
-		this.infectRate = infect;
-		this.recoverRate = recover;
-		this.useExposed = useExposed;
+    /**
+     * Constructor
+     *
+     * @param state0	initial state of system
+     * @param infect	infection rate
+     * @param recover	recovery rate
+     * @param alpha	threshold for determining critical reactions
+     */
+    public SALTauleapSEIR(SEIRState state0,
+            double expose, double infect, Double[] recover,
+            boolean useExposed,
+            double alpha, Boolean isDeterministic) {
+        super();
+        this.state = state0.copy();
+        this.exposeRate = expose;
+        this.infectRate = infect;
+        this.recoverRate = recover;
+        this.useExposed = useExposed;
         this.isDeterministic = isDeterministic;
-		this.alpha = isDeterministic? 0. : alpha;
-		this.engine = engine;
-
-		this.poissonian = new Poisson (1, engine);
-		this.exponential = new Exponential (1, engine);
-	}
+        this.alpha = isDeterministic ? 0. : alpha;
+    }
 
     public void setRates(double expose, double infect, Double[] recover, double alpha) {
 
         this.exposeRate = expose;
         this.infectRate = infect;
         this.recoverRate = recover;
-        this.alpha = isDeterministic? 0. : alpha;
+        this.alpha = isDeterministic ? 0. : alpha;
 
     }
 
+    /**
+     * Set system state
+     *
+     * @param newState
+     */
+    public void setState(SEIRState newState) {
+        state = newState.copy();
+    }
 
-	/**
-	 * Set system state
-	 *
-	 * @param newState
-	 */
-	public void setState(SEIRState newState) {
-		state = newState.copy();
-	}
+    /**
+     * Perform one time-step of fixed length (Does not use exposed compartment.)
+     *
+     * @param	dt	time-step size
+     */
+    public boolean step(double dt, int index) {
 
-	/**
-	 * Perform one time-step of fixed length
-	 * (Does not use exposed compartment.)
-	 *
-	 * @param	dt	time-step size
-	 */
-	public boolean step(double dt, int index) {
+        double t = 0.0;
 
-		double t = 0.0;
+        boolean critical_step = false;
 
-		boolean critical_step = false;
+        while (true) {
 
-		while (true) {
+            // Calculate propensities:
+            double a_infect = infectRate * state.S * state.I;
+            double a_recover = recoverRate[index] * state.I;
 
-			// Calculate propensities:
-			double a_infect = infectRate*state.S*state.I;
-			double a_recover = recoverRate[index]*state.I;
+            // Calculate 2nd order corrections (SAL):
+            double a2_infect = infectRate * state.S * state.I * (infectRate * (state.S - state.I) - recoverRate[index]);
+            double a2_recover = recoverRate[index] * state.I * (infectRate * state.S - recoverRate[index]);
 
-			// Calculate 2nd order corrections (SAL):
-			double a2_infect = infectRate*state.S*state.I*(infectRate*(state.S-state.I)- recoverRate[index]);
-			double a2_recover = recoverRate[index]*state.I*(infectRate*state.S-recoverRate[index]);
-
-			/*
-			double a2_infect = 0;
-			double a2_recover = 0;
-			*/
+            /*
+             double a2_infect = 0;
+             double a2_recover = 0;
+             */
             boolean infectIsCrit = false;
             boolean recoverIsCrit = false;
             double dtCrit = dt - t;
             int critReactionToFire = 0;
 
-			// Determine which reactions are "critical"
-			// and calculate next reaction time:
+            // Determine which reactions are "critical"
+            // and calculate next reaction time:
 
-			double lambda_infect = a_infect*dtCrit + 0.5*a2_infect*dtCrit*dtCrit;
-			if ((alpha>0) && (state.S < lambda_infect + alpha*Math.sqrt(lambda_infect))) {
+            double lambda_infect = a_infect * dtCrit + 0.5 * a2_infect * dtCrit * dtCrit;
+            if ((alpha > 0) && (state.S < lambda_infect + alpha * Math.sqrt(lambda_infect))) {
 
-				// Infection reaction is critical
-				infectIsCrit = true;
+                // Infection reaction is critical
+                infectIsCrit = true;
 
-				// Determine whether infection will fire:
-				double thisdt = exponential.nextDouble(a_infect);
-				if (thisdt < dtCrit) {
-					dtCrit = thisdt;
-					critReactionToFire = 1;
-				}
-			}
+                // Determine whether infection will fire:
+                double thisdt = Randomizer.nextExponential(a_infect);
+                if (thisdt < dtCrit) {
+                    dtCrit = thisdt;
+                    critReactionToFire = 1;
+                }
+            }
 
-			double lambda_recover = a_recover*dtCrit + 0.5*a2_recover*dtCrit*dtCrit;
-			if ((alpha>0) && (state.I < lambda_recover + alpha*Math.sqrt(lambda_recover))) {
+            double lambda_recover = a_recover * dtCrit + 0.5 * a2_recover * dtCrit * dtCrit;
+            if ((alpha > 0) && (state.I < lambda_recover + alpha * Math.sqrt(lambda_recover))) {
 
-				// Recovery is critical:
-				recoverIsCrit = true;
+                // Recovery is critical:
+                recoverIsCrit = true;
 
-				// Determine whether recovery will fire:
-				double thisdt = exponential.nextDouble(a_recover);
-				if (thisdt < dtCrit) {
-					dtCrit = thisdt;
-					critReactionToFire = 2;
-				}
-			}
+                // Determine whether recovery will fire:
+                double thisdt = Randomizer.nextExponential(a_recover);
+                if (thisdt < dtCrit) {
+                    dtCrit = thisdt;
+                    critReactionToFire = 2;
+                }
+            }
 
-			// Reaction has been marked as critical, so this is a critical step:
-			if (infectIsCrit || recoverIsCrit)
-				critical_step = true;
+            // Reaction has been marked as critical, so this is a critical step:
+            if (infectIsCrit || recoverIsCrit)
+                critical_step = true;
 
-			// Update time:
-			t += dtCrit;
-            
-			// tau-leap non-critical reactions:
-			if (infectIsCrit == false) {
-				double q = isDeterministic? (a_infect*dtCrit)
-                        :poissonian.nextInt(a_infect*dtCrit + 0.5*a2_infect*dtCrit*dtCrit);
-				state.S -= q;
-				state.I += q;
-			}
+            // Update time:
+            t += dtCrit;
 
-			if (recoverIsCrit == false) {
-				double q = isDeterministic? (a_recover*dtCrit)
-                        :poissonian.nextInt(a_recover*dtCrit + 0.5*a2_recover*dtCrit*dtCrit);
-				state.I -= q;
-				state.R += q;
-			}
+            // tau-leap non-critical reactions:
+            if (infectIsCrit == false) {
+                double q = isDeterministic ? (a_infect * dtCrit)
+                        : Randomizer.nextPoisson(a_infect * dtCrit + 0.5 * a2_infect * dtCrit * dtCrit);
+                state.S -= q;
+                state.I += q;
+            }
 
-			// Zero negative populations:
-			// (Beginning to think this is the sensible thing to do.)
-			if (state.S<0)
-				state.S = 0;
-			if (state.I<0)
-				state.I = 0;
-			if (state.R<0)
-				state.R = 0;
+            if (recoverIsCrit == false) {
+                double q = isDeterministic ? (a_recover * dtCrit)
+                        : Randomizer.nextPoisson(a_recover * dtCrit + 0.5 * a2_recover * dtCrit * dtCrit);
+                state.I -= q;
+                state.R += q;
+            }
 
-			// End step if no critical reaction fires:
-			if (critReactionToFire == 0)
-				break;
+            // Zero negative populations:
+            // (Beginning to think this is the sensible thing to do.)
+            if (state.S < 0)
+                state.S = 0;
+            if (state.I < 0)
+                state.I = 0;
+            if (state.R < 0)
+                state.R = 0;
 
-			// Implement one critical reaction:
-			switch(critReactionToFire) {
-			case 1:
-				// Infection
-				state.S -= 1;
-				state.I += 1;
-				break;
-			case 2:
-				// Recovery
-				state.I -= 1;
-				state.R += 1;
-				break;
+            // End step if no critical reaction fires:
+            if (critReactionToFire == 0)
+                break;
 
-			default:
-				// No critical reaction
-				break;
-			}
+            // Implement one critical reaction:
+            switch (critReactionToFire) {
+                case 1:
+                    // Infection
+                    state.S -= 1;
+                    state.I += 1;
+                    break;
+                case 2:
+                    // Recovery
+                    state.I -= 1;
+                    state.R += 1;
+                    break;
 
-		}
+                default:
+                    // No critical reaction
+                    break;
+            }
 
-		// Check for negative populations:
-		if (state.S < 0 || state.I < 0 || state.R < 0) {
+        }
+
+        // Check for negative populations:
+        if (state.S < 0 || state.I < 0 || state.R < 0) {
             throw new RuntimeException("Error: negative population detected. Rejecting trajectory.");
-		}
+        }
 
 
-		// Update state time:
-		state.time += dt;
+        // Update state time:
+        state.time += dt;
 
-		return critical_step;
+        return critical_step;
 
-	}
+    }
 
-	/**
-	 * Perform one fixed-size time step using exposed compartment
-	 *
-	 * @param dt	length of time step
-	 * @return true or false depending on whether step involved "critical" reactions
-	 */
-	public boolean step_exposed(double dt, int index) {
-		double t = 0.0;
+    /**
+     * Perform one fixed-size time step using exposed compartment
+     *
+     * @param dt	length of time step
+     * @return true or false depending on whether step involved "critical"
+     * reactions
+     */
+    public boolean step_exposed(double dt, int index) {
+        double t = 0.0;
 
-		boolean critical_step = false;
+        boolean critical_step = false;
 
-		while (true) {
+        while (true) {
 
-			// Calculate propensities:
-			double a_expose = exposeRate*state.S*state.I;
-			double a_infect = infectRate*state.E;
-			double a_recover = recoverRate[index]*state.I;
+            // Calculate propensities:
+            double a_expose = exposeRate * state.S * state.I;
+            double a_infect = infectRate * state.E;
+            double a_recover = recoverRate[index] * state.I;
 
-			// Calculate 2nd order corrections:
-			double a2_expose = -exposeRate*exposeRate*state.S*state.I*state.I
-					+ exposeRate*infectRate*state.E*state.S
-					- exposeRate*recoverRate[index]*state.I*state.S;
-			double a2_infect = infectRate*exposeRate*state.S*state.I
-					-infectRate*infectRate*state.E;
-			double a2_recover = recoverRate[index]*infectRate*state.E
-					-recoverRate[index]*recoverRate[index]*state.I;
+            // Calculate 2nd order corrections:
+            double a2_expose = -exposeRate * exposeRate * state.S * state.I * state.I
+                    + exposeRate * infectRate * state.E * state.S
+                    - exposeRate * recoverRate[index] * state.I * state.S;
+            double a2_infect = infectRate * exposeRate * state.S * state.I
+                    - infectRate * infectRate * state.E;
+            double a2_recover = recoverRate[index] * infectRate * state.E
+                    - recoverRate[index] * recoverRate[index] * state.I;
 
-			// Determine which reactions are "critical"
-			// and calculate next reaction time:
-			double dtCrit = dt - t;
-			int critReactionToFire = 0;
+            // Determine which reactions are "critical"
+            // and calculate next reaction time:
+            double dtCrit = dt - t;
+            int critReactionToFire = 0;
 
-			boolean exposeIsCrit = false;
-			double lambda_expose = a_expose*dtCrit + 0.5*a2_expose*dtCrit*dtCrit;
-			if ((alpha>0) && (state.S < lambda_expose + alpha*Math.sqrt(lambda_expose))) {
+            boolean exposeIsCrit = false;
+            double lambda_expose = a_expose * dtCrit + 0.5 * a2_expose * dtCrit * dtCrit;
+            if ((alpha > 0) && (state.S < lambda_expose + alpha * Math.sqrt(lambda_expose))) {
 
-				// Exposure reaction is critical
-				exposeIsCrit = true;
+                // Exposure reaction is critical
+                exposeIsCrit = true;
 
-				// Determine whether exposure will fire:
-				double thisdt = exponential.nextDouble(a_expose);
-				if (thisdt < dtCrit) {
-					dtCrit = thisdt;
-					critReactionToFire = 1;
-				}
-			}
+                // Determine whether exposure will fire:
+                double thisdt = Randomizer.nextExponential(a_expose);
+                if (thisdt < dtCrit) {
+                    dtCrit = thisdt;
+                    critReactionToFire = 1;
+                }
+            }
 
-			boolean infectIsCrit = false;
-			double lambda_infect = a_infect*dtCrit + 0.5*a2_infect*dtCrit*dtCrit;
-			if ((alpha>0) && (state.E < lambda_infect + alpha*Math.sqrt(lambda_infect))) {
+            boolean infectIsCrit = false;
+            double lambda_infect = a_infect * dtCrit + 0.5 * a2_infect * dtCrit * dtCrit;
+            if ((alpha > 0) && (state.E < lambda_infect + alpha * Math.sqrt(lambda_infect))) {
 
-				// Infection reaction is critical
-				infectIsCrit = true;
+                // Infection reaction is critical
+                infectIsCrit = true;
 
-				// Determine whether infection will fire:
-				double thisdt = exponential.nextDouble(a_infect);
-				if (thisdt < dtCrit) {
-					dtCrit = thisdt;
-					critReactionToFire = 2;
-				}
-			}
+                // Determine whether infection will fire:
+                double thisdt = Randomizer.nextExponential(a_infect);
+                if (thisdt < dtCrit) {
+                    dtCrit = thisdt;
+                    critReactionToFire = 2;
+                }
+            }
 
-			boolean recoverIsCrit = false;
-			double lambda_recover = a_recover*dtCrit + 0.5*a2_recover*dtCrit*dtCrit;
-			if ((alpha>0) && (state.I < lambda_recover + alpha*Math.sqrt(lambda_recover))) {
+            boolean recoverIsCrit = false;
+            double lambda_recover = a_recover * dtCrit + 0.5 * a2_recover * dtCrit * dtCrit;
+            if ((alpha > 0) && (state.I < lambda_recover + alpha * Math.sqrt(lambda_recover))) {
 
-				// Recovery is critical:
-				recoverIsCrit = true;
+                // Recovery is critical:
+                recoverIsCrit = true;
 
-				// Determine whether recovery will fire:
-				double thisdt = exponential.nextDouble(a_recover);
-				if (thisdt < dtCrit) {
-					dtCrit = thisdt;
-					critReactionToFire = 3;
-				}
-			}
+                // Determine whether recovery will fire:
+                double thisdt = Randomizer.nextExponential(a_recover);
+                if (thisdt < dtCrit) {
+                    dtCrit = thisdt;
+                    critReactionToFire = 3;
+                }
+            }
 
-			// Reaction has been marked as critical, so this is a critical step:
-			if (exposeIsCrit || infectIsCrit || recoverIsCrit)
-				critical_step = true;
+            // Reaction has been marked as critical, so this is a critical step:
+            if (exposeIsCrit || infectIsCrit || recoverIsCrit)
+                critical_step = true;
 
-			// Update time:
-			t += dtCrit;
+            // Update time:
+            t += dtCrit;
 
-			// tau-leap non-critical reactions:
-			if (exposeIsCrit == false) {
-				int q = poissonian.nextInt(a_expose*dtCrit + 0.5*a2_expose*dtCrit*dtCrit);
-				state.S -= q;
-				state.E += q;
-			}
+            // tau-leap non-critical reactions:
+            if (exposeIsCrit == false) {
+                int q = (int)Randomizer.nextPoisson(a_expose * dtCrit + 0.5 * a2_expose * dtCrit * dtCrit);
+                state.S -= q;
+                state.E += q;
+            }
 
-			// tau-leap non-critical reactions:
-			if (infectIsCrit == false) {
-				int q = poissonian.nextInt(a_infect*dtCrit + 0.5*a2_infect*dtCrit*dtCrit);
-				state.E -= q;
-				state.I += q;
-			}
+            // tau-leap non-critical reactions:
+            if (infectIsCrit == false) {
+                int q = (int)Randomizer.nextPoisson(a_infect * dtCrit + 0.5 * a2_infect * dtCrit * dtCrit);
+                state.E -= q;
+                state.I += q;
+            }
 
-			if (recoverIsCrit == false) {
-				int q = poissonian.nextInt(a_recover*dtCrit + 0.5*a2_recover*dtCrit*dtCrit);
-				state.I -= q;
-				state.R += q;
-			}
+            if (recoverIsCrit == false) {
+                int q = (int)Randomizer.nextPoisson(a_recover * dtCrit + 0.5 * a2_recover * dtCrit * dtCrit);
+                state.I -= q;
+                state.R += q;
+            }
 
-			// Zero negative populations:
-			if (state.S<0)
-				state.S = 0;
-			if (state.E<0)
-				state.E = 0;
-			if (state.I<0)
-				state.I = 0;
-			if (state.R<0)
-				state.R = 0;
+            // Zero negative populations:
+            if (state.S < 0)
+                state.S = 0;
+            if (state.E < 0)
+                state.E = 0;
+            if (state.I < 0)
+                state.I = 0;
+            if (state.R < 0)
+                state.R = 0;
 
-			// End step if no critical reaction fires:
-			if (critReactionToFire == 0)
-				break;
+            // End step if no critical reaction fires:
+            if (critReactionToFire == 0)
+                break;
 
-			// implement one critical reaction:
-			switch (critReactionToFire) {
-			case 1:
-				// Exposure
-				state.S -= 1;
-				state.E += 1;
-				break;
+            // implement one critical reaction:
+            switch (critReactionToFire) {
+                case 1:
+                    // Exposure
+                    state.S -= 1;
+                    state.E += 1;
+                    break;
 
-			case 2:
-				// Infection
-				state.E -= 1;
-				state.I += 1;
-				break;
+                case 2:
+                    // Infection
+                    state.E -= 1;
+                    state.I += 1;
+                    break;
 
-			case 3:
-				// Recovery
-				state.I -= 1;
-				state.R += 1;
-				break;
-			}
+                case 3:
+                    // Recovery
+                    state.I -= 1;
+                    state.R += 1;
+                    break;
+            }
 
-		}
+        }
 
-		// Check for negative populations:
-		if (state.S < 0 || state.E < 0 || state.I < 0 || state.R < 0) {
+        // Check for negative populations:
+        if (state.S < 0 || state.E < 0 || state.I < 0 || state.R < 0) {
             throw new RuntimeException("Error: negative population detected. Rejecting trajectory.");
-		}
+        }
 
-		// Update state time:
-		state.time += dt;
+        // Update state time:
+        state.time += dt;
 
-		return critical_step;
+        return critical_step;
 
-	}
+    }
 
-	/**
-	 * Generate trajectory
-	 *
-	 * @param T			Integration time
-	 * @param Nt		Number of time-steps
-	 * @param Nsamples	Number of samples to record
-	 *
-	 * @return List of SEIRState instances representing sampled trajectory.
-	 */
-	public List<SEIRState> genTrajectory(double T, int Nt, int Nsamples, List<Integer> criticalTrajectories, double[] times) {
+    /**
+     * Generate trajectory
+     *
+     * @param T	Integration time
+     * @param Nt	Number of time-steps
+     * @param Nsamples	Number of samples to record
+     *
+     * @return List of SEIRState instances representing sampled trajectory.
+     */
+    public List<SEIRState> genTrajectory(double T, int Nt, int Nsamples, List<Integer> criticalTrajectories, double[] times) {
 
-		// Determine time-step size:
-		double dt = T/(Nt-1);
+        // Determine time-step size:
+        double dt = T / (Nt - 1);
 
-		// Determine number of time steps per sample:
-		int stepsPerSample = (Nt-1)/(Nsamples-1);
+        // Determine number of time steps per sample:
+        int stepsPerSample = (Nt - 1) / (Nsamples - 1);
 
-		// Allocate memory for sampled states:
-		List<SEIRState> trajectory = new ArrayList<SEIRState>();
+        // Allocate memory for sampled states:
+        List<SEIRState> trajectory = new ArrayList<SEIRState>();
 
-		// Sample first state:
-		trajectory.add(state.copy());
+        // Sample first state:
+        trajectory.add(state.copy());
 
         //index of rates (in case they change over time)
         int index = 0;
 
-		for (int tidx=1; tidx<Nt; tidx++) {
+        for (int tidx = 1; tidx < Nt; tidx++) {
 
-            index = Stuff.index(tidx*dt, times);
+            index = Stuff.index(tidx * dt, times);
 
-			// Increment state:
-			boolean crit = false;
+            // Increment state:
+            boolean crit = false;
 
-			if (useExposed)
-				crit = step_exposed(dt, index);
-			else
-				crit = step(dt, index);
+            if (useExposed)
+                crit = step_exposed(dt, index);
+            else
+                crit = step(dt, index);
 
-			// Sample if necessary:
-			if (tidx % stepsPerSample == 0) {
-				trajectory.add(state.copy());
+            // Sample if necessary:
+            if (tidx % stepsPerSample == 0) {
+                trajectory.add(state.copy());
 
-				// Adjust critical trajectory count:
+                // Adjust critical trajectory count:
 //				if (crit)
 //					criticalTrajectories.set(tidx/stepsPerSample,
 //							criticalTrajectories.get(tidx/stepsPerSample)+1);
-			}
-		}
+            }
+        }
 
-		return trajectory;
+        return trajectory;
 
-	}
-
+    }
 
     // slightly modified method for BEAST Operator
-	public List<SEIRState> genTrajectory(double T, int Nt, int Nsamples, int ntaxa, Boolean check, double[] times) {
+    public List<SEIRState> genTrajectory(double T, int Nt, int Nsamples, int ntaxa, Boolean check, double[] times) {
 
-		// Determine time-step size:
-		double dt = T/(Nt-1);
+        // Determine time-step size:
+        double dt = T / (Nt - 1);
 
-		// Determine number of time steps per sample:
-		int stepsPerSample = (Nt-1)/(Nsamples-1);
+        // Determine number of time steps per sample:
+        int stepsPerSample = (Nt - 1) / (Nsamples - 1);
 
-		// Allocate memory for sampled states:
-		List<SEIRState> trajectory = new ArrayList<SEIRState>();
+        // Allocate memory for sampled states:
+        List<SEIRState> trajectory = new ArrayList<SEIRState>();
 
-		// Sample first state:
-		trajectory.add(state.copy());
+        // Sample first state:
+        trajectory.add(state.copy());
 
         //index of rates (in case they change over time)
         int index = 0;
 
-		for (int tidx=1; tidx<Nt; tidx++) {
+        for (int tidx = 1; tidx < Nt; tidx++) {
 
-            index = Stuff.index(tidx*dt, times);
+            index = Stuff.index(tidx * dt, times);
 
-			if (useExposed)
-				step_exposed(dt, index);
-			else
-				step(dt, index);
+            if (useExposed)
+                step_exposed(dt, index);
+            else
+                step(dt, index);
 
-			// Sample if necessary:
-			if (tidx % stepsPerSample == 0) {
+            // Sample if necessary:
+            if (tidx % stepsPerSample == 0) {
                 if ((Math.round(state.I) < 1) && (!useExposed || (state.E == 0)))
 //                if (trajectory.get(trajectory.size()-1).S == state.S ) zeroCount++;
 //                if (check && zeroCount > Nsamples/2.)
                     throw new RuntimeException("Abort simulation. No infecteds left.");
 
-				trajectory.add(state.copy());
+                trajectory.add(state.copy());
 
-			}
-		}
+            }
+        }
 
         if ((Math.round(state.I) < 1) && (!useExposed || (state.E == 0)))
             throw new RuntimeException("Abort simulation. No infecteds left.");
 
-		return trajectory;
+        return trajectory;
 
-	}
+    }
 
-	/**
-	 * Main method: for debugging only
-	 *
-	 * @param args
-	 */
-	public static void main(String[] args) {
+    /**
+     * Main method: for debugging only
+     *
+     * @param args
+     */
+    public static void main(String[] args) {
 
 
-		// Simulation parameters:
-		int Ntraj = 10;		// Number of trajectories
-		int Nt = 10001;			// Number of timesteps
-		int Nsamples = 101;		// Number of samples to record
-		double T = 4.;		// Length of time of simulation
+        // Simulation parameters:
+        int Ntraj = 10;		// Number of trajectories
+        int Nt = 10001;			// Number of timesteps
+        int Nsamples = 101;		// Number of samples to record
+        double T = 4.;		// Length of time of simulation
 
-		//double alpha = 10;		// Critical reaction parameter
-		double alpha = 10.;		// No SSA component
+        //double alpha = 10;		// Critical reaction parameter
+        double alpha = 10.;		// No SSA component
 
-		// Model parameters:
+        // Model parameters:
         int s0 = 3000;
         int e0 = 0;
         int i0 = 1;
@@ -486,36 +468,33 @@ public class SALTauleapSEIR implements SEIR_simulator {
 
         double[] times = {T};
         double expose = 0.0;
-		double infect = 0.9/s0;
-		Double[] recover = {0.2};
+        double infect = 0.9 / s0;
+        Double[] recover = {0.2};
 
-		SEIRState x0 = new SEIRState(s0, e0, i0, r0, 0.0);
+        SEIRState x0 = new SEIRState(s0, e0, i0, r0, 0.0);
 
-		// List to hold integrated trajectories:
-		List<List<SEIRState>> trajectoryList = new ArrayList<List<SEIRState>>();
+        // List to hold integrated trajectories:
+        List<List<SEIRState>> trajectoryList = new ArrayList<List<SEIRState>>();
 
-		// Initialise RNG:
-		RandomEngine engine = new MersenneTwister((int) Randomizer.getSeed());
+        // Create SALTauleapSEIR instance:
+        SALTauleapSEIR hybridTauleapSEIR = new SALTauleapSEIR(x0, expose, infect, recover, false, alpha, false);
 
-		// Create SALTauleapSEIR instance:
-		SALTauleapSEIR hybridTauleapSEIR = new SALTauleapSEIR(x0, expose, infect, recover, false, alpha, engine, false);
+        // Allocate and zero critical steps list:
+        List<Integer> criticalTrajectories = new ArrayList<Integer>();
+        for (int i = 0; i < Nsamples; i++)
+            criticalTrajectories.add(0);
 
-		// Allocate and zero critical steps list:
-		List<Integer> criticalTrajectories = new ArrayList<Integer>();
-		for (int i=0; i<Nsamples; i++)
-			criticalTrajectories.add(0);
+        // Integrate trajectories:
+        for (int i = 0; i < Ntraj; i++) {
+            hybridTauleapSEIR.setState(x0);
+            trajectoryList.add(hybridTauleapSEIR.genTrajectory(T, Nt, Nsamples, criticalTrajectories, times));
+        }
 
-		// Integrate trajectories:
-		for (int i=0; i<Ntraj; i++) {
-			hybridTauleapSEIR.setState(x0);
-			trajectoryList.add(hybridTauleapSEIR.genTrajectory(T, Nt, Nsamples, criticalTrajectories,times));
-		}
-
-        for (int i=0; i<Ntraj; i++) {
+        for (int i = 0; i < Ntraj; i++) {
             System.out.println("t\tS\tI\tR");
             List<SEIRState> traj = trajectoryList.get(i);
 
-            for (int j=0; j<Nsamples; j++) {
+            for (int j = 0; j < Nsamples; j++) {
 
                 SEIRState state = traj.get(j);
                 System.out.println(state.time + "\t" + state.S + "\t" + state.I + "\t" + state.R);
@@ -545,7 +524,7 @@ public class SALTauleapSEIR implements SEIR_simulator {
 //		}
 
 
-		// Done!
-		System.exit(0);
-	}
+        // Done!
+        System.exit(0);
+    }
 }
