@@ -17,7 +17,7 @@ import java.io.PrintStream;
  * Created by IntelliJ IDEA. User: Denise Kuehnert Date: Jun 4, 2013 Time:
  * 4:36:41 PM
  */
-public class LikelihoodFigures {
+public class LikelihoodCrossSections {
 
     public static void main(String [] args) throws IOException, Exception {
 
@@ -114,7 +114,7 @@ public class LikelihoodFigures {
 
                     BDSIR bdsir = new BDSIR();
                     bdsir.setInputValue("tree", tree);
-                    bdsir.setInputValue("birthRate", new RealParameter(new Double[]{paramCurrent[0] * 1000}));
+                    bdsir.setInputValue("birthRate", new RealParameter(new Double[]{paramCurrent[0] * paramCurrent[2]}));
                     bdsir.setInputValue("deathRate", new RealParameter(String.valueOf(paramCurrent[1])));
                     bdsir.setInputValue("samplingRate", new RealParameter("0"));
                     bdsir.setInputValue("rho", new RealParameter(new Double[]{tips[j] / 245.}));

@@ -6,7 +6,6 @@ import beast.core.Input.Validate;
 import beast.core.Loggable;
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Tree;
-import beast.evolution.tree.coalescent.IntervalList;
 import beast.evolution.tree.coalescent.PopulationFunction;
 import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.MaxIterationsExceededException;
@@ -25,8 +24,6 @@ import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
 import org.apache.commons.math3.ode.events.EventHandler;
 import org.apache.commons.math3.ode.nonstiff.AdaptiveStepsizeIntegrator;
 import org.apache.commons.math3.ode.nonstiff.HighamHall54Integrator;
-import org.apache.commons.math3.ode.sampling.StepHandler;
-import org.apache.commons.math3.ode.sampling.StepInterpolator;
 
 /**
  * @author Timothy Vaughan
@@ -355,10 +352,8 @@ public class VolzSIR extends PopulationFunction.Abstract implements Loggable {
         try {
             return solver.solve(intensityFunction, 0, n_S_Parameter.get().getValue() / betaParameter.get().getValue());
         } catch (MaxIterationsExceededException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             throw new RuntimeException("Max iterations (" + e.getMaxIterations() + ") exceeded:" + e.getMessage());
         } catch (FunctionEvaluationException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             throw new RuntimeException(e.getMessage());
         }
     }
