@@ -3,7 +3,6 @@ package beast.phylodynamics.epidemiology;
 import java.util.ArrayList;
 import java.util.List;
 
-import cern.jet.random.Poisson;
 import beast.util.Randomizer;
 import beast.phylodynamics.util.SEIRStateMoments;
 import beast.phylodynamics.util.SEIRStateDouble;
@@ -129,13 +128,13 @@ public class HybridTauleapSEIR implements SEIR_simulator {
 
 			// tau-leap non-critical reactions:
 			if (!infectIsCrit) {
-				int q = Poisson.staticNextInt(a_infect*dtCrit);
+				int q = (int)Randomizer.nextPoisson(a_infect*dtCrit);
 				state.S -= q;
 				state.I += q;
 			}
 
 			if (!recoverIsCrit) {
-				int q = Poisson.staticNextInt(a_recover*dtCrit);
+				int q = (int)Randomizer.nextPoisson(a_recover*dtCrit);
 				state.I -= q;
 				state.R += q;
 			}
@@ -247,20 +246,20 @@ public class HybridTauleapSEIR implements SEIR_simulator {
 
 			// tau-leap non-critical reactions:
 			if (!exposeIsCrit) {
-				int q = Poisson.staticNextInt(a_expose*dtCrit);
+				int q = (int)Randomizer.nextPoisson(a_expose*dtCrit);
 				state.S -= q;
 				state.E += q;
 			}
 
 			// tau-leap non-critical reactions:
 			if (!infectIsCrit) {
-				int q = Poisson.staticNextInt(a_infect*dtCrit);
+				int q = (int)Randomizer.nextPoisson(a_infect*dtCrit);
 				state.E -= q;
 				state.I += q;
 			}
 
 			if (!recoverIsCrit) {
-				int q = Poisson.staticNextInt(a_recover*dtCrit);
+				int q = (int)Randomizer.nextPoisson(a_recover*dtCrit);
 				state.I -= q;
 				state.R += q;
 			}
