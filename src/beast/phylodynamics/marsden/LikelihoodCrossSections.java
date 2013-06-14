@@ -48,7 +48,7 @@ public class LikelihoodCrossSections {
 
         Tree tree;
 
-        double logLvc;
+        double logLvolzSIR2009;
 
         for (int j = 0; j < trees.length; j++) {
             for (int p = 0; p < 3; p++) {
@@ -70,9 +70,29 @@ public class LikelihoodCrossSections {
                 for (int i = 1; i <= nsteps; i++) {
 
                     paramCurrent[p] = paramLowerBound[p] + i * paramStep;
-
                     writer.print(paramCurrent[p] + "\t");
 
+                    
+                    // Volz 2012
+                    
+                    VolzSIR volzSIR = new VolzSIR();
+                    volzSIR.setInputValue("beta", new RealParameter(String.valueOf(paramCurrent[0])));
+                    volzSIR.setInputValue("gamma", new RealParameter(String.valueOf(paramCurrent[1])));
+                    volzSIR.setInputValue("n_S0", new RealParameter(String.valueOf(paramCurrent[2])));
+                    volzSIR.setInputValue("origin", new RealParameter("2.5"));
+                    volzSIR.setInputValue("integrationStepCount", 1000);
+                    volzSIR.initAndValidate();
+                    
+                    Coalescent coal = new Coalescent();
+                    coal.initByName("treeIntervals", treeIntervals,
+                            "populationModel", volzSIR);
+                    
+                    double logLvolzSIR = coal.calculateLogP();
+                    writer.print((Double.isInfinite(logLvolzSIR) ? "NA" : logLvolzSIR) + "\t");
+                    
+                    
+                    // Volz 2009
+                    
                     Volz2009Coalescent volzSIR2009 = new Volz2009Coalescent();
                     volzSIR2009.setInputValue("treeIntervals", new TreeIntervals(tree));
                     volzSIR2009.setInputValue("beta", new RealParameter(String.valueOf(paramCurrent[0])));
@@ -82,20 +102,16 @@ public class LikelihoodCrossSections {
 
                     try {
                         volzSIR2009.initAndValidate();
-                        logLvc = volzSIR2009.calculateLogP();
+                        logLvolzSIR2009 = volzSIR2009.calculateLogP();
 
                     } catch (Exception e) {
-                        logLvc = Double.NaN;
+                        logLvolzSIR2009 = Double.NaN;
                     }
+                    
+                    writer.print((Double.isInfinite(logLvolzSIR2009) ? "NA" : logLvolzSIR2009) + "\t");
 
-                    VolzSIR volzSIR = new VolzSIR();
-                    volzSIR.setInputValue("beta", new RealParameter(String.valueOf(paramCurrent[0])));
-                    volzSIR.setInputValue("gamma", new RealParameter(String.valueOf(paramCurrent[1])));
-                    volzSIR.setInputValue("n_S0", new RealParameter(String.valueOf(paramCurrent[2])));
-                    volzSIR.setInputValue("origin", new RealParameter("2.5"));
-                    volzSIR.setInputValue("integrationStepCount", 1000);
 
-                    volzSIR.initAndValidate();
+                    // BDSIR
 
                     HybridSEIREpidemic sir = new HybridSEIREpidemic();
                     sir.initByName(
@@ -111,7 +127,6 @@ public class LikelihoodCrossSections {
 
                     sir.initTraj(paramCurrent[0], 0., new Double[]{paramCurrent[1]}, new Double[]{0.}, 2.5, tree.getLeafNodeCount(), 100, 1000, sir.times);
 
-
                     BDSIR bdsir = new BDSIR();
                     bdsir.setInputValue("tree", tree);
                     bdsir.setInputValue("birthRate", new RealParameter(new Double[]{paramCurrent[0] * paramCurrent[2]}));
@@ -126,13 +141,6 @@ public class LikelihoodCrossSections {
 
                     bdsir.initAndValidate();
 
-                    Coalescent coal = new Coalescent();
-                    coal.initByName("treeIntervals", treeIntervals,
-                            "populationModel", volzSIR);
-
-                    double logLvvc = coal.calculateLogP();
-                    writer.print((Double.isInfinite(logLvvc) ? "NA" : logLvvc) + "\t");
-                    writer.print((Double.isInfinite(logLvc) ? "NA" : logLvc) + "\t");
 
                     double logLbdsir;
                     try {
