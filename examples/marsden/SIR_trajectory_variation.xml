@@ -36,7 +36,14 @@
 	    momentName='I'
 	    factorial='true'>
       <factor idref="I"/>
-  </moment>
+    </moment>
+
+    <moment spec='Moment'
+	    momentName='S'
+	    factorial='true'>
+      <factor idref="S"/>
+    </moment>
+
     <output spec='JsonOutput' fileName='SIR_output.json'/>
   </run>
 </beast>
