@@ -43,6 +43,11 @@ public class ScaleOffsetOperator extends ScaleOperator{
      */
     @Override
     public double proposal() {
+
+        if (offsetTree.get() !=null) offset = offsetTree.get().getRoot().getHeight();
+
+        else offset = scalingOffset.get().getValue();
+
         try {
 
             double hastingsRatio;
@@ -50,7 +55,6 @@ public class ScaleOffsetOperator extends ScaleOperator{
 
             // scale a parameter
             final boolean bScaleAll = m_pScaleAll.get();
-            final int nDegreesOfFreedom = m_pDegreesOfFreedom.get();
             final boolean bScaleAllIndependently = m_pScaleAllIndependently.get();
 
             final RealParameter param = m_pParameter.get(this);
@@ -60,38 +64,15 @@ public class ScaleOffsetOperator extends ScaleOperator{
             final int dim = param.getDimension();
 
             if (bScaleAllIndependently) {
-                // update all dimensions independently.
-                hastingsRatio = 0;
-                for (int i = 0; i < dim; i++) {
 
-                    final double scaleOne = getScaler();
-                    final double newValue = offset + scaleOne * (param.getValue(i) - offset);
+                throw new NotImplementedException();
 
-                    hastingsRatio -= Math.log(scaleOne);
-
-                    if (outsideBounds(newValue, param)) {
-                        return Double.NEGATIVE_INFINITY;
-                    }
-
-                    param.setValue(i, newValue);
-                }
             } else if (bScaleAll) {
-                // update all dimensions
-                // hasting ratio is dim-2 times of 1dim case. would be nice to have a reference here
-                // for the proof. It is supposed to be somewhere in an Alexei/Nicholes article.
-                final int df = (nDegreesOfFreedom > 0) ? -nDegreesOfFreedom : dim - 2;
-                hastingsRatio = df * Math.log(scale);
 
-                // all Values assumed independent!
-                for (int i = 0; i < dim; i++) {
-                    final double newValue = offset + scale * (param.getValue(i) - offset);
+                throw new NotImplementedException();
 
-                    if (outsideBounds(newValue, param)) {
-                        return Double.NEGATIVE_INFINITY;
-                    }
-                    param.setValue(i, newValue);
                 }
-            } else {
+//            } else {
                 hastingsRatio = -Math.log(scale);
 
                 // which position to scale
@@ -146,7 +127,7 @@ public class ScaleOffsetOperator extends ScaleOperator{
                 param.setValue(index, newValue);
                 // provides a hook for subclasses
                 //cleanupOperation(newValue, oldValue);
-            }
+//            }
 
             return hastingsRatio;
 
