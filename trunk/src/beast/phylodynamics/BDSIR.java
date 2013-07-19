@@ -31,18 +31,13 @@ public class BDSIR extends BirthDeathSkylineModel {
     public Input<Boolean> checkTreeConsistent = new Input<Boolean>("checkTreeConsistent", "check if trajectory is consistent with number of lineages in tree? default true", true);
 
     Double S0;
-    Double bS0;
     Double[] dS;
     Double[] dE;
     Double[] dR;
 
-    Boolean recomputeSIR;
+    int dim;
     double T;
     int ntaxa;
-
-    Double[] birth_stored;
-    Double[]  death_stored;
-    Double[]  psi_stored;
 
 
     @Override
@@ -51,8 +46,9 @@ public class BDSIR extends BirthDeathSkylineModel {
         S0 =  (S0_input.get().getArrayValue());
 
         dS = m_dS.get().getValues();
+        dim = dS.length;
 
-        birthChanges = intervalNumber.get() - 1; 
+        birthChanges = dim - 1;
         super.initAndValidate();
 
         if (transform){
@@ -83,37 +79,37 @@ public class BDSIR extends BirthDeathSkylineModel {
 
         dE = (m_dE.get() !=null)? m_dE.get().getValues(): (new Double[dS.length]);
         if (dE[0]==null) Arrays.fill(dE,0.);
-        
+
         dR = m_dR.get().getValues();
 
-        
-        double cumS = S0 - 1 ;
-        int dim = dS.length;
-        double b = birth[0]/S0 ;
-        double time; 
 
-        birth = new Double[dim];
+        double cumS = S0 - 1 ;
+        double b = birth[0]/S0 ;
+        double time;
+
+        Double[] birthSIR = new Double[dim];
         double I = 1.;
         double R = 0.;
 
-        birth[0] = b * cumS;
+        birthSIR[0] = b * cumS;
         for (int i = 0; i < dim-1; i++){
 
             cumS -= dS[i];
-            birth[i+1] = b * cumS;
+            birthSIR[i+1] = b * cumS;
 
             I += dS[i] - dE[i] - dR[i];
             R += dR[i];
-            time = (i+1)*T/(dim-1);
+            time = (i+1.)/dim * T;
 
             if ( checkTreeConsistent.get() && (I<=0. || I < lineageCountAtTime(T-time, tree)))
                 return Double.NEGATIVE_INFINITY;
 
         }
 
-        if (cumS < 0 || S0 - cumS < m_tree.get().getLeafNodeCount() || (Math.abs(S0 - (cumS+I+R))) > .01)
+        if (cumS < 0 || S0 - cumS < m_tree.get().getLeafNodeCount() || S0 != (cumS+I+R))
             return Double.NEGATIVE_INFINITY;
 
+        adjustBirthRates(birthSIR);
         return 0.;
 
     }
@@ -124,5 +120,7 @@ public class BDSIR extends BirthDeathSkylineModel {
         return true;
     }
 
-
+    public int getSIRdimension(){
+        return dim;
+    }
 }
