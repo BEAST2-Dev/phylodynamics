@@ -8,7 +8,7 @@ import beast.core.CalculationNode;
 import beast.core.Loggable;
 import beast.core.Input;
 import beast.core.Input.Validate;
-import beast.core.Valuable;
+import beast.core.Function;
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.core.parameter.BooleanParameter;
@@ -23,8 +23,8 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
 
 
 
-    public Input<Valuable> S0 =
-            new Input<Valuable>("S0", "The numbers of susceptible individuals", Validate.REQUIRED);
+    public Input<Function> S0 =
+            new Input<Function>("S0", "The numbers of susceptible individuals", Validate.REQUIRED);
     public Input<IntegerParameter> E0 =
             new Input<IntegerParameter>("E0", "The numbers of exposed individuals");
 
@@ -38,9 +38,9 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
     public Input<Double> alpha = new Input<Double>("alpha", "threshold parameter for the transition to the SSA", 0.);
 
     public Input<RealParameter> exposeRate = new Input<RealParameter>("expose", "The rate at which individuals become exposed");
-    public Input<Valuable> birthRateScalar = new Input<Valuable>("birth", "BirthRate = BirthRateVector * birthRateScalar, birthrate can change over time", Validate.REQUIRED);
-    public Input<Valuable> deathRateScalar = new Input<Valuable>("death", "The deathRate vector with deathRates between times", Validate.REQUIRED);
-    public Input<Valuable> samplingRate = new Input<Valuable>("sampling", "The sampling rate per individual", Validate.REQUIRED);      // psi
+    public Input<Function> birthRateScalar = new Input<Function>("birth", "BirthRate = BirthRateVector * birthRateScalar, birthrate can change over time", Validate.REQUIRED);
+    public Input<Function> deathRateScalar = new Input<Function>("death", "The deathRate vector with deathRates between times", Validate.REQUIRED);
+    public Input<Function> samplingRate = new Input<Function>("sampling", "The sampling rate per individual", Validate.REQUIRED);      // psi
     // the interval times for sampling rate
     public Input<RealParameter> samplingRateChangeTimesInput =
             new Input<RealParameter>("samplingRateChangeTimes", "The times t_i specifying when sampling rate or sampling proportion changes occur", (RealParameter) null);

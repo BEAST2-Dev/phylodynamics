@@ -2,7 +2,6 @@ package beast.phylodynamics.epidemiology;
 
 
 import beast.core.*;
-import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Tree;
 import beast.util.Randomizer;
@@ -17,27 +16,27 @@ import java.util.ArrayList;
  *         Date: Apr 12, 2013
  *         Time: 10:46:37 AM
  */
-public class SIR_Initializer  extends Plugin implements StateNodeInitialiser {
+public class SIR_Initializer  extends BEASTObject implements StateNodeInitialiser {
 
 
 
     public Input<HybridSEIREpidemic> SIR =
             new Input<HybridSEIREpidemic>("SIR", "SIR trajectory calculation node - simulates dS", Input.Validate.REQUIRED);
 
-    public Input<Valuable> S0_input =
-            new Input<Valuable>("S0", "The numbers of susceptible individuals", Input.Validate.REQUIRED);
+    public Input<Function> S0_input =
+            new Input<Function>("S0", "The numbers of susceptible individuals", Input.Validate.REQUIRED);
 
     public Input<RealParameter> dS_input =
             new Input<RealParameter>("dS", "dS vector containing the changes in numbers of susceptibles per location", Input.Validate.REQUIRED);
     public Input<RealParameter> dR_input =
             new Input<RealParameter>("dR", "dR vector containing the changes in numbers of susceptibles per location", Input.Validate.REQUIRED);
 
-    public Input<Valuable> birth =
-            new Input<Valuable>("birth", "birth rate vector with rate per location",  Input.Validate.REQUIRED);
-    public Input<Valuable> death =
-            new Input<Valuable>("death", "death rate vector with rate per location",  Input.Validate.REQUIRED);
-    public Input<Valuable> sampling =
-            new Input<Valuable>("sampling", "sampling rate vector with rate per location",  Input.Validate.REQUIRED);
+    public Input<Function> birth =
+            new Input<Function>("birth", "birth rate vector with rate per location",  Input.Validate.REQUIRED);
+    public Input<Function> death =
+            new Input<Function>("death", "death rate vector with rate per location",  Input.Validate.REQUIRED);
+    public Input<Function> sampling =
+            new Input<Function>("sampling", "sampling rate vector with rate per location",  Input.Validate.REQUIRED);
 
     public Input<Tree> m_tree =
             new Input<Tree>("tree", "The phylogenetic tree being estimated",  Input.Validate.REQUIRED);

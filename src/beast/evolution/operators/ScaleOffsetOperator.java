@@ -54,10 +54,10 @@ public class ScaleOffsetOperator extends ScaleOperator{
             final double scale = getScaler();
 
             // scale a parameter
-            final boolean bScaleAll = m_pScaleAll.get();
-            final boolean bScaleAllIndependently = m_pScaleAllIndependently.get();
+            final boolean bScaleAll = scaleAllInput.get();
+            final boolean bScaleAllIndependently = scaleAllIndependentlyInput.get();
 
-            final RealParameter param = m_pParameter.get(this);
+            final RealParameter param = parameterInput.get(this);
 
             assert param.getLower() != null && param.getUpper() != null;
 
@@ -77,7 +77,7 @@ public class ScaleOffsetOperator extends ScaleOperator{
 
                 // which position to scale
                 final int index;
-                final BooleanParameter indicators = m_indicator.get();
+                final BooleanParameter indicators = ndicatorInput.get();
                 if (indicators != null) {
                     final int nDim = indicators.getDimension();
                     Boolean[] indicator = indicators.getValues();
