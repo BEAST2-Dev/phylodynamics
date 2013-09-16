@@ -31,7 +31,7 @@ public class Volz2009Coalescent extends TreeDistribution {
 
     @Override
     public void initAndValidate() throws Exception {
-        intervals = treeIntervals.get();
+        intervals = treeIntervalsInput.get();
         if (intervals == null) {
             throw new Exception("Expected treeIntervals to be specified");
         }
@@ -51,7 +51,7 @@ public class Volz2009Coalescent extends TreeDistribution {
 
         FirstOrderIntegrator integrator = new ClassicalRungeKuttaIntegrator(0.001);
 
-        int n = treeIntervals.get().getIntervalCount() + 1;
+        int n = treeIntervalsInput.get().getIntervalCount() + 1;
 
         A a = new A();
 
@@ -110,7 +110,7 @@ public class Volz2009Coalescent extends TreeDistribution {
 
             // A
             // f_SI = beta * S * I
-            Adot[0] = -beta * S * A[0] * A[0] / I;
+            Adot[0] = beta * S * A[0] * A[0] / I;
         }
     }
 }

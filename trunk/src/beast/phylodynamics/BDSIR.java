@@ -2,7 +2,7 @@ package beast.phylodynamics;
 
 import beast.core.Input;
 import beast.core.Description;
-import beast.core.Valuable;
+import beast.core.Function;
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Tree;
 import beast.evolution.speciation.BirthDeathSkylineModel;
@@ -18,8 +18,8 @@ import java.util.Arrays;
 public class BDSIR extends BirthDeathSkylineModel {
 
 
-    public Input<Valuable> S0_input =
-            new Input<Valuable>("S0", "The numbers of susceptible individuals");
+    public Input<Function> S0_input =
+            new Input<Function>("S0", "The numbers of susceptible individuals");
 
     public Input<RealParameter> m_dS =
             new Input<RealParameter>("dS", "dS vector containing the changes in numbers of susceptibles per location", Input.Validate.REQUIRED);
@@ -60,7 +60,7 @@ public class BDSIR extends BirthDeathSkylineModel {
         }
 
         T = origin.get().getValue();
-        ntaxa = m_tree.get().getLeafNodeCount();
+        ntaxa = treeInput.get().getLeafNodeCount();
 
     }
 
@@ -106,7 +106,7 @@ public class BDSIR extends BirthDeathSkylineModel {
 
         }
 
-        if (cumS < 0 || S0 - cumS < m_tree.get().getLeafNodeCount() || S0 != (cumS+I+R))
+        if (cumS < 0 || S0 - cumS < treeInput.get().getLeafNodeCount() || S0 != (cumS+I+R))
             return Double.NEGATIVE_INFINITY;
 
         adjustBirthRates(birthSIR);
