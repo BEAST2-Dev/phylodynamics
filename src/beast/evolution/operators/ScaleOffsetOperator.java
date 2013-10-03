@@ -77,7 +77,7 @@ public class ScaleOffsetOperator extends ScaleOperator{
 
                 // which position to scale
                 final int index;
-                final BooleanParameter indicators = ndicatorInput.get();
+                final BooleanParameter indicators = indicatorInput.get();
                 if (indicators != null) {
                     final int nDim = indicators.getDimension();
                     Boolean[] indicator = indicators.getValues();
