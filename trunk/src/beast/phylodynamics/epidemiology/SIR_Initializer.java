@@ -16,7 +16,7 @@ import java.util.ArrayList;
  *         Date: Apr 12, 2013
  *         Time: 10:46:37 AM
  */
-public class SIR_Initializer  extends BEASTObject implements StateNodeInitialiser {
+public class SIR_Initializer extends BEASTObject implements StateNodeInitialiser {
 
 
 
@@ -153,14 +153,10 @@ public class SIR_Initializer  extends BEASTObject implements StateNodeInitialise
      * @return list of StateNodes that are initialised
      */
     @Override
-    public List<StateNode> getInitialisedStateNodes() {
+    public void getInitialisedStateNodes(List<StateNode> stateNodes) {
 
-        List<StateNode> statenodes = new ArrayList<StateNode>();
-
-        statenodes.add(dS_input.get());
-        statenodes.add(dR_input.get());
-
-        return statenodes;
+        stateNodes.add(dS_input.get());
+        stateNodes.add(dR_input.get());
     }
 
 }
