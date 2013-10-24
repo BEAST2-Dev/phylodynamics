@@ -6,6 +6,7 @@ import beast.core.Function;
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Tree;
 import beast.evolution.speciation.BirthDeathSkylineModel;
+import beast.evolution.tree.TreeInterface;
 
 import java.util.Arrays;
 
@@ -66,7 +67,7 @@ public class BDSIR extends BirthDeathSkylineModel {
 
 
     @Override
-    public Double updateRatesAndTimes(Tree tree){
+    public Double updateRatesAndTimes(TreeInterface tree){
 
         super.updateRatesAndTimes(tree);
 
