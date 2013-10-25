@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * @author Timothy Vaughan
- * @author Alexei Drummond
+ * @author Alex Popinga
  */
 
 @Description("Population function for performing likelihood calculations based on Volz 2012.")
