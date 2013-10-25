@@ -4,7 +4,6 @@ import beast.core.Input;
 import beast.core.Description;
 import beast.core.Function;
 import beast.core.parameter.RealParameter;
-import beast.evolution.tree.Tree;
 import beast.evolution.speciation.BirthDeathSkylineModel;
 import beast.evolution.tree.TreeInterface;
 
@@ -110,7 +109,6 @@ public class BDSIR extends BirthDeathSkylineModel {
         if (cumS < 0 || S0 - cumS < treeInput.get().getLeafNodeCount() || S0 != (cumS+I+R))
             return Double.NEGATIVE_INFINITY;
 
-        adjustBirthRates(birthSIR);
         return 0.;
 
     }
@@ -121,7 +119,5 @@ public class BDSIR extends BirthDeathSkylineModel {
         return true;
     }
 
-    public int getSIRdimension(){
-        return dim;
-    }
+
 }
