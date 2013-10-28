@@ -109,6 +109,7 @@ public class BDSIR extends BirthDeathSkylineModel {
         if (cumS < 0 || S0 - cumS < treeInput.get().getLeafNodeCount() || S0 != (cumS+I+R))
             return Double.NEGATIVE_INFINITY;
 
+        adjustBirthRates(birthSIR);
         return 0.;
 
     }
