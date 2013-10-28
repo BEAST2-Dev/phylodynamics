@@ -120,5 +120,7 @@ public class BDSIR extends BirthDeathSkylineModel {
         return true;
     }
 
-
+    public int getSIRdimension(){
+        return dim;
+    }
 }
