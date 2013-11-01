@@ -6,6 +6,7 @@ import java.util.List;
 import beast.util.Randomizer;
 import beast.phylodynamics.util.SEIRStateMoments;
 import beast.phylodynamics.util.SEIRStateDouble;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 //import sun.plugin.dom.exception.InvalidStateException;
 
 /**
@@ -46,12 +47,14 @@ public class HybridTauleapSEIR implements SEIR_simulator {
 //		this.random = random;
 	}
 
-    public void setRates(double expose, double infect, Double[] recover, double alpha) {
+    public void setRates(double expose, double infect, Double[] recover, double loseImmunity, double alpha) {
 
         this.exposeRate = expose;
         this.infectRate = infect;
         this.recoverRate = recover[0];
         this.alpha = alpha;
+
+        if (loseImmunity>0.) throw new NotImplementedException();  //todo: implement loseImmunity (SIRS)
                
     }
 

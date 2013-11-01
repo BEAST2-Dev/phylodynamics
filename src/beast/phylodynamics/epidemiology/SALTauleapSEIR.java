@@ -5,17 +5,19 @@ import java.util.List;
 
 import beast.util.Randomizer;
 import beast.phylodynamics.util.Stuff;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 //import sun.plugin.dom.exception.InvalidStateException;
 /**
- * Class implementing Sehl et al.'s SAL tau-leaping algorithm
+ * Class implementing Sehl et al.'s (2009) SAL tau-leaping algorithm
  *
  * @author Tim Vaughan
+ * @author Denise Kühnert (extended to SIRS)
  */
 public class SALTauleapSEIR implements SEIR_simulator {
 
     SEIRState state;
-    double exposeRate, infectRate;
+    double exposeRate, infectRate, loseImmunityRate;
     Double[] recoverRate;
     double alpha;
     boolean useExposed;
@@ -41,13 +43,30 @@ public class SALTauleapSEIR implements SEIR_simulator {
         this.useExposed = useExposed;
         this.isDeterministic = isDeterministic;
         this.alpha = isDeterministic ? 0. : alpha;
+        this.loseImmunityRate = 0.;
     }
 
-    public void setRates(double expose, double infect, Double[] recover, double alpha) {
+    public SALTauleapSEIR(SEIRState state0,
+            double expose, double infect, Double[] recover, Double loseImmunity,
+            boolean useExposed,
+            double alpha, Boolean isDeterministic) {
+        super();
+        this.state = state0.copy();
+        this.exposeRate = expose;
+        this.infectRate = infect;
+        this.recoverRate = recover;
+        this.useExposed = useExposed;
+        this.isDeterministic = isDeterministic;
+        this.alpha = isDeterministic ? 0. : alpha;
+        this.loseImmunityRate = loseImmunity;
+    }
+
+    public void setRates(double expose, double infect, Double[] recover, double loseImmunity, double alpha) {
 
         this.exposeRate = expose;
         this.infectRate = infect;
         this.recoverRate = recover;
+        this.loseImmunityRate = loseImmunity;
         this.alpha = isDeterministic ? 0. : alpha;
 
     }
@@ -77,10 +96,12 @@ public class SALTauleapSEIR implements SEIR_simulator {
             // Calculate propensities:
             double a_infect = infectRate * state.S * state.I;
             double a_recover = recoverRate[index] * state.I;
+            double a_loseImmunity = loseImmunityRate * state.R;
 
             // Calculate 2nd order corrections (SAL):
             double a2_infect = infectRate * state.S * state.I * (infectRate * (state.S - state.I) - recoverRate[index]);
             double a2_recover = recoverRate[index] * state.I * (infectRate * state.S - recoverRate[index]);
+            double a2_loseImmunity = loseImmunityRate * state.R * ( -loseImmunityRate - recoverRate[index] * state.I);
 
             /*
              double a2_infect = 0;
@@ -88,6 +109,7 @@ public class SALTauleapSEIR implements SEIR_simulator {
              */
             boolean infectIsCrit = false;
             boolean recoverIsCrit = false;
+            boolean loseImmunityIsCrit = false;
             double dtCrit = dt - t;
             int critReactionToFire = 0;
 
@@ -122,8 +144,23 @@ public class SALTauleapSEIR implements SEIR_simulator {
                 }
             }
 
+
+            double lambda_loseImmunity = a_loseImmunity * dtCrit + 0.5 * a2_loseImmunity * dtCrit * dtCrit;
+            if ((alpha > 0) && (state.R < lambda_loseImmunity + alpha * Math.sqrt(lambda_loseImmunity))) {
+
+                // losing immunity is critical:
+                loseImmunityIsCrit = true;
+
+                // Determine whether recovery will fire:
+                double thisdt = Randomizer.nextExponential(a_loseImmunity);
+                if (thisdt < dtCrit) {
+                    dtCrit = thisdt;
+                    critReactionToFire = 3;
+                }
+            }
+
             // Reaction has been marked as critical, so this is a critical step:
-            if (infectIsCrit || recoverIsCrit)
+            if (infectIsCrit || recoverIsCrit || loseImmunityIsCrit)
                 critical_step = true;
 
             // Update time:
@@ -142,6 +179,13 @@ public class SALTauleapSEIR implements SEIR_simulator {
                         : Randomizer.nextPoisson(a_recover * dtCrit + 0.5 * a2_recover * dtCrit * dtCrit);
                 state.I -= q;
                 state.R += q;
+            }
+
+            if (loseImmunityIsCrit == false) {
+                double q = isDeterministic ? (a_loseImmunity * dtCrit)
+                        : Randomizer.nextPoisson(a_loseImmunity * dtCrit + 0.5 * a2_loseImmunity * dtCrit * dtCrit);
+                state.R -= q;
+                state.S += q;
             }
 
             // Zero negative populations:
@@ -168,6 +212,12 @@ public class SALTauleapSEIR implements SEIR_simulator {
                     // Recovery
                     state.I -= 1;
                     state.R += 1;
+                    break;
+
+                case 3:
+                    // Losing immunity
+                    state.R -= 1;
+                    state.S += 1;
                     break;
 
                 default:
@@ -198,6 +248,10 @@ public class SALTauleapSEIR implements SEIR_simulator {
      * reactions
      */
     public boolean step_exposed(double dt, int index) {
+
+
+        if (loseImmunityRate>0) throw new NotImplementedException(); //    SEIRS is not yet implemented!
+
         double t = 0.0;
 
         boolean critical_step = false;
@@ -470,6 +524,7 @@ public class SALTauleapSEIR implements SEIR_simulator {
         double expose = 0.0;
         double infect = 0.9 / s0;
         Double[] recover = {0.2};
+        double loseImmunity = 0.1;
 
         SEIRState x0 = new SEIRState(s0, e0, i0, r0, 0.0);
 
@@ -477,7 +532,7 @@ public class SALTauleapSEIR implements SEIR_simulator {
         List<List<SEIRState>> trajectoryList = new ArrayList<List<SEIRState>>();
 
         // Create SALTauleapSEIR instance:
-        SALTauleapSEIR hybridTauleapSEIR = new SALTauleapSEIR(x0, expose, infect, recover, false, alpha, false);
+        SALTauleapSEIR hybridTauleapSEIR = new SALTauleapSEIR(x0, expose, infect, recover, loseImmunity, false, alpha, false);
 
         // Allocate and zero critical steps list:
         List<Integer> criticalTrajectories = new ArrayList<Integer>();
