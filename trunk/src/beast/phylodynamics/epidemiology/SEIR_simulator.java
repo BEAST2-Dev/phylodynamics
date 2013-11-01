@@ -10,7 +10,7 @@ import java.util.List;
 public interface SEIR_simulator {
 
 
-    public void setRates(double expose, double infect, Double[] recover, double alpha);
+    public void setRates(double expose, double infect, Double[] recover, double loseImmunity, double alpha);
 
     public void setState(SEIRState newState);
 

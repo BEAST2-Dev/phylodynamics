@@ -28,8 +28,6 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
     public Input<IntegerParameter> E0 =
             new Input<IntegerParameter>("E0", "The numbers of exposed individuals");
 
-    public Input<Tree> m_tree =
-            new Input<Tree>("tree", "The phylogenetic tree on which to condition the trajectory",  Input.Validate.REQUIRED);
     public Input<RealParameter> origin =
             new Input<RealParameter>("origin", "The origin of infection x0", Input.Validate.REQUIRED);
 
@@ -41,6 +39,7 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
     public Input<Function> birthRateScalar = new Input<Function>("birth", "BirthRate = BirthRateVector * birthRateScalar, birthrate can change over time", Validate.REQUIRED);
     public Input<Function> deathRateScalar = new Input<Function>("death", "The deathRate vector with deathRates between times", Validate.REQUIRED);
     public Input<Function> samplingRate = new Input<Function>("sampling", "The sampling rate per individual", Validate.REQUIRED);      // psi
+    public Input<RealParameter> loseImmunityRate = new Input<RealParameter>("loseImmunityRate", "The at which recovereds lose immunity");
     // the interval times for sampling rate
     public Input<RealParameter> samplingRateChangeTimesInput =
             new Input<RealParameter>("samplingRateChangeTimes", "The times t_i specifying when sampling rate or sampling proportion changes occur", (RealParameter) null);
@@ -58,6 +57,7 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
     Double expose;
     Double infect;
     Double[] recover;
+    Double loseImmunity;
     int e0;
     int i0 = 1;
     int r0 = 0;
@@ -100,6 +100,8 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
 
             recover[i] = deathRateScalar.get().getArrayValue(i) +  samplingRate.get().getArrayValue(i);
         }
+
+        loseImmunity = (loseImmunityRate.get() !=null) ? loseImmunityRate.get().getValue() : 0.;
 
         times=new double[recover.length-1];
         if (samplingRateChangeTimesInput.get()!= null) updateSamplingChangeTimes();
@@ -283,7 +285,7 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
             e0 = E0;
         }
 
-        hybridTauleapSEIR.setRates(expose, infect, recover, alpha.get());
+        hybridTauleapSEIR.setRates(expose, infect, recover, 0., alpha.get());
 
         return generateTrajectory(S0, intervals, ntaxa, Nt.get(), useExposed, T, maxLoop, times);
 
