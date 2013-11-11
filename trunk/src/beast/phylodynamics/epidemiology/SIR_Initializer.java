@@ -117,7 +117,7 @@ public class SIR_Initializer extends BEASTObject implements StateNodeInitialiser
 //        if ( !current.init(b, 0., d, s, T, ntaxa, 100, m, current.times))
 //            throw new RuntimeException("Could not find suitable trajectory. Please try different epi parameters!");
 
-        if (!current.initTraj(b, 0., d, s, T, ntaxa, 100, m, current.times)){
+        if (!current.initTraj(b, 0., d, s, 0., T, ntaxa, 100, m, current.times, false)){
 
             int count = 0;
 
@@ -128,7 +128,7 @@ public class SIR_Initializer extends BEASTObject implements StateNodeInitialiser
                 d[0]*= (1.-scaler);
                 count++;
 
-            } while (count<100 && !current.initTraj(b, 0., d, s, T, ntaxa, 100, m, current.times));
+            } while (count<100 && !current.initTraj(b, 0., d, s, 0., T, ntaxa, 100, m, current.times, false));
         }
 
         dS_input.get().assignFromWithoutID(new RealParameter(current.dS));

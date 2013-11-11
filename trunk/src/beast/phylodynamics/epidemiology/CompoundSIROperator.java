@@ -30,12 +30,19 @@ public class CompoundSIROperator extends Operator {
     public Input<RealParameter> dR_input =
             new Input<RealParameter>("dR", "dR vector containing the changes in numbers of susceptibles per location", Input.Validate.REQUIRED);
 
+    public Input<RealParameter> infectedPopulationInput =
+            new Input<RealParameter>("infectedPopulation", "infectedPopulation over time (relative to eventTimes)", Input.Validate.XOR, dS_input);
+    public Input<RealParameter> eventTimeInput =
+            new Input<RealParameter>("eventTimes", "ordered times at which events in SIR happen", Input.Validate.XOR, dR_input);
+
     public Input<Function> birth =
             new Input<Function>("birth", "birth rate vector with rate per location",  Input.Validate.REQUIRED);
     public Input<Function> death =
             new Input<Function>("death", "death rate vector with rate per location",  Input.Validate.REQUIRED);
     public Input<Function> sampling =
             new Input<Function>("sampling", "sampling rate vector with rate per location",  Input.Validate.REQUIRED);
+
+    public Input<RealParameter> loseImmunityRate = new Input<RealParameter>("loseImmunityRate", "The rate at which recovereds lose immunity");
 
     public Input<Tree> m_tree =
             new Input<Tree>("tree", "The phylogenetic tree being estimated",  Input.Validate.REQUIRED);
@@ -71,7 +78,7 @@ public class CompoundSIROperator extends Operator {
             b = birth.get().getArrayValue();
 
             int dim = death.get().getDimension();
-            if (dim != sampling.get().getDimension()) throw new RuntimeException("Error: Death and sampling must have equalt dimensions!");
+            if (dim != sampling.get().getDimension()) throw new RuntimeException("Error: Death and sampling must have equal dimensions!");
             d = new Double[dim];
             s = new Double[dim];
 
@@ -95,11 +102,19 @@ public class CompoundSIROperator extends Operator {
 
         // initialize trajectory
         current =  SIR.get();
-        if ( !current.initTraj(b, 0., d, s, T, ntaxa, 100, m, current.times))
+        if ( !current.initTraj(b, 0., d, s, (loseImmunityRate.get()==null)?0.:loseImmunityRate.get().getValue(), T, ntaxa, 100, m, current.times, dS_input.get()==null))
             throw new RuntimeException("Could not find suitable trajectory. Please try different epi parameters!");
 
-        dS_input.get().assignFromWithoutID(new RealParameter(current.dS));
-        dR_input.get().assignFromWithoutID(new RealParameter(current.dR));
+        if (dS_input.get() !=null){
+
+            dS_input.get().assignFromWithoutID(new RealParameter(current.dS));
+            dR_input.get().assignFromWithoutID(new RealParameter(current.dR));
+        }
+        else {
+            infectedPopulationInput.get().assignFromWithoutID(new RealParameter(current.I));
+            eventTimeInput.get().assignFromWithoutID(new RealParameter(current.eventTimes));
+
+        }
     }
 
 
@@ -129,15 +144,23 @@ public class CompoundSIROperator extends Operator {
 
         // simulate trajectory
         current =  SIR.get();
-        if ( !current.refresh(S0,0, b, 0., d, s, T, ntaxa, 1, m, current.times) /* && Randomizer.nextDouble()>.75*/){
+        if ( !current.refresh(S0,0, b, 0., d, s,(loseImmunityRate.get()==null)?0.:loseImmunityRate.get().getValue(), T, ntaxa, 1, m, current.times, dS_input.get()==null) /* && Randomizer.nextDouble()>.75*/){
             return Double.NEGATIVE_INFINITY;
         }
 
-        for (int i =0; i < m-1; i++){
-            dS_input.get().setValue(i, current.dS[i]);
-            dR_input.get().setValue(i, current.dR[i]);
+        if (dS_input.get()!=null){
+            for (int i =0; i < m-1; i++){
+                dS_input.get().setValue(i, current.dS[i]);
+                dR_input.get().setValue(i, current.dR[i]);
+            }
         }
+        else{
+            for (int i =0; i < current.eventTimes.length; i++){
+                 infectedPopulationInput.get().setValue(i, current.I[i]);
+                 eventTimeInput.get().setValue(i, current.eventTimes[i]);
+             }
 
+        }
         return hastingsRatio;
     }
 
