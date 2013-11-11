@@ -39,7 +39,7 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
     public Input<Function> birthRateScalar = new Input<Function>("birth", "BirthRate = BirthRateVector * birthRateScalar, birthrate can change over time", Validate.REQUIRED);
     public Input<Function> deathRateScalar = new Input<Function>("death", "The deathRate vector with deathRates between times", Validate.REQUIRED);
     public Input<Function> samplingRate = new Input<Function>("sampling", "The sampling rate per individual", Validate.REQUIRED);      // psi
-    public Input<RealParameter> loseImmunityRate = new Input<RealParameter>("loseImmunityRate", "The at which recovereds lose immunity");
+    public Input<RealParameter> loseImmunityRate = new Input<RealParameter>("loseImmunityRate", "The rate at which recovereds lose immunity");
     // the interval times for sampling rate
     public Input<RealParameter> samplingRateChangeTimesInput =
             new Input<RealParameter>("samplingRateChangeTimes", "The times t_i specifying when sampling rate or sampling proportion changes occur", (RealParameter) null);
@@ -66,6 +66,8 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
     public Double[] dS;
     public Double[] dE;
     public Double[] dR;
+    public Double[] I;
+    public Double[] eventTimes;
     double tau;
     public double[] times;
 
@@ -119,7 +121,7 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
         if (simulationType.get().equals("hybrid"))
             hybridTauleapSEIR = new HybridTauleapSEIR(x0, expose, infect, recover[0], false, alpha);
         else
-            hybridTauleapSEIR = new SALTauleapSEIR(x0, expose, infect, recover, false, alpha, isDeterministic.get());
+            hybridTauleapSEIR = new SALTauleapSEIR(x0, expose, infect, recover, loseImmunity, false, alpha, isDeterministic.get());
 
         hybridTauleapSEIR.setState(x0);
 //        List<SEIRState> trajectory = null;
@@ -162,7 +164,7 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
      * @param times
      * @return if the generation of a time series was succesful
      */
-     public Boolean generateTrajectory(int S0, int Nsamples, int ntaxa, int Nt, Boolean useExposed, double T, int maxLoop, double[] times) {
+    public Boolean generateTrajectory(int S0, int Nsamples, int ntaxa, int Nt, Boolean useExposed, double T, int maxLoop, double[] times, Boolean outputInfPop) {
 
         SEIRState x0 = new SEIRState(S0 - e0 - i0 - r0, e0, i0, r0, 0.0);
 
@@ -188,25 +190,43 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
             return false;
         }
 
-        dS = new Double[Nsamples-1];
-        dE = new Double[Nsamples-1];
-        dR = new Double[Nsamples-1];
+        SEIRState former;
+        SEIRState current;
+        former = trajectory.get(0);
 
-        SEIRState former = trajectory.get(0);
+        if (!outputInfPop){
 
-        for (int i = 0; i < Nsamples-1; i++) {
-            SEIRState current = trajectory.get(i+1);
+            dS = new Double[Nsamples-1];
+            dE = new Double[Nsamples-1];
+            dR = new Double[Nsamples-1];
 
-            dS[i] = former.S - current.S;
 
-            if (useExposed)
-                dE[i] = current.E - former.E;
+            for (int i = 0; i < Nsamples-1; i++) {
 
-            dR[i] = current.R - former.R;
+                current = trajectory.get(i+1);
 
-            former = current;
+                dS[i] = former.S - current.S;
+
+                if (useExposed)
+                    dE[i] = current.E - former.E;
+
+                dR[i] = current.R - former.R;
+
+                former = current;
+            }
         }
+        else {
+            I = eventTimes = new Double[trajectory.size()];
 
+            for (int i = 0; i < eventTimes.length; i++) {
+                current = trajectory.get(i);
+
+                I[i] = current.I;
+                eventTimes[i] = current.time;
+
+            }
+
+        }
         return true;
 
     }
@@ -257,14 +277,14 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
 
 
     //
-    public Boolean initTraj(Double birth,Double expose, Double[] death, Double[] psi, double T, int ntaxa, int maxLoop, int intervals, double[] times){
+    public Boolean initTraj(Double birth,Double expose, Double[] death, Double[] psi, Double loseImmunity, double T, int ntaxa, int maxLoop, int intervals, double[] times, Boolean outputInfPop){
 
-        return refresh((int) S0.get().getArrayValue(), useExposed ? E0.get().getValue(): 0, birth, useExposed?expose:0., death, psi, T, ntaxa, maxLoop, intervals, times);
+        return refresh((int) S0.get().getArrayValue(), useExposed ? E0.get().getValue(): 0, birth, useExposed?expose:0., death, psi, loseImmunity, T, ntaxa, maxLoop, intervals, times, outputInfPop);
 
     }
 
 
-    public Boolean refresh(int S0, int E0, Double birth,Double exposed, Double[] death, Double[] psi, double T, int ntaxa, int maxLoop, int intervals, double[] times){
+    public Boolean refresh(int S0, int E0, Double birth,Double exposed, Double[] death, Double[] psi, Double loseImmunity, double T, int ntaxa, int maxLoop, int intervals, double[] times, Boolean outputInfPop){
 
         tau = T / intervals;
 
@@ -285,9 +305,9 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
             e0 = E0;
         }
 
-        hybridTauleapSEIR.setRates(expose, infect, recover, 0., alpha.get());
+        hybridTauleapSEIR.setRates(expose, infect, recover, loseImmunity, alpha.get());
 
-        return generateTrajectory(S0, intervals, ntaxa, Nt.get(), useExposed, T, maxLoop, times);
+        return generateTrajectory(S0, intervals, ntaxa, Nt.get(), useExposed, T, maxLoop, times, outputInfPop);
 
     }
 

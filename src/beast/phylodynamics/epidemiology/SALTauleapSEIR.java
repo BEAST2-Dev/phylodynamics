@@ -100,8 +100,8 @@ public class SALTauleapSEIR implements SEIR_simulator {
 
             // Calculate 2nd order corrections (SAL):
             double a2_infect = infectRate * state.S * state.I * (infectRate * (state.S - state.I) - recoverRate[index]);
-            double a2_recover = recoverRate[index] * state.I * (infectRate * state.S - recoverRate[index]);
-            double a2_loseImmunity = loseImmunityRate * state.R * ( -loseImmunityRate - recoverRate[index] * state.I);
+            double a2_recover = recoverRate[index] * state.I * (infectRate * state.S - recoverRate[index] -loseImmunityRate);
+            double a2_loseImmunity = loseImmunityRate * state.R * ( -loseImmunityRate - infectRate * state.I);
 
             /*
              double a2_infect = 0;

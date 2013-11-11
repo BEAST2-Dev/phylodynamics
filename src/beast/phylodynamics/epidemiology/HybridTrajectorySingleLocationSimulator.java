@@ -92,7 +92,7 @@ public class HybridTrajectorySingleLocationSimulator extends Operator {
 
         // initialize trajectory
         current =  SIR.get();
-        if ( !current.initTraj(b, 0., d, s, T, ntaxa, 100, m, current.times))
+        if ( !current.initTraj(b, 0., d, s, 0., T, ntaxa, 100, m, current.times, false))
             throw new RuntimeException("Could not find suitable trajectory. Please try different epi parameters!");
 
         dS_input.get().assignFromWithoutID(new RealParameter(current.dS));
@@ -124,7 +124,7 @@ public class HybridTrajectorySingleLocationSimulator extends Operator {
 
         // simulate trajectory
         current =  SIR.get();
-        if ( !current.refresh(S0,0, b, 0., d, s, T, ntaxa, 1, m, current.times) /* && Randomizer.nextDouble()>.75*/){
+        if ( !current.refresh(S0,0, b, 0., d, s, 0., T, ntaxa, 1, m, current.times, false) /* && Randomizer.nextDouble()>.75*/){
             return Double.NEGATIVE_INFINITY;
         }
 
