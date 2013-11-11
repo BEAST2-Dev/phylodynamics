@@ -45,7 +45,7 @@ public class BDSIRLikelihoodDebugging {
         
         // Simulate trajectories:
         for (int traj=0; traj<nTraj; traj++) {
-            sir.initTraj(0.005, 0., new Double[]{2.0}, new Double[]{0.}, 2.5, tree.getLeafNodeCount(), 100, 10001, sir.times);
+            sir.initTraj(0.005, 0., new Double[]{2.0}, new Double[]{0.},0., 2.5, tree.getLeafNodeCount(), 100, 10001, sir.times,false);
 
             double S = 1000.0;
             meanS[0] += S;
