@@ -216,7 +216,9 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
             }
         }
         else {
-            I = eventTimes = new Double[trajectory.size()];
+            I  = new Double[trajectory.size()];
+            eventTimes = new Double[trajectory.size()];
+
 
             for (int i = 0; i < eventTimes.length; i++) {
                 current = trajectory.get(i);

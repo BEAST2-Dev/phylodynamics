@@ -146,7 +146,7 @@ public class SALTauleapSEIR implements SEIR_simulator {
 
 
             double lambda_loseImmunity = a_loseImmunity * dtCrit + 0.5 * a2_loseImmunity * dtCrit * dtCrit;
-            if ((alpha > 0) && (state.R < lambda_loseImmunity + alpha * Math.sqrt(lambda_loseImmunity))) {
+            if (loseImmunityRate>0 && (alpha > 0) && (state.R < lambda_loseImmunity + alpha * Math.sqrt(lambda_loseImmunity))) {
 
                 // losing immunity is critical:
                 loseImmunityIsCrit = true;
@@ -181,7 +181,7 @@ public class SALTauleapSEIR implements SEIR_simulator {
                 state.R += q;
             }
 
-            if (loseImmunityIsCrit == false) {
+            if (loseImmunityRate>0 && loseImmunityIsCrit == false) {
                 double q = isDeterministic ? (a_loseImmunity * dtCrit)
                         : Randomizer.nextPoisson(a_loseImmunity * dtCrit + 0.5 * a2_loseImmunity * dtCrit * dtCrit);
                 state.R -= q;
