@@ -30,6 +30,8 @@ public class BDSIR extends BirthDeathSkylineModel {
 
     public Input<Boolean> checkTreeConsistent = new Input<Boolean>("checkTreeConsistent", "check if trajectory is consistent with number of lineages in tree? default true", true);
 
+    public Input<Boolean> isSeasonal = new Input<Boolean>("isSeasonal", "Is this a SeasonalSIRSEpidemic? default false", false);
+
     Double S0;
     Double[] dS;
     Double[] dE;
@@ -52,12 +54,14 @@ public class BDSIR extends BirthDeathSkylineModel {
         super.initAndValidate();
 
         if (transform){
-            if (R0.get().getDimension() != 1)// || becomeUninfectiousRate.get().getDimension() != 1 || samplingProportion.get().getDimension() != 1)
+            if (R0.get().getDimension() != 1 && !isSeasonal.get())// || becomeUninfectiousRate.get().getDimension() != 1 || samplingProportion.get().getDimension() != 1)
                 throw new RuntimeException("R0, becomeUninfectiousRate and samplingProportion have to be 1-dimensional!");
         } else {
-            if (birthRate.get().getDimension() != 1)//  || death.length != 1 || psi.length != 1)
+            if (birthRate.get().getDimension() != 1 && !isSeasonal.get())//  || death.length != 1 || psi.length != 1)
                 throw new RuntimeException("Birth, death and sampling rate have to be 1-dimensional!");
         }
+
+        // todo: add check that intervaltimes make sense (removed for BDSIR in bdsky to allow seasonality)
 
         T = origin.get().getValue();
         ntaxa = treeInput.get().getLeafNodeCount();
@@ -84,22 +88,31 @@ public class BDSIR extends BirthDeathSkylineModel {
 
 
         double cumS = S0 - 1 ;
-        double b = birth[0]/S0 ;
+
+
         double time;
 
         Double[] birthSIR = new Double[dim];
         double I = 1.;
         double R = 0.;
 
-        birthSIR[0] = b * cumS;
+
+        int season = (!isSeasonal.get()) ? 0 : getSeason(T);
+        int initialSeason = season;
+
+        if (isSeasonal.get()) birth[1] = transform ? (R0.get().getValue(1)*becomeUninfectiousRate.get().getValue()) : birthRate.get().getValue(1);
+
+        birthSIR[0] = birth[season]/S0 * cumS;
         for (int i = 0; i < dim-1; i++){
 
+            time = (i+1.)/dim * T;
+            if (isSeasonal.get()) season = (initialSeason + getSeason(T-time)) % 2;
+
             cumS -= dS[i];
-            birthSIR[i+1] = b * cumS;
+            birthSIR[i+1] = birth[season]/S0 * cumS;
 
             I += dS[i] - dE[i] - dR[i];
             R += dR[i];
-            time = (i+1.)/dim * T;
 
             if ( checkTreeConsistent.get() && (I<=0. || I < lineageCountAtTime(T-time, tree)))
                 return Double.NEGATIVE_INFINITY;
@@ -111,6 +124,16 @@ public class BDSIR extends BirthDeathSkylineModel {
 
         adjustBirthRates(birthSIR);
         return 0.;
+
+    }
+
+    int getSeason(double time){   // this assumes that the second minus first change time entry in the xml defines the length of a season
+
+        double seasonLength = birthRateChangeTimesInput.get().getValue(1)-birthRateChangeTimesInput.get().getValue(0);
+
+        double t = (time-birthRateChangeTimesInput.get().getValue(0));
+
+        return (int) Math.floor(1+t/seasonLength) % 2;
 
     }
 

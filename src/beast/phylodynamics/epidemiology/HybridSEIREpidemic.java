@@ -55,7 +55,7 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
 
     // Trajectory parameters:
     Double expose;
-    Double infect;
+    Double[] infect;
     Double[] recover;
     Double loseImmunity;
     int e0;
@@ -66,6 +66,7 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
     public Double[] dS;
     public Double[] dE;
     public Double[] dR;
+    public Double[] S;
     public Double[] I;
     public Double[] eventTimes;
     double tau;
@@ -94,12 +95,16 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
             e0 = 0;
         }
 
-        infect = birthRateScalar.get().getArrayValue();
 
         // allow the sampling rate to change over time
+        infect = new Double[birthRateScalar.get().getDimension()];
         recover = new Double[samplingRate.get().getDimension()];
-        for (int i=0; i<recover.length; i++){
 
+        for (int i=0; i<infect.length; i++){
+            infect[i] = birthRateScalar.get().getArrayValue(i);
+        }
+
+        for (int i=0; i<recover.length; i++){
             recover[i] = deathRateScalar.get().getArrayValue(i) +  samplingRate.get().getArrayValue(i);
         }
 
@@ -119,9 +124,9 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
         SEIRState x0 = new SEIRState((int) S0.get().getArrayValue() - e0 - i0 - r0, e0, i0, r0, 0.0);
 
         if (simulationType.get().equals("hybrid"))
-            hybridTauleapSEIR = new HybridTauleapSEIR(x0, expose, infect, recover[0], false, alpha);
+            hybridTauleapSEIR = new HybridTauleapSEIR(x0, expose, infect[0], recover[0], false, alpha);
         else
-            hybridTauleapSEIR = new SALTauleapSEIR(x0, expose, infect, recover, loseImmunity, false, alpha, isDeterministic.get());
+            hybridTauleapSEIR = new SALTauleapSEIR(x0, expose, infect[0], recover, loseImmunity, false, alpha, isDeterministic.get());
 
         hybridTauleapSEIR.setState(x0);
 //        List<SEIRState> trajectory = null;
@@ -216,6 +221,7 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
             }
         }
         else {
+            S  = new Double[trajectory.size()];
             I  = new Double[trajectory.size()];
             eventTimes = new Double[trajectory.size()];
 
@@ -224,6 +230,7 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
                 current = trajectory.get(i);
 
                 I[i] = current.I;
+                S[i] = current.S;
                 eventTimes[i] = current.time;
 
             }
@@ -279,14 +286,14 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
 
 
     //
-    public Boolean initTraj(Double birth,Double expose, Double[] death, Double[] psi, Double loseImmunity, double T, int ntaxa, int maxLoop, int intervals, double[] times, Boolean outputInfPop){
+    public Boolean initTraj(Double[] birth,Double expose, Double[] death, Double[] psi, Double loseImmunity, double T, int ntaxa, int maxLoop, int intervals, double[] times, Boolean outputInfPop){
 
         return refresh((int) S0.get().getArrayValue(), useExposed ? E0.get().getValue(): 0, birth, useExposed?expose:0., death, psi, loseImmunity, T, ntaxa, maxLoop, intervals, times, outputInfPop);
 
     }
 
 
-    public Boolean refresh(int S0, int E0, Double birth,Double exposed, Double[] death, Double[] psi, Double loseImmunity, double T, int ntaxa, int maxLoop, int intervals, double[] times, Boolean outputInfPop){
+    public Boolean refresh(int S0, int E0, Double[] birth,Double exposed, Double[] death, Double[] psi, Double loseImmunity, double T, int ntaxa, int maxLoop, int intervals, double[] times, Boolean outputInfPop){
 
         tau = T / intervals;
 
@@ -307,7 +314,7 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
             e0 = E0;
         }
 
-        hybridTauleapSEIR.setRates(expose, infect, recover, loseImmunity, alpha.get());
+        hybridTauleapSEIR.setRates(expose, infect[0], recover, loseImmunity, alpha.get());
 
         return generateTrajectory(S0, intervals, ntaxa, Nt.get(), useExposed, T, maxLoop, times, outputInfPop);
 

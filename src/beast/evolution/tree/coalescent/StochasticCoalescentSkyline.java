@@ -1,5 +1,6 @@
 package beast.evolution.tree.coalescent;
 
+import beast.core.Description;
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.TreeDistribution;
@@ -7,21 +8,32 @@ import beast.evolution.tree.TreeInterface;
 import beast.math.Binomial;
 
 /**
- * User: Denise
+ * User: Denise Kuehnert
  * Date: 10.11.13
  * Time: 16:49
  */
+
+@Description("Coalescent skyline plot coupled with forward simulated SIR epidemiological model (aka the coalescent BDSIR)")
 public class StochasticCoalescentSkyline extends TreeDistribution {
 
+    public Input<RealParameter> susceptiblePopulationInput = new Input<RealParameter>("susceptiblePopulation", "susceptible population size at times eventTimes",
+            Input.Validate.REQUIRED);
+
     public Input<RealParameter> infectedPopulationInput = new Input<RealParameter>("infectedPopulation", "infected population size at times eventTimes",
+            Input.Validate.REQUIRED);
+
+    public Input<RealParameter> transmissionRateInput = new Input<RealParameter>("transmissionRate", "the transmission rate",
             Input.Validate.REQUIRED);
 
     public Input<RealParameter> eventTimeInput = new Input<RealParameter>("eventTimes", "event times from first infection to present (i.e. in forward time)",
             Input.Validate.REQUIRED);
 
     TreeIntervals intervals;
+    double transmission;
+    Double[] susceptiblePopulation;
     Double[] infectedPopulation;
     Double[] eventTimes;
+    Double[] S;
     Double[] I;
     Boolean[] isCoalescent;
     double[] coalescentTimes;
@@ -31,9 +43,6 @@ public class StochasticCoalescentSkyline extends TreeDistribution {
 
     boolean m_bIsPrepared = false;
 
-    // This pseudo-constructor is only used for junit tests
-    public StochasticCoalescentSkyline() {
-    }
 
     public void initAndValidate() throws Exception {
         if (treeInput.get() != null) {
@@ -50,12 +59,16 @@ public class StochasticCoalescentSkyline extends TreeDistribution {
 
     public void prepare() {
 
+        transmission = transmissionRateInput.get().getValue();
+
         coalescentTimes = intervals.getCoalescentTimes(coalescentTimes);
         eventTimes =  eventTimeInput.get().getValues();
         infectedPopulation = infectedPopulationInput.get().getValues();
+        susceptiblePopulation = susceptiblePopulationInput.get().getValues();
 
         dimension = eventTimes.length + coalescentTimes.length;
 
+        S = new Double[dimension];
         I = new Double[dimension];
         times = new double[dimension];
         isCoalescent = new Boolean[dimension];
@@ -71,15 +84,17 @@ public class StochasticCoalescentSkyline extends TreeDistribution {
 
                 times[i] = T-eventTimes[eventIndex];
                 I[i] = infectedPopulation[eventIndex];
+                S[i] = susceptiblePopulation[eventIndex];
                 isCoalescent[i] = false;
                 eventIndex--;
 
             }
             else {
                 times[i] = coalescentTimes[coalescentIndex];
+                S[i] = susceptiblePopulation[Math.min(eventIndex+1,eventTimes.length-1)];
                 I[i] = infectedPopulation[Math.min(eventIndex+1,eventTimes.length-1)];
 
-                isCoalescent[i] = intervals.getIntervalType(coalescentIndex)==IntervalType.COALESCENT;
+                isCoalescent[i] = true;
 
                 if(eventIndex>=0 && eventTimes[eventIndex]==coalescentTimes[coalescentIndex]) {
                     I[i] = infectedPopulation[eventIndex];
@@ -89,8 +104,6 @@ public class StochasticCoalescentSkyline extends TreeDistribution {
                 coalescentIndex++;
 
             }
-
-
         }
 
         m_bIsPrepared = true;
@@ -132,31 +145,27 @@ public class StochasticCoalescentSkyline extends TreeDistribution {
         double currentTime = 0.0;
         double time;
 
-        for (int j = 1 ; j < times.length && currentTime<=intervals.getTotalDuration(); j++) {
+        for (int j = 1 ; j < times.length && currentTime<intervals.getTotalDuration(); j++) {
 
-            time = times[j];
+            time = times[j] - currentTime;
 
-            logP += calculateIntervalLikelihood(I[j-1], time, currentTime,
-                    lineageCountAtTime(time,intervals.treeInput.get()), isCoalescent[j]); // todo: change I[j-1] to (beta S I)/(I^2)!!! (like in Volz)
+            logP += calculateIntervalLikelihood((2 * transmission * (S[j-1]+S[j])/2.) / (I[j-1]+I[j])/2., time,
+                    lineageCountAtTime(currentTime,intervals.treeInput.get()), isCoalescent[j]);
 
             currentTime += time;
         }
         return logP;
     }
 
-    public static double calculateIntervalLikelihood(double popSize, double width,
-                                                     double timeOfPrevCoal, int lineageCount, Boolean isCoalescent) {
-
-        final double timeOfThisCoal = width + timeOfPrevCoal;
-
-        final double intervalArea = (timeOfThisCoal - timeOfPrevCoal) / popSize;
+    public static double calculateIntervalLikelihood(double coalescentRate, double width,
+                                                     int lineageCount, Boolean isCoalescent) {
 
         final double kchoose2 = Binomial.choose2(lineageCount);
-        double like = -kchoose2 * intervalArea;
+        double like = -kchoose2 * width * coalescentRate; //exponential waiting time
 
-        if (isCoalescent)  {
-            final double demographic = Math.log(popSize);//demogFunction.getLogDemographic(timeOfThisCoal);
-            like += -demographic;
+        if (isCoalescent!=null && isCoalescent)  {
+
+            like += Math.log(coalescentRate);
         }
 
         return like;
