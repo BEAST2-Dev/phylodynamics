@@ -30,8 +30,11 @@ public class CompoundSIROperator extends Operator {
     public Input<RealParameter> dR_input =
             new Input<RealParameter>("dR", "dR vector containing the changes in numbers of susceptibles per location", Input.Validate.REQUIRED);
 
+    public Input<RealParameter> susceptiblePopulationInput = new Input<RealParameter>("susceptiblePopulation", "susceptible population size at times eventTimes");
+
     public Input<RealParameter> infectedPopulationInput =
             new Input<RealParameter>("infectedPopulation", "infectedPopulation over time (relative to eventTimes)", Input.Validate.XOR, dS_input);
+
     public Input<RealParameter> eventTimeInput =
             new Input<RealParameter>("eventTimes", "ordered times at which events in SIR happen", Input.Validate.XOR, dR_input);
 
@@ -57,7 +60,7 @@ public class CompoundSIROperator extends Operator {
     double T;
     HybridSEIREpidemic current;
 
-    Double b;
+    Double[] b;
     Double[] d;
     Double[] s;
     Boolean birthChanges;
@@ -75,7 +78,12 @@ public class CompoundSIROperator extends Operator {
 
         if (birth.get() != null && death.get() != null && sampling.get() != null){
 
-            b = birth.get().getArrayValue();
+            b = new Double[birth.get().getDimension()];
+
+            for (int i=0; i<b.length; i++){
+                b[i] = birth.get().getArrayValue(i);
+            }
+
 
             int dim = death.get().getDimension();
             if (dim != sampling.get().getDimension()) throw new RuntimeException("Error: Death and sampling must have equal dimensions!");
@@ -112,13 +120,12 @@ public class CompoundSIROperator extends Operator {
             dR_input.get().assignFromWithoutID(new RealParameter(current.dR));
         }
         else {
+            susceptiblePopulationInput.get().assignFromWithoutID(new RealParameter(current.S));
             infectedPopulationInput.get().assignFromWithoutID(new RealParameter(current.I));
             eventTimeInput.get().assignFromWithoutID(new RealParameter(current.eventTimes));
 
         }
     }
-
-
 
     @Override
     public double proposal() {
@@ -127,13 +134,16 @@ public class CompoundSIROperator extends Operator {
 
         S0 = (int) (S0_input.get().getArrayValue());
 
+//        b = new Double[birth.get().getDimension()];
 
-        b = birth.get().getArrayValue();
+        for (int i=0; i<b.length; i++){
+            b[i] = birth.get().getArrayValue(i);
+        }
 
         int dim = death.get().getDimension();
         if (dim != sampling.get().getDimension()) throw new RuntimeException("Error: Death and sampling must have equal dimensions!");
-        d = new Double[dim];
-        s = new Double[dim];
+//        d = new Double[dim];
+//        s = new Double[dim];
 
         for (int i = 0; i<dim; i++){
             d[i] = death.get().getArrayValue(i);
@@ -157,9 +167,10 @@ public class CompoundSIROperator extends Operator {
         }
         else{
             for (int i =0; i < current.eventTimes.length; i++){
-                 infectedPopulationInput.get().setValue(i, current.I[i]);
-                 eventTimeInput.get().setValue(i, current.eventTimes[i]);
-             }
+                susceptiblePopulationInput.get().setValue(i, current.S[i]);
+                infectedPopulationInput.get().setValue(i, current.I[i]);
+                eventTimeInput.get().setValue(i, current.eventTimes[i]);
+            }
 
         }
         return hastingsRatio;

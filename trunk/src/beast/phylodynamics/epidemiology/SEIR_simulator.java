@@ -18,7 +18,7 @@ public interface SEIR_simulator {
 
     public boolean step_exposed(double dt, int index);
 
-    public List<SEIRState> genTrajectory(double T, int Nt, int Nsamples, List<Integer> criticalTrajectories, double[] times);
+//    public List<SEIRState> genTrajectory(double T, int Nt, int Nsamples, List<Integer> criticalTrajectories, double[] times);
 
     public List<SEIRState> genTrajectory(double T, int Nt, int Nsamples, int ntaxa, Boolean check, double[] times) ;
 
