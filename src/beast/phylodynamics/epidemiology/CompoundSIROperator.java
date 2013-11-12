@@ -97,6 +97,7 @@ public class CompoundSIROperator extends Operator {
 
         tree = m_tree.get();
         T = origin.get().getValue();
+        if (T<=0) T=tree.getRoot().getHeight();
 
         ntaxa = tree.getLeafNodeCount();
 
@@ -116,7 +117,6 @@ public class CompoundSIROperator extends Operator {
 
         }
     }
-
 
 
 
@@ -141,6 +141,7 @@ public class CompoundSIROperator extends Operator {
         }
 
         T = origin.get().getValue();
+        if (T<=0) T=tree.getRoot().getHeight();
 
         // simulate trajectory
         current =  SIR.get();
