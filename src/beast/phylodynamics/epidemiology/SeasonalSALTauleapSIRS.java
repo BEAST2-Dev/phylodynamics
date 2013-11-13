@@ -466,7 +466,7 @@ public class SeasonalSALTauleapSIRS implements SEIR_simulator {
 
         double[] times = {T};
         double expose = 0.0;
-        Double[] infect = {9. / s0, 1. / s0};
+        Double[] infect = {9. / s0, 2. / s0};
         Double[] recover = {5.};
         double loseImmunity = 2.;
 
@@ -487,8 +487,14 @@ public class SeasonalSALTauleapSIRS implements SEIR_simulator {
 
         // Integrate trajectories:
         for (int i = 0; i < Ntraj; i++) {
-            hybridTauleapSEIR.setState(x0);
-            trajectoryList.add(hybridTauleapSEIR.genTrajectory(T, Nt, Nsamples, 10, true, times));
+
+            try{
+
+                hybridTauleapSEIR.setState(x0);
+                trajectoryList.add(hybridTauleapSEIR.genTrajectory(T, Nt, Nsamples, 10, true, times));
+
+            }catch(Exception e) { i--;}
+
         }
 
         for (int i = 0; i < Ntraj; i++) {

@@ -143,6 +143,11 @@ public class BDSIR extends BirthDeathSkylineModel {
         return true;
     }
 
+    public Boolean isSeasonalBDSIR(){
+         return isSeasonal.get();
+     }
+
+
     public int getSIRdimension(){
         return dim;
     }
