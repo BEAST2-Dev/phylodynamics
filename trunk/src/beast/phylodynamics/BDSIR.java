@@ -1,5 +1,6 @@
 package beast.phylodynamics;
 
+import beast.core.Citation;
 import beast.core.Input;
 import beast.core.Description;
 import beast.core.Function;
@@ -14,7 +15,12 @@ import java.util.Arrays;
  *
  */
 
-@Description("Adaptation of Tanja Stadler's BirthDeathSamplingModel, to allow for birth and death rates to change at times t_i")
+@Description("Phylodynamic tree prior that couples compartmental models (e.g. SIR, SIRS) " +
+        "with a piecewise constant birth-death-sampling process.")
+@Citation("Kuehnert, D., Stadler, T., Vaughan, T. G., and Drummond, A. J. 2013. " +
+        "“Simultaneous reconstruction of evolutionary history and epidemiological " +
+        "dynamics from viral sequences with the birth-death sir model.” " +
+        "In revision. Preprint: http://arxiv.org/abs/1308.5140.")
 public class BDSIR extends BirthDeathSkylineModel {
 
 
