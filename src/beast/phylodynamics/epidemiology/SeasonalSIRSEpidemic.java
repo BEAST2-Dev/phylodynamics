@@ -85,7 +85,7 @@ public class SeasonalSIRSEpidemic extends HybridSEIREpidemic {
             e0 = E0;
         }
 
-        hybridTauleapSEIR.setRates(expose, infect[0], recover, loseImmunity, alpha.get());
+        ((SeasonalSALTauleapSIRS)hybridTauleapSEIR).setRates(expose, infect, recover, loseImmunity, alpha.get());
 
         return generateTrajectory(S0, intervals, ntaxa, Nt.get(), useExposed, T, maxLoop, times, outputInfPop);
 

@@ -53,6 +53,11 @@ public class SeasonalSALTauleapSIRS implements SEIR_simulator {
 
     public void setRates(double expose, double infect, Double[] recover, double loseImmunity, double alpha) {
 
+        this.exposeRate = expose;
+        this.infectRate = new Double[]{infect};
+        this.recoverRate = recover;
+        this.loseImmunityRate = loseImmunity;
+        this.alpha = isDeterministic ? 0. : alpha;
 
     }
 
@@ -415,7 +420,7 @@ public class SeasonalSALTauleapSIRS implements SEIR_simulator {
 
             index = Stuff.index(tidx * dt, times);
 
-            season = Stuff.index(tidx * dt, seasons) % 2 ;
+            season = (Stuff.index(tidx * dt, seasons)+1) % 2 ;
 
             if (useExposed)
                 step_exposed(dt, index);
