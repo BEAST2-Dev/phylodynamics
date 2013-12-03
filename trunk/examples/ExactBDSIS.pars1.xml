@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.likelihood:beast.core.parameter:beast.util:beast.evolution.operators" version="2.0">
+
+    <tree spec='TreeParser' id='tree' IsLabelledNewick="true" adjustTipHeights="false" newick='((t4:5.886652822,t3:5.075246558):3.181874028,((t2:4.560604883,t5:1.283971882):1.764257282,t1:0.2780273074):0.787520925)'/>
+
+    <distribution spec='beast.phylodynamics.ExactBDSIS' id='treeprior' survival="false" tree="@tree">
+		<parameter dimension='1' id='popSize'       name='popSize'       value='10.00000' upper="25"/>
+		<parameter dimension='1' id='infectionRate' name='infectionRate' value='1.00000'  upper="3" />
+		<parameter dimension='1' id='deathRate'     name='deathRate'     value='0.10000'/>
+		<parameter dimension='1' id='samplingRate'  name='samplingRate'  value='0.10000' upper="1"/>
+		<parameter dimension='1' id='rho'           name='rho'           value='0.00000'/>
+        <parameter dimension='1' id='origin'        name='origin'        value='9.9050916'/>
+    </distribution>
+
+    <!--
+        Test ability of BEAST 2 to estimate SIS parameters using ExactBDSIS
+
+        Start likelihood:  -15.87041
+        ML    likelihood:  -15.69016
+
+        True parameters:   N=10,          beta=1,          psi=0.1
+        ML   parameters:   N=10.00000912  beta=1.07243139  psi=0.08272599
+
+    -->
+	<run chainLength="100000000" id="mcmc" preBurnin="0" sampleFromPrior="false" spec="MCMC" storeEvery="-1" distribution="@treeprior">
+
+        <state id="state" storeEvery="1000">
+            <stateNode idref='popSize'/>
+            <stateNode idref='infectionRate'/>
+            <stateNode idref='samplingRate'/>
+		</state>
+
+
+        <operator id='popSize_scaler' spec='ScaleOperator' scaleFactor=".4" weight="30" parameter="@popSize"/>
+        <operator id='infectionRate_scaler' spec='ScaleOperator' scaleFactor=".4" weight="30" parameter="@infectionRate"/>
+        <!--operator id='deathRate_scaler' spec='ScaleOperator' scaleFactor=".3" weight="1" parameter="@deathRate"/-->
+        <operator id='samplingRate_scaler' spec='ScaleOperator' scaleFactor=".3" weight="30" parameter="@samplingRate"/>
+
+
+        <logger fileName="pars1.test.ExactBDSIS.$(seed).log" id="tiplog" logEvery="1000" mode="autodetect" model="@treeprior">
+            <distribution idref='treeprior' name='log'/>
+            <log idref='popSize'/>
+            <log idref='infectionRate'/>
+            <log idref='samplingRate'/>
+        </logger>
+
+
+        <logger id="screenlog" logEvery="10000" mode="autodetect" sanitiseHeaders="true" sort="none">
+            <distribution idref='treeprior' name='log'/>
+            <log idref='popSize'/>
+            <log idref='infectionRate'/>
+            <log idref='samplingRate'/>
+        </logger>
+
+    </run>
+
+
+</beast>
+
