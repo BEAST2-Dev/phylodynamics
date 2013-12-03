@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.likelihood:beast.core.parameter:beast.util:beast.evolution.operators" version="2.0">
+
+    <tree spec='TreeParser' id='tree' IsLabelledNewick="true" adjustTipHeights="false" newick='((t50:0.1653342,(((t48:0.6017485845,((((t28:0.1947093422,(((t59:1.06664302,(t52:1.970651458,t65:0.1178549665):0.7274766603):1.439363047,t2:0.6977466025):0.8782442439,((t35:3.503070314,t8:0.7169272797):0.006951347955,(t27:0.2596170998,t11:0.3916264133):0.3614505218):0.5847045187):0.8862136982):0.4588960947,((t63:1.683235912,t19:0.2450725347):1.769055181,(t1:0.1952596285,t12:0.0002296634671):1.560048929):2.49572556):0.5837854449,((((t32:0.7597033595,t37:1.661910583):0.6408211594,(((t99:2.211011107,t53:1.117693516):0.6657365536,t75:0.7073981678):0.542140506,t60:4.232450118):0.7716565976):1.301833824,((t40:0.07371095111,((t83:1.657002183,t80:0.4628363758):0.2935098273,(((t4:0.8596349495,(t56:0.5529220619,t61:0.8486399163):0.07898901929):0.9450884855,(t77:0.09466967089,t25:0.5021766908):0.07283795092):0.5530933348,t45:1.534857515):0.06041584339):1.575350757):0.560236261,t17:0.3947991912):0.5920646362):0.6646311645,(t72:0.8989248571,(t33:2.306603233,(t96:0.187065322,t18:0.5730487353):2.720753873):0.03750224714):0.5727188067):0.1868743487):0.09814155447,(t43:2.086282115,(((t42:0.1704811222,t91:0.04148137029):0.9618251675,t39:1.774306304):4.09684394,((((t49:0.1703705094,t100:0.3199523815):1.479375177,t58:0.6846160817):1.29935073,(t34:0.3414594278,t13:0.4990593311):1.64598902):1.756729129,t15:1.294138563):1.401567254):0.0908218796):0.939260345):0.04054896113):1.499355527,((((t66:1.497742673,t21:0.3098088692):0.1631322905,(((t84:2.794455836,((t54:1.653801367,(t10:0.9900245881,t41:1.096583088):0.03782936331):0.8962333305,t9:1.072619127):1.316143967):0.9047497577,(((t7:0.1331199706,t55:0.1396493498):0.8694358739,t46:0.5139746828):0.05282144525,(t36:0.3124839645,t38:0.01706613471):0.3014131399):0.05206781808):0.7324613801,(((t29:1.867097807,(t87:0.4865856249,((t79:1.288846022,t89:1.226457311):0.6412197811,t95:0.2686263704):0.4612501063):0.3119309723):0.3904847925,t5:2.545559826):0.9628547953,(t3:2.72956821,((t71:1.224277702,t16:0.5535895809):0.4781518335,t51:0.0173893063):0.04204960744):0.1947505445):1.294349826):0.9029292173):2.033574237,((((t57:0.1143653644,t76:0.1718089455):1.346382308,t98:0.3340832325):0.3348682928,((((t88:0.2397868743,t82:0.3668746731):2.448494643,(t22:1.842353358,((t85:0.6320804249,t6:0.374233032):0.04764779923,t74:2.852642822):0.1765572113):0.02347650451):0.9379863447,t70:1.743137528):0.7061763783,(t73:0.2494880187,(t20:0.9301756465,t62:0.2128891436):0.3243024788):2.618184843):2.332895803):0.7578756232,t67:1.561935332):0.4357545377):0.3918777759,((t23:0.1755071921,(((t86:2.640663805,(t31:0.3102873198,t14:0.2787631965):0.3303823625):0.5951804048,(t92:0.6075494882,(t26:0.5905191564,t30:0.006846596041):0.8143471459):0.8853020889):0.2865406768,((((t44:0.7617501976,t94:0.1075096498):0.8052335045,((t24:0.2054651139,(t69:1.955270647,t97:1.700405071):0.4285259265):0.8988979911,t47:3.359604953):1.383862484):0.3210667518,(t90:2.593228562,t81:3.248122415):0.2740914504):0.1704974603,t93:0.9824217188):0.9912607968):0.5037342829):0.9961609775,t64:0.1699902519):0.8097526917):0.1513012218):1.030692012,t68:2.712704951):1.737773366):0.04576875174,t78:0.5879346903)'/>
+
+	<distribution spec='beast.phylodynamics.ExactBDSIS' id='treeprior' survival="false" tree="@tree">
+		<parameter dimension='1' id='popSize'       name='popSize'       value='100.00000' upper="150"/>
+		<parameter dimension='1' id='infectionRate' name='infectionRate' value='1.00000'  upper="3" />
+		<parameter dimension='1' id='deathRate'     name='deathRate'     value='0.10000'/>
+		<parameter dimension='1' id='samplingRate'  name='samplingRate'  value='0.40000' upper="1"/>
+		<parameter dimension='1' id='rho'           name='rho'           value='0.00000'/>
+        <parameter dimension='1' id='origin'        name='origin'        value='12.8543815 '/>
+    </distribution>
+
+    <!--
+        Test ability of BEAST 2 to estimate SIS parameters using ExactBDSIS
+
+        Start likelihood:  -217.3405
+        ML    likelihood:  -216.6499
+
+        True parameters:   N=100,         beta=1,          psi=0.4
+        ML parameters:     N=129.4657051  beta=0.9780585   psi=0.3518154
+
+    -->
+	<run chainLength="100000000" id="mcmc" preBurnin="0" sampleFromPrior="false" spec="MCMC" storeEvery="-1" distribution="@treeprior">
+
+        <state id="state" storeEvery="1000">
+            <stateNode idref='popSize'/>
+            <stateNode idref='infectionRate'/>
+            <stateNode idref='samplingRate'/>
+		</state>
+
+
+        <operator id='popSize_scaler' spec='ScaleOperator' scaleFactor=".4" weight="30" parameter="@popSize"/>
+        <operator id='infectionRate_scaler' spec='ScaleOperator' scaleFactor=".4" weight="30" parameter="@infectionRate"/>
+        <!--operator id='deathRate_scaler' spec='ScaleOperator' scaleFactor=".3" weight="1" parameter="@deathRate"/-->
+        <operator id='samplingRate_scaler' spec='ScaleOperator' scaleFactor=".3" weight="30" parameter="@samplingRate"/>
+
+
+        <logger fileName="pars2.test.ExactBDSIS.$(seed).log" id="tiplog" logEvery="1000" mode="autodetect" model="@treeprior">
+            <distribution idref='treeprior' name='log'/>
+            <log idref='popSize'/>
+            <log idref='infectionRate'/>
+            <log idref='samplingRate'/>
+        </logger>
+
+
+        <logger id="screenlog" logEvery="100" mode="autodetect" sanitiseHeaders="true" sort="none">
+            <distribution idref='treeprior' name='log'/>
+            <log idref='popSize'/>
+            <log idref='infectionRate'/>
+            <log idref='samplingRate'/>
+        </logger>
+
+    </run>
+
+
+</beast>
+
