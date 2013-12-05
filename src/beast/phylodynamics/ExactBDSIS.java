@@ -370,21 +370,23 @@ public class ExactBDSIS extends TreeDistribution {
 
 
         // Copy parameter values to primitives and check that no absolute bounds are exceeded
-        updateRatesAndTimes(tree);
+        if (updateRatesAndTimes(tree) >= 0) {
 
-        if (rho < 0 || rho > 1) {
-            throw new Exception("Illegal parameter value (rho = "+rho+")");
-        }
-
-        for (int i = 0; i < totalIntervals; i++) {
-            if (K[i] < 0 || beta[i] <= 0 ||  mu[i] < 0.0 || psi[i] < 0.0) {
-                throw new Exception("Illegal parameter values\nK\tbeta\tmu\tpsi\n"+K[i]+"\t"+beta[i]+"\t"+mu[i]+"\t"+psi[i]);
+            if (rho < 0 || rho > 1) {
+                throw new Exception("Illegal parameter value (rho = "+rho+")");
             }
-        }
 
-        if (extantAtRoot < 0) {
-            throw new Exception("Illegal parameter value (extantAtRoot = "+extantAtRoot+")");
-        }
+            for (int i = 0; i < totalIntervals; i++) {
+                if (K[i] < 0 || beta[i] <= 0 ||  mu[i] < 0.0 || psi[i] < 0.0) {
+                    throw new Exception("Illegal parameter values\nK\tbeta\tmu\tpsi\n"+K[i]+"\t"+beta[i]+"\t"+mu[i]+"\t"+psi[i]);
+                }
+            }
+
+            if (extantAtRoot < 0) {
+                throw new Exception("Illegal parameter value (extantAtRoot = "+extantAtRoot+")");
+            }
+        } else
+            throw new Exception("Illegal parameter value (origin > tree height)");
     }
 
 
@@ -398,12 +400,14 @@ public class ExactBDSIS extends TreeDistribution {
         // Convert SIS parameters to primitives
         rho      = (rhoParameter != null) ? rhoParameter.getValue() : 0;
         origin   = originParameter.getValue();
+        if (origin < tree.getRoot().getHeight())
+            return -1;
 
         if (transform) {
             for (int i = 0; i < totalIntervals; i++) {
                 K[i]    = popSizeParameter.getValue(i);
                 s0      = (int) Math.floor(K[i])-1;
-                beta[i] = R0Parameter.getValue(i)*becomeUninfectiousRateParameter.getValue(i)/s0;
+                beta[i] = R0Parameter.getValue(i)*becomeUninfectiousRateParameter.getValue(i)*K[i]/s0;
                 psi[i]  = samplingProportionParameter.getValue(i)*becomeUninfectiousRateParameter.getValue(i);
                 mu[i]   = becomeUninfectiousRateParameter.getValue(i) - psi[i];
             }
