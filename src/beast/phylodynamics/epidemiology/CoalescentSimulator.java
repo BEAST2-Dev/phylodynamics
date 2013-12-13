@@ -10,6 +10,8 @@ import beast.evolution.alignment.Taxon;
 import beast.evolution.alignment.TaxonSet;
 import beast.evolution.tree.RandomTree;
 import beast.evolution.tree.TraitSet;
+import beast.evolution.tree.Tree;
+import beast.evolution.tree.TreeTraceAnalysis;
 import beast.evolution.tree.coalescent.PopulationFunction;
 
 import java.io.PrintStream;
@@ -84,13 +86,20 @@ public class CoalescentSimulator extends beast.core.Runnable {
         else
             pstream = new PrintStream(outputFileName);
 
+        //List<Tree> treeAnalysis = new ArrayList<Tree>();
 
         for (int i = 0; i < replicates; i++) {
             RandomTree tree = new RandomTree();
             tree.initByName("taxonset", taxa, "trait", timeTraitSet, "populationModel", populationFunction);
 
+            //treeAnalysis.add(tree);
             pstream.print(tree.toString() + "\n");
         }
+
+        // Use TreeTraceAnalysis to report topologies
+        //TreeTraceAnalysis tta = new TreeTraceAnalysis(treeAnalysis, 0.0, 95.0);
+        //tta.report(pstream);
+
         if (outputFileName != null) {
             pstream.flush();
             pstream.close();
