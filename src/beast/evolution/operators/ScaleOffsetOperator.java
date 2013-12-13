@@ -1,5 +1,6 @@
 package beast.evolution.operators;
 
+import beast.core.Description;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import beast.core.parameter.RealParameter;
 import beast.core.parameter.BooleanParameter;
@@ -12,6 +13,8 @@ import beast.evolution.tree.Tree;
  * Date: Jul 2, 2013
  * Time: 4:03:43 PM
  */
+
+@Description("Scale a parameter that must always be larger than the height of the tree")
 public class ScaleOffsetOperator extends ScaleOperator{
 
 

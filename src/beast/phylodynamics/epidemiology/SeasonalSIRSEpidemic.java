@@ -1,5 +1,6 @@
 package beast.phylodynamics.epidemiology;
 
+import beast.core.Description;
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -11,6 +12,8 @@ import java.util.Arrays;
  * Date: 12.11.13
  * Time: 11:22
  */
+
+@Description("Simulates a stochastic forward SIRS epidemic with seasonality")
 public class SeasonalSIRSEpidemic extends HybridSEIREpidemic {
 
     public Input<RealParameter> birthRateChangeTimesInput =

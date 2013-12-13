@@ -16,6 +16,7 @@ import java.util.ArrayList;
  *         Date: Apr 12, 2013
  *         Time: 10:46:37 AM
  */
+@Description("Initializes a stichastic SIR trajectory")
 public class SIR_Initializer extends BEASTObject implements StateNodeInitialiser {
 
 
