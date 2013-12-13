@@ -4,11 +4,8 @@ import java.util.List;
 import java.util.Arrays;
 import java.io.PrintStream;
 
-import beast.core.CalculationNode;
-import beast.core.Loggable;
-import beast.core.Input;
+import beast.core.*;
 import beast.core.Input.Validate;
-import beast.core.Function;
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.core.parameter.BooleanParameter;
@@ -19,6 +16,7 @@ import beast.evolution.tree.Tree;
  *         Date: Aug 22, 2011
  *         Time: 3:39:19 PM
  */
+@Description("Simulates a stochastic forward SIR, SEIR or SIRS epidemic")
 public class HybridSEIREpidemic extends CalculationNode implements Loggable {
 
 
