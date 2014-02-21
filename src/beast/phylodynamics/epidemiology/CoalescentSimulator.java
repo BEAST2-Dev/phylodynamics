@@ -9,9 +9,9 @@ import beast.core.Input;
 import beast.evolution.alignment.Taxon;
 import beast.evolution.alignment.TaxonSet;
 import beast.evolution.tree.RandomTree;
-//import beast.evolution.tree.TraitSet;
-//import beast.evolution.tree.Tree;
-//import beast.evolution.tree.TreeTraceAnalysis;
+import beast.evolution.tree.TraitSet;
+import beast.evolution.tree.Tree;
+import beast.evolution.tree.TreeTraceAnalysis;
 import beast.evolution.tree.coalescent.PopulationFunction;
 
 import java.io.PrintStream;
@@ -33,11 +33,11 @@ public class CoalescentSimulator extends beast.core.Runnable {
             "If provided, simulated trees are written to this file rather "
                     + "than to standard out.");
 
-    //public Input<TaxonSet> m_taxonset = new Input<TaxonSet>("taxonset","set of taxa to initialise tree with specified by a taxonset", Input.Validate.REQUIRED);
+    public Input<TaxonSet> m_taxonset = new Input<TaxonSet>("taxonset","set of taxa to initialise tree with specified by a taxonset", Input.Validate.REQUIRED);
 
-    //public Input<List<TraitSet>> m_traitList = new Input<List<TraitSet>>("trait",
-    //        "trait information for initializing traits (like node dates) in the tree",
-    //        new ArrayList<TraitSet>(), Input.Validate.REQUIRED);
+    public Input<List<TraitSet>> m_traitList = new Input<List<TraitSet>>("trait",
+            "trait information for initializing traits (like node dates) in the tree",
+            new ArrayList<TraitSet>(), Input.Validate.REQUIRED);
 
     /**
      * nr of categories in site model *
@@ -52,7 +52,7 @@ public class CoalescentSimulator extends beast.core.Runnable {
 
     TaxonSet taxa = new TaxonSet();
 
-    //List<TraitSet> timeTraitSet;
+    List<TraitSet> timeTraitSet;
 
     /**
      * name of output file *
@@ -67,7 +67,7 @@ public class CoalescentSimulator extends beast.core.Runnable {
         ntaxa = ntaxaInput.get();
         populationFunction = populationFunctionInput.get();
         outputFileName = outputFileNameInput.get();
-        //timeTraitSet = m_traitList.get();
+        timeTraitSet = m_traitList.get();
 
         List<Taxon> taxaList = new ArrayList<Taxon>();
         for (int i = 1; i <= ntaxa; i++) {
@@ -86,20 +86,19 @@ public class CoalescentSimulator extends beast.core.Runnable {
         else
             pstream = new PrintStream(outputFileName);
 
-        //List<Tree> treeAnalysis = new ArrayList<Tree>();
+        List<Tree> treeAnalysis = new ArrayList<Tree>();
 
         for (int i = 0; i < replicates; i++) {
             RandomTree tree = new RandomTree();
-            tree.initByName("taxonset", taxa, "populationModel", populationFunction);
-            //tree.initByName("taxonset", taxa, "trait", timeTraitSet, "populationModel", populationFunction);
+            tree.initByName("taxonset", taxa, "trait", timeTraitSet, "populationModel", populationFunction);
 
-            //treeAnalysis.add(tree);
+            treeAnalysis.add(tree);
             //pstream.print(tree.toString() + "\n");
         }
 
         // Use TreeTraceAnalysis to report topologies
-        //TreeTraceAnalysis tta = new TreeTraceAnalysis(treeAnalysis, 0.0, 95.0);
-        //tta.report(pstream);
+        TreeTraceAnalysis tta = new TreeTraceAnalysis(treeAnalysis, 0.0, 95.0);
+        tta.report(pstream);
 
         if (outputFileName != null) {
             pstream.flush();
