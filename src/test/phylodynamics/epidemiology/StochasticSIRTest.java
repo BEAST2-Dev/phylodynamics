@@ -24,22 +24,22 @@ public class StochasticSIRTest {
 
         RealParameter n_S0 = new RealParameter("999");
         RealParameter beta = new RealParameter("0.00075");
-        RealParameter gamma = new RealParameter("1.15");
+        RealParameter gamma = new RealParameter("0.30");
 
         StochasticSIR ssir = new StochasticSIR(n_S0, beta, gamma, origin);
 
         StochasticSIRPopulationFunction ssirPopFun = new StochasticSIRPopulationFunction(ssir);
 
-        Coalescent c = new Coalescent(intervals, ssirPopFun);
-        //StochasticCoalescent c = new StochasticCoalescent(intervals, ssirPopFun);
+        StochasticCoalescent c = new StochasticCoalescent(intervals, ssirPopFun);
 
-        int reps = 1000;
+        int reps = 1;
 
         for (int i = 0; i < reps; i++) {
             ssirPopFun.simulateStochasticTrajectory();
             double logL = c.calculateLogP();
             double totalITime = ssirPopFun.stochasticSIR.get().totalItime;
             //System.out.println(i + "\t" + logL + "\t" + totalITime);
+            //System.out.println(i + "\t" + logL + "\t");
             System.out.println(i + "\t" + logL + "\t");
         }
 
