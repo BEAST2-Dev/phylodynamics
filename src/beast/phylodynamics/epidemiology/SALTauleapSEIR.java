@@ -29,7 +29,7 @@ public class SALTauleapSEIR implements SEIR_simulator {
      * @param state0	initial state of system
      * @param infect	infection rate
      * @param recover	recovery rate
-     * @param alpha	threshold for determining critical reactions
+     * @param alpha	    threshold for determining critical reactions
      */
     public SALTauleapSEIR(SEIRState state0,
             double expose, double infect, Double[] recover,
@@ -480,10 +480,10 @@ public class SALTauleapSEIR implements SEIR_simulator {
 
             // Sample if necessary:
             if (tidx % stepsPerSample == 0) {
-                if ((Math.round(state.I) < 1) && (!useExposed || (state.E == 0)))
+//                if ((Math.round(state.I) < 1) && (!useExposed || (state.E == 0)))
 //                if (trajectory.get(trajectory.size()-1).S == state.S ) zeroCount++;
 //                if (check && zeroCount > Nsamples/2.)
-                    throw new RuntimeException("Abort simulation. No infecteds left.");
+//                    throw new RuntimeException("Abort simulation. No infecteds left.");
 
                 trajectory.add(state.copy());
 

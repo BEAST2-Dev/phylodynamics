@@ -4,8 +4,8 @@ import beast.evolution.alignment.Alignment;
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.coalescent.Coalescent;
 import beast.evolution.tree.coalescent.TreeIntervals;
-import beast.phylodynamics.epidemiology.Volz2009Coalescent;
-import beast.phylodynamics.epidemiology.VolzSIR;
+import beast.phylodynamics.epidemiology.DeterministicSIR;
+import beast.phylodynamics.epidemiology.Volz2009TreeDistribution;
 import test.beast.BEASTTestCase;
 
 /**
@@ -31,7 +31,7 @@ public class VolzSIRTest extends BEASTTestCase {
         TreeIntervals treeIntervals = new TreeIntervals();
         treeIntervals.initByName("tree", tree);
 
-        VolzSIR cp = new VolzSIR();
+        DeterministicSIR cp = new DeterministicSIR();
         cp.initByName(
                 "n_S0", Double.toString(n_S0),
                 "beta", Double.toString(beta),
@@ -45,7 +45,7 @@ public class VolzSIRTest extends BEASTTestCase {
         double logL = coal.calculateLogP();
         System.out.println("Coalescent(VolzSIR).logL=" + logL);
 
-        Volz2009Coalescent volzCoalescent = new Volz2009Coalescent();
+        Volz2009TreeDistribution volzCoalescent = new Volz2009TreeDistribution();
         volzCoalescent.initByName(
                 "S0", Double.toString(n_S0),
                 "beta", Double.toString(beta),

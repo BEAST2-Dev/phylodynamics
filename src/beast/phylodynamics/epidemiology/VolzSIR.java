@@ -13,6 +13,15 @@ import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.MaxIterationsExceededException;
 import org.apache.commons.math.analysis.UnivariateRealFunction;
 import org.apache.commons.math.analysis.solvers.BrentSolver;
+import org.apache.commons.math3.exception.NumberIsTooSmallException;
+
+import org.apache.commons.math3.exception.DimensionMismatchException;
+import org.apache.commons.math3.exception.MaxCountExceededException;
+import org.apache.commons.math3.ode.ContinuousOutputModel;
+import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
+import org.apache.commons.math3.ode.events.EventHandler;
+import org.apache.commons.math3.ode.nonstiff.AdaptiveStepsizeIntegrator;
+import org.apache.commons.math3.ode.nonstiff.HighamHall54Integrator;
 
 
 /**
@@ -31,9 +40,6 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
     public Input<RealParameter> originParameter = new Input<RealParameter>("origin",
             "the time before the root that the first infection occurred.", Input.Validate.REQUIRED);
 
-    public Input<Double> recoveryRate = new Input<Double>("recoveryRate",
-            "if significantly different than gamma, use for stochastic trajectories (defaults to 0.25).", 0.25);
-
     public Input<Integer> storedStateCount = new Input<Integer>("integrationStepCount",
             "number of integration time steps to use (defaults to 1000).", 1000);
 
@@ -50,7 +56,9 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
     public List<Double> intensityTraj;
     public double tIntensityTrajStart;
     public double dt;
+
     protected boolean dirty;
+    protected ContinuousOutputModel integrationResults;
 
     @Override
     public void initAndValidate() throws Exception {
@@ -88,6 +96,104 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
 
     protected abstract boolean update();
 
+    /**
+     * Obtain dt for integration results at discrete locations
+     *
+     * @param beta
+     * @param gamma
+     * @param NS0
+     * @return
+     */
+    public double simulateTrajectory(final double beta, final double gamma, final double NS0) {
+
+          // Equations of motion:
+        FirstOrderDifferentialEquations ode = new FirstOrderDifferentialEquations() {
+
+            @Override
+            public int getDimension() {
+                return 2;
+            }
+
+            @Override
+            public void computeDerivatives(double t, double[] y, double[] ydot) throws MaxCountExceededException, DimensionMismatchException {
+                double S = y[0];
+                double I = y[1];
+                ydot[0] = -beta * S * I;
+                ydot[1] = beta * S * I - gamma * I;
+            }
+        };
+
+        try {
+            AdaptiveStepsizeIntegrator integrator = new HighamHall54Integrator(1E-10, 100, 0.5, 0.01);
+
+            integrationResults = new ContinuousOutputModel();
+            integrator.addStepHandler(integrationResults);
+
+            integrator.addEventHandler(new EventHandler() {
+
+                @Override
+                public void init(double t0, double[] y, double t) { };
+
+                @Override
+                public double g(double t, double[] y) {
+                    return y[1] - finishingThresholdInput.get();
+                }
+
+                @Override
+                public EventHandler.Action eventOccurred(double t, double[] y, boolean increasing) {
+                    if (!increasing)
+                        return Action.STOP;
+                    else
+                        return Action.CONTINUE;
+                }
+
+                @Override
+                public void resetState(double d, double[] doubles) { };
+
+            }, 1.0, 0.1, 10);
+
+            integrator.addEventHandler(new EventHandler() {
+
+                @Override
+                public void init(double t0, double[] y, double t) { };
+
+                @Override
+                public double g(double t, double[] y) {
+                    return y[1];
+                }
+
+                @Override
+                public EventHandler.Action eventOccurred(double t, double[] y, boolean increasing) {
+                    return EventHandler.Action.STOP;
+                }
+
+                @Override
+                public void resetState(double d, double[] doubles) { };
+
+            }, 0.1, 0.1, 10);
+
+
+            double [] y0 = new double[2];
+            y0[0] = NS0;
+            y0[1] = 1.0;
+            double [] y = new double[2];
+
+            // Integrate SIR model ODEs:
+            try {
+                integrator.integrate(ode, 0, y0, maxSimLengthInput.get(), y);
+            } catch (MaxCountExceededException e) {
+                reject = true;
+            }
+
+        } catch (NumberIsTooSmallException tse) {
+            reject=true;
+        }
+
+        // Obtain integration results at discrete locations
+        dt = integrationResults.getFinalTime()/storedStateCount.get();
+
+        return dt;
+    }
 
     /**
      * "Effective" population size for calculating coalescent likelihood

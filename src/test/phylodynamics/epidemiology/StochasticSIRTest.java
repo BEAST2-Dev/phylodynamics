@@ -24,7 +24,7 @@ public class StochasticSIRTest {
 
         RealParameter n_S0 = new RealParameter("999");
         RealParameter beta = new RealParameter("0.00075");
-        RealParameter gamma = new RealParameter("0.30");
+        RealParameter gamma = new RealParameter("1.28");
 
         StochasticSIR ssir = new StochasticSIR(n_S0, beta, gamma, origin);
 
