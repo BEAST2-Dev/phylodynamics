@@ -2,14 +2,6 @@ package beast.phylodynamics.epidemiology;
 
 import beast.core.*;
 import beast.core.parameter.RealParameter;
-import org.apache.commons.math3.exception.DimensionMismatchException;
-import org.apache.commons.math3.exception.MaxCountExceededException;
-import org.apache.commons.math3.exception.NumberIsTooSmallException;
-import org.apache.commons.math3.ode.ContinuousOutputModel;
-import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
-import org.apache.commons.math3.ode.events.EventHandler;
-import org.apache.commons.math3.ode.nonstiff.AdaptiveStepsizeIntegrator;
-import org.apache.commons.math3.ode.nonstiff.HighamHall54Integrator;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -27,15 +19,12 @@ import java.util.List;
 
 public class StochasticSIR extends VolzSIR {
 
-    private ContinuousOutputModel integrationResults;
-
     public double totalItime = 0;
     double storedTotalItime = 0;
 
     public StochasticSIR() {}
 
     public StochasticSIR(RealParameter nSO, RealParameter beta, RealParameter gamma, RealParameter origin) throws Exception {
-
         initByName("n_S0", nSO, "beta", beta, "gamma", gamma, "origin", origin);
     }
 
@@ -44,7 +33,14 @@ public class StochasticSIR extends VolzSIR {
                 gammaParameter.get().getValue(), n_S_Parameter.get().getValue());
     }
 
+    @Override
+    public double simulateTrajectory(double beta, double gamma, double NS0) {
+        return super.simulateTrajectory(beta, gamma, NS0);
+    }
+
+
     /**
+     *  Simulate a stochastic trajectory using SALTauleapSEIR
      *
      * @param beta
      * @param gamma
@@ -53,93 +49,8 @@ public class StochasticSIR extends VolzSIR {
      */
     private boolean simulateStochasticTrajectory(final double beta, final double gamma, double NS0) {
 
+            dt = simulateTrajectory(beta, gamma, NS0);
 
-        // Equations of motion:
-        FirstOrderDifferentialEquations ode = new FirstOrderDifferentialEquations() {
-
-            @Override
-            public int getDimension() {
-                return 2;
-            }
-
-            @Override
-            public void computeDerivatives(double t, double[] y, double[] ydot) throws MaxCountExceededException, DimensionMismatchException {
-                double S = y[0];
-                double I = y[1];
-                ydot[0] = -beta * S * I;
-                ydot[1] = beta * S * I - gamma * I;
-            }
-        };
-
-        try {
-            AdaptiveStepsizeIntegrator integrator = new HighamHall54Integrator(1E-10, 100, 0.5, 0.01);
-
-            integrationResults = new ContinuousOutputModel();
-            integrator.addStepHandler(integrationResults);
-
-            integrator.addEventHandler(new EventHandler() {
-
-                @Override
-                public void init(double t0, double[] y, double t) { };
-
-                @Override
-                public double g(double t, double[] y) {
-                    return y[1] - finishingThresholdInput.get();
-                }
-
-                @Override
-                public EventHandler.Action eventOccurred(double t, double[] y, boolean increasing) {
-                    if (!increasing)
-                        return Action.STOP;
-                    else
-                        return Action.CONTINUE;
-                }
-
-                @Override
-                public void resetState(double d, double[] doubles) { };
-
-            }, 1.0, 0.1, 10);
-
-            integrator.addEventHandler(new EventHandler() {
-
-                @Override
-                public void init(double t0, double[] y, double t) {
-                }
-
-                ;
-
-                @Override
-                public double g(double t, double[] y) {
-                    return y[1];
-                }
-
-                @Override
-                public EventHandler.Action eventOccurred(double t, double[] y, boolean increasing) {
-                    return EventHandler.Action.STOP;
-                }
-
-                @Override
-                public void resetState(double d, double[] doubles) {
-                }
-
-                ;
-
-            }, 0.1, 0.1, 10);
-
-            double [] y0 = new double[2];
-            y0[0] = NS0;
-            y0[1] = 1.0;
-            double [] y = new double[2];
-
-            // Integrate SIR model ODEs:
-            try {
-                integrator.integrate(ode, 0, y0, maxSimLengthInput.get(), y);
-            } catch (MaxCountExceededException e) {
-                reject = true;
-            }
-
-            // Obtain integration results at discrete locations
-            dt = integrationResults.getFinalTime()/storedStateCount.get();
             NStraj.clear();
             NItraj.clear();
             effectivePopSizeTraj.clear();
@@ -197,7 +108,7 @@ public class StochasticSIR extends VolzSIR {
                     }
                     NStraj.add(state.S);
                     NItraj.add(state.I);
-                    effectivePopSizeTraj.add(state.I / (2.0 * beta * state.S));
+                    effectivePopSizeTraj.add((state.I -1) / (2.0 * beta * state.S));
 
                     totalItime += state.I * (T/Nsamples);
                 }
@@ -221,10 +132,6 @@ public class StochasticSIR extends VolzSIR {
             tIntensityTrajStart = originParameter.get().getValue() - dt * (effectivePopSizeTraj.size()-1) - 0.5 * dt;
 
             dirty = false;
-
-        } catch (NumberIsTooSmallException tse) {
-            return true;
-        }
 
         return false;
     }

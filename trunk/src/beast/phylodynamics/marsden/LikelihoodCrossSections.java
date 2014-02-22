@@ -2,16 +2,13 @@ package beast.phylodynamics.marsden;
 
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.coalescent.TreeIntervals;
+import beast.phylodynamics.epidemiology.DeterministicSIR;
 import beast.util.TreeParser;
 import beast.core.parameter.RealParameter;
 import beast.phylodynamics.epidemiology.Volz2009TreeDistribution;
-import beast.phylodynamics.epidemiology.VolzSIR;
 
 // Restructured since Denise wrote this -Alex
-import beast.phylodynamics.epidemiology.Volz2012PopulationFunction;
-import beast.core.Input;
 
-import beast.phylodynamics.epidemiology.HybridSEIREpidemic;
 //import beast.phylodynamics.BDSIR;
 
 import java.io.IOException;
@@ -79,7 +76,7 @@ public class LikelihoodCrossSections {
                     
                     // Volz 2012
                     
-                    VolzSIR volzSIR = new VolzSIR();
+                    DeterministicSIR volzSIR = new DeterministicSIR();
                     volzSIR.setInputValue("beta", new RealParameter(String.valueOf(paramCurrent[0])));
                     volzSIR.setInputValue("gamma", new RealParameter(String.valueOf(paramCurrent[1])));
                     volzSIR.setInputValue("n_S0", new RealParameter(String.valueOf(paramCurrent[2])));

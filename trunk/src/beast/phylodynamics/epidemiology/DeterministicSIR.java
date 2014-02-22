@@ -4,14 +4,7 @@ import beast.core.*;
 
 import java.util.Collections;
 
-import org.apache.commons.math3.exception.DimensionMismatchException;
-import org.apache.commons.math3.exception.MaxCountExceededException;
-import org.apache.commons.math3.exception.NumberIsTooSmallException;
-import org.apache.commons.math3.ode.ContinuousOutputModel;
-import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
-import org.apache.commons.math3.ode.events.EventHandler;
-import org.apache.commons.math3.ode.nonstiff.AdaptiveStepsizeIntegrator;
-import org.apache.commons.math3.ode.nonstiff.HighamHall54Integrator;
+import beast.core.parameter.RealParameter;
 
 
 /**
@@ -24,8 +17,6 @@ import org.apache.commons.math3.ode.nonstiff.HighamHall54Integrator;
 
 public class DeterministicSIR extends VolzSIR {
 
-    private ContinuousOutputModel integrationResults;
-
     // index checkers
     int NScounter = 0;
     int NIcounter = 0;
@@ -33,93 +24,38 @@ public class DeterministicSIR extends VolzSIR {
     double decay_x = -0.1;
     double decay_y = -0.1;
 
+    public DeterministicSIR() {}
 
+    public DeterministicSIR(RealParameter nSO, RealParameter beta, RealParameter gamma, RealParameter origin) throws Exception {
+        initByName("n_S0", nSO, "beta", beta, "gamma", gamma, "origin", origin);
+    }
+
+    public boolean simulateDeterministicTrajectory() {
+        return  simulateDeterministicTrajectory(betaParameter.get().getValue(),
+                gammaParameter.get().getValue(), n_S_Parameter.get().getValue());
+    }
+
+    @Override
+    public double simulateTrajectory(double beta, double gamma, double NS0) {
+        return super.simulateTrajectory(beta, gamma, NS0);
+    }
+
+    /**
+     *  Simulate a deterministic trajectory using coalescent rate described by Volz (2012)
+     *
+     * @param beta
+     * @param gamma
+     * @param NS0
+     * @return true if simulated stochastic trajectory should force a reject
+     */
     private boolean simulateDeterministicTrajectory(final double beta, final double gamma, double NS0) {
 
-        // Equations of motion:
-        FirstOrderDifferentialEquations ode = new FirstOrderDifferentialEquations() {
+            dt = simulateTrajectory(beta, gamma, NS0);
 
-            @Override
-            public int getDimension() {
-                return 2;
-            }
-
-            @Override
-            public void computeDerivatives(double t, double[] y, double[] ydot) throws MaxCountExceededException, DimensionMismatchException {
-                double S = y[0];
-                double I = y[1];
-                ydot[0] = -beta * S * I;
-                ydot[1] = beta * S * I - gamma * I;
-            }
-        };
-
-        try {
-            AdaptiveStepsizeIntegrator integrator = new HighamHall54Integrator(1E-10, 100, 0.5, 0.01);
-
-            integrationResults = new ContinuousOutputModel();
-            integrator.addStepHandler(integrationResults);
-
-            integrator.addEventHandler(new EventHandler() {
-
-                @Override
-                public void init(double t0, double[] y, double t) { };
-
-                @Override
-                public double g(double t, double[] y) {
-                    return y[1] - finishingThresholdInput.get();
-                }
-
-                @Override
-                public EventHandler.Action eventOccurred(double t, double[] y, boolean increasing) {
-                    if (!increasing)
-                        return Action.STOP;
-                    else
-                        return Action.CONTINUE;
-                }
-
-                @Override
-                public void resetState(double d, double[] doubles) { };
-
-            }, 1.0, 0.1, 10);
-
-            integrator.addEventHandler(new EventHandler() {
-
-                @Override
-                public void init(double t0, double[] y, double t) { };
-
-                @Override
-                public double g(double t, double[] y) {
-                    return y[1];
-                }
-
-                @Override
-                public EventHandler.Action eventOccurred(double t, double[] y, boolean increasing) {
-                    return EventHandler.Action.STOP;
-                }
-
-                @Override
-                public void resetState(double d, double[] doubles) { };
-
-            }, 0.1, 0.1, 10);
-
-
-            double [] y0 = new double[2];
-            y0[0] = NS0;
-            y0[1] = 1.0;
-            double [] y = new double[2];
-
-            // Integrate SIR model ODEs:
-            try {
-                integrator.integrate(ode, 0, y0, maxSimLengthInput.get(), y);
-            } catch (MaxCountExceededException e) {
-                reject = true;
-            }
-
-            // Obtain integration results at discrete locations
-            dt = integrationResults.getFinalTime()/storedStateCount.get();
             NStraj.clear();
             NItraj.clear();
             effectivePopSizeTraj.clear();
+
             for (int i=0; i<=storedStateCount.get(); i++) {
                 double t = i*dt;
                 integrationResults.setInterpolatedTime(t);
@@ -154,11 +90,12 @@ public class DeterministicSIR extends VolzSIR {
 
             dirty = false;
 
-        } catch (NumberIsTooSmallException tse) {
-            reject = true;
-        }
+        return false;
+    }
 
-        return reject;
+    public void store() {
+        super.store();
+        dirty = true;
     }
 
     /**
@@ -167,10 +104,8 @@ public class DeterministicSIR extends VolzSIR {
     @Override
     protected boolean update() {
 
-        boolean reject = false;
-
         if (!dirty)
-            return reject;
+            return false;
 
         return simulateDeterministicTrajectory(betaParameter.get().getValue(),
                 gammaParameter.get().getValue(), n_S_Parameter.get().getValue());
@@ -220,6 +155,11 @@ public class DeterministicSIR extends VolzSIR {
         } else {
             return NItraj.get(tidx);
         }
+    }
+
+    public void restore() {
+        super.restore();
+        dirty = true;
     }
 
 }
