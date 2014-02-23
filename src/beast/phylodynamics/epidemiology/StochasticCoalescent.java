@@ -18,6 +18,7 @@ import beast.evolution.tree.coalescent.IntervalType;
 
 /**
  * @author Alexei Drummond
+ * @author Alex Popinga
  */
 
 @Description("Calculates the probability of a beast.tree conditional on a population size function. " +
@@ -25,12 +26,15 @@ import beast.evolution.tree.coalescent.IntervalType;
         "in account, in other words, the constant required for making this a proper distribution that integrates " +
         "to unity is not calculated (partly, because we don't know how for sequentially sampled data).")
 public class StochasticCoalescent extends TreeDistribution {
+
     public Input<PopulationFunction> popSizeInput = new Input<PopulationFunction>("populationModel", "A population size model", Validate.REQUIRED);
+    public Input<Integer> REP = new Input<Integer>("REP", "Average probabilities, i.e. a value of 1 means no averaging is done, (defaults 1).", 1);
+    public Input<Boolean> allowNaN = new Input<Boolean>("allowNaN", "Indicate whether to allow NaN likelihoods (defaults false).", false);
 
     TreeIntervals treeIntervals;
 
-    public static int REPS = 1;
-    public static boolean allowNaNs = false;
+    public int REPS = REP.get();
+    public boolean allowNaNs = allowNaN.get();
 
     public StochasticCoalescent() {}
 
