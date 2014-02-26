@@ -1,13 +1,14 @@
 package beast.phylodynamics.epidemiology;
 
+import beast.phylodynamics.util.Stuff;
+import beast.util.Randomizer;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import beast.util.Randomizer;
-import beast.phylodynamics.util.Stuff;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 //import sun.plugin.dom.exception.InvalidStateException;
+
 /**
  * Class implementing Sehl et al.'s (2009) SAL tau-leaping algorithm
  *
@@ -26,15 +27,15 @@ public class SALTauleapSEIR implements SEIR_simulator {
     /**
      * Constructor
      *
-     * @param state0	initial state of system
-     * @param infect	infection rate
-     * @param recover	recovery rate
-     * @param alpha	    threshold for determining critical reactions
+     * @param state0  initial state of system
+     * @param infect  infection rate
+     * @param recover recovery rate
+     * @param alpha   threshold for determining critical reactions
      */
     public SALTauleapSEIR(SEIRState state0,
-            double expose, double infect, Double[] recover,
-            boolean useExposed,
-            double alpha, Boolean isDeterministic) {
+                          double expose, double infect, Double[] recover,
+                          boolean useExposed,
+                          double alpha, Boolean isDeterministic) {
         super();
         this.state = state0.copy();
         this.exposeRate = expose;
@@ -47,9 +48,9 @@ public class SALTauleapSEIR implements SEIR_simulator {
     }
 
     public SALTauleapSEIR(SEIRState state0,
-            double expose, double infect, Double[] recover, Double loseImmunity,
-            boolean useExposed,
-            double alpha, Boolean isDeterministic) {
+                          double expose, double infect, Double[] recover, Double loseImmunity,
+                          boolean useExposed,
+                          double alpha, Boolean isDeterministic) {
         super();
         this.state = state0.copy();
         this.exposeRate = expose;
@@ -83,7 +84,7 @@ public class SALTauleapSEIR implements SEIR_simulator {
     /**
      * Perform one time-step of fixed length (Does not use exposed compartment.)
      *
-     * @param	dt	time-step size
+     * @param    dt    time-step size
      */
     public boolean step(double dt, int index) {
 
@@ -100,8 +101,8 @@ public class SALTauleapSEIR implements SEIR_simulator {
 
             // Calculate 2nd order corrections (SAL):
             double a2_infect = infectRate * state.S * state.I * (infectRate * (state.S - state.I) - recoverRate[index]);
-            double a2_recover = recoverRate[index] * state.I * (infectRate * state.S - recoverRate[index] -loseImmunityRate);
-            double a2_loseImmunity = loseImmunityRate * state.R * ( -loseImmunityRate - infectRate * state.I);
+            double a2_recover = recoverRate[index] * state.I * (infectRate * state.S - recoverRate[index] - loseImmunityRate);
+            double a2_loseImmunity = loseImmunityRate * state.R * (-loseImmunityRate - infectRate * state.I);
 
             /*
              double a2_infect = 0;
@@ -146,7 +147,7 @@ public class SALTauleapSEIR implements SEIR_simulator {
 
 
             double lambda_loseImmunity = a_loseImmunity * dtCrit + 0.5 * a2_loseImmunity * dtCrit * dtCrit;
-            if (loseImmunityRate>0 && (alpha > 0) && (state.R < lambda_loseImmunity + alpha * Math.sqrt(lambda_loseImmunity))) {
+            if (loseImmunityRate > 0 && (alpha > 0) && (state.R < lambda_loseImmunity + alpha * Math.sqrt(lambda_loseImmunity))) {
 
                 // losing immunity is critical:
                 loseImmunityIsCrit = true;
@@ -181,7 +182,7 @@ public class SALTauleapSEIR implements SEIR_simulator {
                 state.R += q;
             }
 
-            if (loseImmunityRate>0 && loseImmunityIsCrit == false) {
+            if (loseImmunityRate > 0 && loseImmunityIsCrit == false) {
                 double q = isDeterministic ? (a_loseImmunity * dtCrit)
                         : Randomizer.nextPoisson(a_loseImmunity * dtCrit + 0.5 * a2_loseImmunity * dtCrit * dtCrit);
                 state.R -= q;
@@ -243,14 +244,14 @@ public class SALTauleapSEIR implements SEIR_simulator {
     /**
      * Perform one fixed-size time step using exposed compartment
      *
-     * @param dt	length of time step
+     * @param dt length of time step
      * @return true or false depending on whether step involved "critical"
-     * reactions
+     *         reactions
      */
     public boolean step_exposed(double dt, int index) {
 
 
-        if (loseImmunityRate>0) throw new NotImplementedException(); //    SEIRS is not yet implemented!
+        if (loseImmunityRate > 0) throw new NotImplementedException(); //    SEIRS is not yet implemented!
 
         double t = 0.0;
 
@@ -331,20 +332,20 @@ public class SALTauleapSEIR implements SEIR_simulator {
 
             // tau-leap non-critical reactions:
             if (exposeIsCrit == false) {
-                int q = (int)Randomizer.nextPoisson(a_expose * dtCrit + 0.5 * a2_expose * dtCrit * dtCrit);
+                int q = (int) Randomizer.nextPoisson(a_expose * dtCrit + 0.5 * a2_expose * dtCrit * dtCrit);
                 state.S -= q;
                 state.E += q;
             }
 
             // tau-leap non-critical reactions:
             if (infectIsCrit == false) {
-                int q = (int)Randomizer.nextPoisson(a_infect * dtCrit + 0.5 * a2_infect * dtCrit * dtCrit);
+                int q = (int) Randomizer.nextPoisson(a_infect * dtCrit + 0.5 * a2_infect * dtCrit * dtCrit);
                 state.E -= q;
                 state.I += q;
             }
 
             if (recoverIsCrit == false) {
-                int q = (int)Randomizer.nextPoisson(a_recover * dtCrit + 0.5 * a2_recover * dtCrit * dtCrit);
+                int q = (int) Randomizer.nextPoisson(a_recover * dtCrit + 0.5 * a2_recover * dtCrit * dtCrit);
                 state.I -= q;
                 state.R += q;
             }
@@ -401,13 +402,12 @@ public class SALTauleapSEIR implements SEIR_simulator {
     /**
      * Generate trajectory
      *
-     * @param T	Integration time
-     * @param Nt	Number of time-steps
-     * @param Nsamples	Number of samples to record
-     *
+     * @param T        Integration time
+     * @param Nt       Number of time-steps
+     * @param Nsamples Number of samples to record
      * @return List of SEIRState instances representing sampled trajectory.
      */
-    public List<SEIRState> genTrajectory(double T, int Nt, int Nsamples, List<Integer> criticalTrajectories, double[] times) {
+    public List<SEIRState> genTrajectory(double T, int Nt, int Nsamples, double[] times) {
 
         // Determine time-step size:
         double dt = T / (Nt - 1);
@@ -440,10 +440,6 @@ public class SALTauleapSEIR implements SEIR_simulator {
             if (tidx % stepsPerSample == 0) {
                 trajectory.add(state.copy());
 
-                // Adjust critical trajectory count:
-//				if (crit)
-//					criticalTrajectories.set(tidx/stepsPerSample,
-//							criticalTrajectories.get(tidx/stepsPerSample)+1);
             }
         }
 
@@ -506,13 +502,13 @@ public class SALTauleapSEIR implements SEIR_simulator {
 
 
         // Simulation parameters:
-        int Ntraj = 10;		// Number of trajectories
-        int Nt = 10001;			// Number of timesteps
-        int Nsamples = 101;		// Number of samples to record
-        double T = 4.;		// Length of time of simulation
+        int Ntraj = 10;        // Number of trajectories
+        int Nt = 10001;            // Number of timesteps
+        int Nsamples = 101;        // Number of samples to record
+        double T = 4.;        // Length of time of simulation
 
         //double alpha = 10;		// Critical reaction parameter
-        double alpha = 10.;		// No SSA component
+        double alpha = 10.;        // No SSA component
 
         // Model parameters:
         int s0 = 3000;
@@ -534,15 +530,10 @@ public class SALTauleapSEIR implements SEIR_simulator {
         // Create SALTauleapSEIR instance:
         SALTauleapSEIR hybridTauleapSEIR = new SALTauleapSEIR(x0, expose, infect, recover, loseImmunity, false, alpha, false);
 
-        // Allocate and zero critical steps list:
-        List<Integer> criticalTrajectories = new ArrayList<Integer>();
-        for (int i = 0; i < Nsamples; i++)
-            criticalTrajectories.add(0);
-
         // Integrate trajectories:
         for (int i = 0; i < Ntraj; i++) {
             hybridTauleapSEIR.setState(x0);
-            trajectoryList.add(hybridTauleapSEIR.genTrajectory(T, Nt, Nsamples, criticalTrajectories, times));
+            trajectoryList.add(hybridTauleapSEIR.genTrajectory(T, Nt, Nsamples, times));
         }
 
         for (int i = 0; i < Ntraj; i++) {
@@ -558,7 +549,6 @@ public class SALTauleapSEIR implements SEIR_simulator {
             }
 
         }
-
 
 
 //		// Calculate and print some moments:
