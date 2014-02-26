@@ -1,6 +1,7 @@
 package beast.phylodynamics.epidemiology;
 
-import beast.core.*;
+import beast.core.Description;
+import beast.core.Input;
 import beast.core.parameter.RealParameter;
 
 import java.io.PrintStream;
@@ -19,28 +20,26 @@ import java.util.List;
 
 public class StochasticSIR extends VolzSIR {
 
+    public Input<Integer> numSamplesFromTrajectory = new Input<Integer>("numSamplesFromTrajectory",
+            "number of samples taken from trajectory to use in piecewise-constant coalescent pop-size function (defaults to 1000). integrationStepCount should be an integer multiple of this.", 1000);
+
     public double totalItime = 0;
     double storedTotalItime = 0;
 
-    public StochasticSIR() {}
+    public StochasticSIR() {
+    }
 
     public StochasticSIR(RealParameter nSO, RealParameter beta, RealParameter gamma, RealParameter origin) throws Exception {
         initByName("n_S0", nSO, "beta", beta, "gamma", gamma, "origin", origin);
     }
 
     public boolean simulateStochasticTrajectory() {
-        return  simulateStochasticTrajectory(betaParameter.get().getValue(),
+        return simulateStochasticTrajectory(betaParameter.get().getValue(),
                 gammaParameter.get().getValue(), n_S_Parameter.get().getValue());
     }
 
-    @Override
-    public double simulateTrajectory(double beta, double gamma, double NS0) {
-        return super.simulateTrajectory(beta, gamma, NS0);
-    }
-
-
     /**
-     *  Simulate a stochastic trajectory using SALTauleapSEIR
+     * Simulate a stochastic trajectory using SALTauleapSEIR
      *
      * @param beta
      * @param gamma
@@ -49,89 +48,95 @@ public class StochasticSIR extends VolzSIR {
      */
     private boolean simulateStochasticTrajectory(final double beta, final double gamma, double NS0) {
 
-            dt = simulateTrajectory(beta, gamma, NS0);
+        NStraj.clear();
+        NItraj.clear();
+        effectivePopSizeTraj.clear();
 
-            NStraj.clear();
-            NItraj.clear();
-            effectivePopSizeTraj.clear();
+        totalItime = 0.0;
 
-            totalItime = 0.0;
+        int Nt = integrationStepCount.get();
+        int Nsamples = numSamplesFromTrajectory.get();
 
-            int Nt = storedStateCount.get();
+        int Ntraj = 1;
+        double T = originParameter.get().getValue();
+        double[] times = {T};
 
-            int Ntraj = 1;
-            double T = originParameter.get().getValue();
-            double[] times = {T};
+        // USE SEIR_simulator to populate the following variables: NStraj, NItraj, effectivePopSizeTraj, intensityTraj
 
-            int Nsamples = 10;
+        SEIRState state0 = new SEIRState(
+                NS0,       // susceptibles
+                0,         // exposed
+                1,         // infected
+                0,         // recovered
+                0.0        // time
+        );
+        double alpha = 10;
 
-            // USE SEIR_simulator to populate the following variables: NStraj, NItraj, effectivePopSizeTraj, intensityTraj
+        SALTauleapSEIR simulator = new SALTauleapSEIR(
+                state0,                 // initial state for simulation
+                0,                      // exposure rate
+                beta,                   // infection rate
+                new Double[]{gamma},    // recovery rate
+                false,                  // use exposed compartment?
+                alpha,                  // threshold for determining critical reactions
+                false                   // is deterministic?
+        );
 
-            SEIRState state0 = new SEIRState(NS0, 0, 1, 0, 0);
-            double alpha = 10;
 
-            SALTauleapSEIR simulator = new SALTauleapSEIR(state0, 0, beta, new Double[] {gamma}, false, alpha, false);
+        // List to hold integrated trajectories:
+        List<List<SEIRState>> trajectoryList = new ArrayList<List<SEIRState>>();
 
+        // Integrate trajectories:
+        for (int i = 0; i < Ntraj; i++) {
+            simulator.setState(state0);
+            trajectoryList.add(simulator.genTrajectory(
+                    T,        // total time for simulation of trajectory
+                    Nt,       // the number of points used for the tau-leaping lattice (i.e. dt for tau-leaping is T / Nt)
+                    Nsamples, // the number of points stored in the resulting trajectory object (i.e. dt for returned trajectory is T / Nsamples)
+                    times
+            ));
+        }
 
-            // List to hold integrated trajectories:
-            List<List<SEIRState>> trajectoryList = new ArrayList<List<SEIRState>>();
+        double dt_Nsamples = T / Nsamples;
 
-            // Allocate and zero critical steps list:
-            List<Integer> criticalTrajectories = new ArrayList<Integer>();
-            for (int i = 0; i < Nsamples; i++) {
-                criticalTrajectories.add(0);
-            }
+        for (int i = 0; i < Ntraj; i++) {
+            //System.out.println("t\tS\tI\tR");
+            List<SEIRState> traj = trajectoryList.get(i);
 
-            // Integrate trajectories:
-            for (int i = 0; i < Ntraj; i++) {
-                simulator.setState(state0);
-                trajectoryList.add(simulator.genTrajectory(T, Nt, Nsamples, criticalTrajectories, times));
-            }
+            for (int j = 0; j < Nsamples; j++) {
 
-            for (int i = 0; i < Ntraj; i++) {
-                //System.out.println("t\tS\tI\tR");
-                List<SEIRState> traj = trajectoryList.get(i);
+                SEIRState state = traj.get(j);
 
-                for (int j = 0; j < Nsamples; j++) {
-
-                    SEIRState state = traj.get(j);
-                    //System.out.println(state.time + "\t" + state.S + "\t" + state.I + "\t" + state.R);
-
-                    //Obtain integration results at discrete locations
-                    double t = j*dt;
-                    integrationResults.setInterpolatedTime(t);
-
-                    if (state.I < 0.0 || state.S < 0.0) {
-                        //System.out.println("panic! T="+((double)j/T/(double)Nsamples));
-                        //break;
-                        return true;
-                    }
-                    NStraj.add(state.S);
-                    NItraj.add(state.I);
-                    effectivePopSizeTraj.add((state.I -1) / (2.0 * beta * state.S));
-
-                    totalItime += state.I * (T/Nsamples);
+                if (state.I < 1.0 || state.S < 0.0) {
+                    // trajectory failed to reach big T
+                    return true;
                 }
+                NStraj.add(state.S);
+                NItraj.add(state.I);
+                effectivePopSizeTraj.add((state.I - 1) / (2.0 * beta * state.S));
+
+                totalItime += state.I * dt_Nsamples;
             }
+        }
 
-            // Switch effective pop size to reverse time:
-            Collections.reverse(effectivePopSizeTraj);
+        // Switch effective pop size to reverse time:
+        Collections.reverse(effectivePopSizeTraj);
 
-            // Estimate intensity on integration lattice:
-            intensityTraj.clear();
+        // Estimate intensity on integration lattice:
+        intensityTraj.clear();
 
-            double intensity = 0.0;
+        double intensity = 0.0;
+        intensityTraj.add(intensity);
+
+        for (Double popSize : effectivePopSizeTraj) {
+            intensity += dt_Nsamples / popSize;
             intensityTraj.add(intensity);
+        }
 
-            for (int i = 0; i < effectivePopSizeTraj.size(); i++) {
-                intensity += dt / effectivePopSizeTraj.get(i);
-                intensityTraj.add(intensity);
-            }
+        // Start of integral is 0.5*dt from end of forward-time integration.
+        tIntensityTrajStart = originParameter.get().getValue() - dt_Nsamples * (effectivePopSizeTraj.size() - 1) - 0.5 * dt_Nsamples;
 
-            // Start of integral is 0.5*dt from end of forward-time integration.
-            tIntensityTrajStart = originParameter.get().getValue() - dt * (effectivePopSizeTraj.size()-1) - 0.5 * dt;
-
-            dirty = false;
+        dirty = false;
 
         return false;
     }
@@ -164,7 +169,7 @@ public class StochasticSIR extends VolzSIR {
     public void log(int nSample, PrintStream out) {
 
         // logs R0
-        super.log(nSample,out);
+        super.log(nSample, out);
 
         // now log the integral of infecteds
 

@@ -23,14 +23,15 @@ public class StochasticSIRPopulationFunction extends PopulationFunction.Abstract
             "oldMethod",
             "Use old (slow) method to evaluate intensity.  Default false.", false);
 
-    public StochasticSIRPopulationFunction() {}
+    public StochasticSIRPopulationFunction() {
+    }
 
     public StochasticSIRPopulationFunction(StochasticSIR ssir) throws Exception {
         initByName("stochasticSIR", ssir);
     }
 
     public boolean simulateStochasticTrajectory() {
-        return  stochasticSIR.get().simulateStochasticTrajectory();
+        return stochasticSIR.get().simulateStochasticTrajectory();
     }
 
     // Implementation of abstract methods
@@ -66,9 +67,8 @@ public class StochasticSIRPopulationFunction extends PopulationFunction.Abstract
     public double getIntegral(double start, double finish) {
 
         // Approximation for the case of very small intervals:
-
         if (finish - start < 1e-15)
-            return (finish-start)/getPopSize(0.5*(start+finish));
+            return (finish - start) / getPopSize(0.5 * (start + finish));
 
         if (oldMethodInput.get())
             return getNumericalIntegral(start, finish);
@@ -89,11 +89,9 @@ public class StochasticSIRPopulationFunction extends PopulationFunction.Abstract
     @Override
     public double getIntensity(double t) {
 
-        if (stochasticSIR.get().reject == true)
+        if (stochasticSIR.get().reject) {
             return Double.NEGATIVE_INFINITY;
-
-        else return stochasticSIR.get().getIntensity(t);
-
+        } else return stochasticSIR.get().getIntensity(t);
     }
 
     @Override

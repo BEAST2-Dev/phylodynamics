@@ -4,24 +4,22 @@ import beast.core.CalculationNode;
 import beast.core.Input;
 import beast.core.Loggable;
 import beast.core.parameter.RealParameter;
-
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.MaxIterationsExceededException;
 import org.apache.commons.math.analysis.UnivariateRealFunction;
 import org.apache.commons.math.analysis.solvers.BrentSolver;
-import org.apache.commons.math3.exception.NumberIsTooSmallException;
-
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.exception.MaxCountExceededException;
+import org.apache.commons.math3.exception.NumberIsTooSmallException;
 import org.apache.commons.math3.ode.ContinuousOutputModel;
 import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
 import org.apache.commons.math3.ode.events.EventHandler;
 import org.apache.commons.math3.ode.nonstiff.AdaptiveStepsizeIntegrator;
 import org.apache.commons.math3.ode.nonstiff.HighamHall54Integrator;
+
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -40,8 +38,8 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
     public Input<RealParameter> originParameter = new Input<RealParameter>("origin",
             "the time before the root that the first infection occurred.", Input.Validate.REQUIRED);
 
-    public Input<Integer> storedStateCount = new Input<Integer>("integrationStepCount",
-            "number of integration time steps to use (defaults to 1000).", 1000);
+    public Input<Integer> integrationStepCount = new Input<Integer>("integrationStepCount",
+            "number of integration time steps to use for ODE solver or tau-leaping (defaults to 1000).", 1000);
 
     public Input<Double> finishingThresholdInput = new Input<Double>("finishingThreshold",
             "Integration will finish when infected pop drops below this.", 1.0);
@@ -55,7 +53,9 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
     public List<Double> effectivePopSizeTraj;
     public List<Double> intensityTraj;
     public double tIntensityTrajStart;
-    public double dt;
+
+    // the smallest unit of time for computation of the population size function
+    protected double dt;
 
     protected boolean dirty;
     protected ContinuousOutputModel integrationResults;
@@ -91,7 +91,6 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
 
         dirty = true;
         update();
-
     }
 
     protected abstract boolean update();
@@ -106,7 +105,7 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
      */
     public double simulateTrajectory(final double beta, final double gamma, final double NS0) {
 
-          // Equations of motion:
+        // Equations of motion:
         FirstOrderDifferentialEquations ode = new FirstOrderDifferentialEquations() {
 
             @Override
@@ -124,7 +123,12 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
         };
 
         try {
-            AdaptiveStepsizeIntegrator integrator = new HighamHall54Integrator(1E-10, 100, 0.5, 0.01);
+            AdaptiveStepsizeIntegrator integrator = new HighamHall54Integrator(
+                    1E-10, // min step size (time)
+                    100,   // max step size (time)
+                    0.5,   // absolute tolerance
+                    0.01   // relative tolerance
+            );
 
             integrationResults = new ContinuousOutputModel();
             integrator.addStepHandler(integrationResults);
@@ -132,10 +136,12 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
             integrator.addEventHandler(new EventHandler() {
 
                 @Override
-                public void init(double t0, double[] y, double t) { };
+                public void init(double t0, double[] y, double t) {
+                }
 
                 @Override
                 public double g(double t, double[] y) {
+                    // stop when population goes under the finishing threshold
                     return y[1] - finishingThresholdInput.get();
                 }
 
@@ -148,14 +154,19 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
                 }
 
                 @Override
-                public void resetState(double d, double[] doubles) { };
-
-            }, 1.0, 0.1, 10);
+                public void resetState(double d, double[] doubles) {
+                }
+            },
+                    1.0, // maxCheckInterval
+                    0.1, // convergence,
+                    10   // maxIterationCount
+            );
 
             integrator.addEventHandler(new EventHandler() {
 
                 @Override
-                public void init(double t0, double[] y, double t) { };
+                public void init(double t0, double[] y, double t) {
+                }
 
                 @Override
                 public double g(double t, double[] y) {
@@ -168,15 +179,16 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
                 }
 
                 @Override
-                public void resetState(double d, double[] doubles) { };
+                public void resetState(double d, double[] doubles) {
+                }
 
             }, 0.1, 0.1, 10);
 
 
-            double [] y0 = new double[2];
+            double[] y0 = new double[2];
             y0[0] = NS0;
             y0[1] = 1.0;
-            double [] y = new double[2];
+            double[] y = new double[2];
 
             // Integrate SIR model ODEs:
             try {
@@ -186,11 +198,11 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
             }
 
         } catch (NumberIsTooSmallException tse) {
-            reject=true;
+            reject = true;
         }
 
         // Obtain integration results at discrete locations
-        dt = integrationResults.getFinalTime()/storedStateCount.get();
+        dt = integrationResults.getFinalTime() / integrationStepCount.get();
 
         return dt;
     }
@@ -308,8 +320,8 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
 
         //out.format("%g\t", dt);
 
-        out.format("%g\t", betaParameter.get().getValue()*n_S_Parameter.get().getValue()
-                /gammaParameter.get().getValue());
+        out.format("%g\t", betaParameter.get().getValue() * n_S_Parameter.get().getValue()
+                / gammaParameter.get().getValue());
 
         //double tend = NStraj.size() * dt;
         //double delta = tend / (statesToLogInput.get() - 1);
