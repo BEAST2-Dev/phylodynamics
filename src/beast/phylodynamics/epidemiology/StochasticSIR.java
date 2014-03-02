@@ -21,7 +21,8 @@ import java.util.List;
 public class StochasticSIR extends VolzSIR {
 
     public Input<Integer> numSamplesFromTrajectory = new Input<Integer>("numSamplesFromTrajectory",
-            "number of samples taken from trajectory to use in piecewise-constant coalescent pop-size function (defaults to 1000). integrationStepCount should be an integer multiple of this.", 1000);
+            "number of samples taken from trajectory to use in piecewise-constant coalescent pop-size function " +
+                    "(defaults to 100). integrationStepCount should be an integer multiple of this.", 100);
 
     public double totalItime = 0;
     double storedTotalItime = 0;
@@ -70,7 +71,7 @@ public class StochasticSIR extends VolzSIR {
                 0,         // recovered
                 0.0        // time
         );
-        double alpha = 10;
+        double alpha = 100;
 
         SALTauleapSEIR simulator = new SALTauleapSEIR(
                 state0,                 // initial state for simulation
@@ -97,7 +98,7 @@ public class StochasticSIR extends VolzSIR {
             ));
         }
 
-        double dt_Nsamples = T / Nsamples;
+        dt = T / (Nsamples - 1);
 
         for (int i = 0; i < Ntraj; i++) {
             //System.out.println("t\tS\tI\tR");
@@ -115,7 +116,6 @@ public class StochasticSIR extends VolzSIR {
                 NItraj.add(state.I);
                 effectivePopSizeTraj.add((state.I - 1) / (2.0 * beta * state.S));
 
-                totalItime += state.I * dt_Nsamples;
             }
         }
 
@@ -129,12 +129,12 @@ public class StochasticSIR extends VolzSIR {
         intensityTraj.add(intensity);
 
         for (Double popSize : effectivePopSizeTraj) {
-            intensity += dt_Nsamples / popSize;
+            intensity += dt / popSize;
             intensityTraj.add(intensity);
         }
 
         // Start of integral is 0.5*dt from end of forward-time integration.
-        tIntensityTrajStart = originParameter.get().getValue() - dt_Nsamples * (effectivePopSizeTraj.size() - 1) - 0.5 * dt_Nsamples;
+        tIntensityTrajStart = originParameter.get().getValue() - dt * (effectivePopSizeTraj.size() - 1) - 0.5 * dt;
 
         dirty = false;
 
