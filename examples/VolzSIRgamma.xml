@@ -27,16 +27,16 @@
     </input>
 
 
-    <run spec="MCMC" id="mcmc" chainLength="100000000" noLikelihoodCheck="true">
+    <run spec="MCMC" id="mcmc" chainLength="10000" noLikelihoodCheck="true">
 
         <distribution spec="CompoundDistribution" id="posterior">
-            <distribution id="coalescent" spec="StochasticCoalescent" allowNaN="false" REP="1">
+            <distribution id="coalescent" spec="StochasticCoalescent" allowNaN="false" REP="300">
                 <treeIntervals spec='TreeIntervals' id='treeIntervals'>
                     <tree idref="tree"/>
                 </treeIntervals>
                 
                 <populationModel spec="StochasticSIRPopulationFunction" id='popFunc'>
-                    <stochasticSIR spec="StochasticSIR" id="volzSIR" integrationStepCount='10001' numSamplesFromTrajectory='1001'>
+                    <stochasticSIR spec="StochasticSIR" id="volzSIR" integrationStepCount='1001' numSamplesFromTrajectory='1001'>
                         <beta idref="volz.beta"/>
                         <gamma idref="volz.gamma"/>
                         <n_S0 idref="volz.n_S0"/>
@@ -69,7 +69,7 @@
       </operator>-->
 
 
-        <logger logEvery="10000" fileName="Volz2012_stochStoch_gamma_1.log">
+        <logger logEvery="100" fileName="Volz2012_stochStoch_gamma_1.log">
    	        <model idref='posterior'/>
             <log idref="posterior"/>
             <log idref="volz.n_S0"/>
@@ -79,7 +79,7 @@
             <log idref="volzSIR"/>
         </logger>
 
-        <logger logEvery="10000">
+        <logger logEvery="100">
             <model idref='posterior'/>
             <log idref="posterior"/>
             <log idref="volz.n_S0"/>
