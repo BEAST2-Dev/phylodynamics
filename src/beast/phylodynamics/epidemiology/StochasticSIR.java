@@ -23,7 +23,7 @@ public class StochasticSIR extends VolzSIR {
     public Input<Integer> numSamplesFromTrajectory = new Input<Integer>("numSamplesFromTrajectory",
             "number of samples taken from trajectory to use in piecewise-constant coalescent pop-size function " +
                     "(defaults to 100). integrationStepCount should be an integer multiple of this.", 100);
-
+    
     public double totalItime = 0;
     double storedTotalItime = 0;
 
@@ -141,6 +141,7 @@ public class StochasticSIR extends VolzSIR {
         return false;
     }
 
+    @Override
     public void store() {
         super.store();
         storedTotalItime = totalItime;
@@ -149,6 +150,7 @@ public class StochasticSIR extends VolzSIR {
 
     /**
      * Update stochastic trajectory.
+     * @return 
      */
     @Override
     protected boolean update() {
@@ -177,6 +179,7 @@ public class StochasticSIR extends VolzSIR {
 
     }
 
+    @Override
     public void init(PrintStream out) throws Exception {
 
         // inits R0
@@ -185,6 +188,7 @@ public class StochasticSIR extends VolzSIR {
         out.print("totalItime\t");
     }
 
+    @Override
     public void restore() {
         super.restore();
         totalItime = storedTotalItime;
