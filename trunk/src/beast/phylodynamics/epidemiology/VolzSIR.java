@@ -45,7 +45,9 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
             "Integration will finish when infected pop drops below this.", 1.0);
     public Input<Double> maxSimLengthInput = new Input<Double>("maxSimLength",
             "Maximum length of simulation. (Default 1000.)", 1000.0);
-
+    
+    public Input<Boolean> logTrajectoriesInput = new Input<Boolean>("logTrajectories",
+            "Log entire trajectories. Default false.", false);
 
     public List<Double> NStraj;
     public List<Double> NItraj;
@@ -92,7 +94,7 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
         dirty = true;
         update();
     }
-
+    
     protected abstract boolean update();
 
     /**
@@ -313,6 +315,9 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
         //    out.format("I%d\t", i);
         //    out.format("t%d\t", i);
         //}
+        
+        if (logTrajectoriesInput.get())
+            out.print("trajI\ttrajTime\t");
     }
 
     @Override
@@ -336,6 +341,23 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
         //    out.format("%g\t", NItraj.get(tidx));
         //    out.format("%g\t", t);
         // }
+        
+        if (logTrajectoriesInput.get()) {
+            out.print("\"");
+            for (int idx=0; idx<NItraj.size(); idx++) {
+                if (idx>0)
+                    out.print(",");
+                out.print(NItraj.get(idx));
+            }
+            out.print("\"\t\"");
+            for (int idx=0; idx<NItraj.size(); idx++) {
+                double t = dt*idx;
+                if (idx>0)
+                    out.print(",");
+                out.print(t);
+            }
+            out.print("\"\t");
+        }
     }
 
     @Override
