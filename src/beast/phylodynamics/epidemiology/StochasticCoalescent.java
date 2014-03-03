@@ -33,13 +33,13 @@ public class StochasticCoalescent extends TreeDistribution {
 
     TreeIntervals treeIntervals;
 
-    public int REPS = REP.get();
-    public boolean allowNaNs = allowNaN.get();
+    public int REPS = 1;
+    public boolean allowNaNs = false;
 
     public StochasticCoalescent() {}
 
-    public StochasticCoalescent(TreeIntervals treeIntervals, PopulationFunction populationModel) throws Exception {
-        initByName("treeIntervals", treeIntervals, "populationModel", populationModel);
+    public StochasticCoalescent(TreeIntervals treeIntervals, PopulationFunction populationModel, int ensembleSize) throws Exception {
+        initByName("treeIntervals", treeIntervals, "populationModel", populationModel, "REP", ensembleSize);
     }
 
     @Override
@@ -48,6 +48,10 @@ public class StochasticCoalescent extends TreeDistribution {
         if (treeIntervals == null) {
             throw new Exception("Expected treeIntervals to be specified");
         }
+
+        REPS = REP.get();
+        allowNaNs = allowNaN.get();
+
         calculateLogP();
     }
 
@@ -67,47 +71,39 @@ public class StochasticCoalescent extends TreeDistribution {
 
             ArrayList<Double> logps = new ArrayList<Double>();
 
-            int failCount = 0;
-            while (logps.size() < REPS) {
-                scSIR.simulateStochasticTrajectory();
+            for (int i = 0; i < REPS; i++) {
+                boolean fail = scSIR.simulateStochasticTrajectory();
 
-                double logp = calculateLogLikelihood(treeIntervals, popSizeInput.get());
+                double logp = Double.NEGATIVE_INFINITY;
+                if (!fail) {
+                    logp = calculateLogLikelihood(treeIntervals, popSizeInput.get());
+                }
 
                 if (allowNaNs || (!Double.isNaN(logp) && !Double.isInfinite(logp))) {
                     logps.add(logp);
-                } else {
-                    failCount += 1;
                 }
             }
+            if (logps.size() == 0) return Double.NEGATIVE_INFINITY;
 
             // find maximum likelihood, make it the 'new zero'
             double ML = Collections.max(logps);
             double newML = 0.0 - ML;
 
             Collections.sort(logps);
-            double ave = 0.0;
+            double sum = 0.0;
 
             // shift array elements according to newML and exponentiate all the things
             for (int j = 0; j < logps.size(); j++) {
                 logps.set(j, Math.exp(logps.get(j) + newML));
 
                 double logp = logps.get(j);
-                ave += logp;
+                sum += logp;
             }
 
             // average probability
-            double logAve = Math.log(ave/logps.size());
+            double logAve = Math.log(sum/REPS);
+
             logP = logAve + ML;
-
-            if (failCount > 0) {
-                // do something special to correct for the proportion of failures
-                // someone with more brains than AJD should check this
-
-                double probSurvivalOfTrajectory = (double)REPS/(double)(failCount+REPS);
-
-                logP += Math.log(probSurvivalOfTrajectory);
-            }
-
 
         } else {
             logP = calculateLogLikelihood(treeIntervals, popSizeInput.get());

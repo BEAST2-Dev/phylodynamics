@@ -30,6 +30,9 @@ public class StochasticSIRPopulationFunction extends PopulationFunction.Abstract
         initByName("stochasticSIR", ssir);
     }
 
+    /**
+     * @return true if the stochastic simulation failed
+     */
     public boolean simulateStochasticTrajectory() {
         return stochasticSIR.get().simulateStochasticTrajectory();
     }
