@@ -168,21 +168,21 @@ public class SALTauleapSEIR implements SEIR_simulator {
             t += dtCrit;
 
             // tau-leap non-critical reactions:
-            if (infectIsCrit == false) {
+            if (!infectIsCrit) {
                 double q = isDeterministic ? (a_infect * dtCrit)
                         : Randomizer.nextPoisson(a_infect * dtCrit + 0.5 * a2_infect * dtCrit * dtCrit);
                 state.S -= q;
                 state.I += q;
             }
 
-            if (recoverIsCrit == false) {
+            if (!recoverIsCrit) {
                 double q = isDeterministic ? (a_recover * dtCrit)
                         : Randomizer.nextPoisson(a_recover * dtCrit + 0.5 * a2_recover * dtCrit * dtCrit);
                 state.I -= q;
                 state.R += q;
             }
 
-            if (loseImmunityRate > 0 && loseImmunityIsCrit == false) {
+            if (loseImmunityRate > 0 && !loseImmunityIsCrit) {
                 double q = isDeterministic ? (a_loseImmunity * dtCrit)
                         : Randomizer.nextPoisson(a_loseImmunity * dtCrit + 0.5 * a2_loseImmunity * dtCrit * dtCrit);
                 state.R -= q;
@@ -331,20 +331,20 @@ public class SALTauleapSEIR implements SEIR_simulator {
             t += dtCrit;
 
             // tau-leap non-critical reactions:
-            if (exposeIsCrit == false) {
+            if (!exposeIsCrit) {
                 int q = (int) Randomizer.nextPoisson(a_expose * dtCrit + 0.5 * a2_expose * dtCrit * dtCrit);
                 state.S -= q;
                 state.E += q;
             }
 
             // tau-leap non-critical reactions:
-            if (infectIsCrit == false) {
+            if (!infectIsCrit) {
                 int q = (int) Randomizer.nextPoisson(a_infect * dtCrit + 0.5 * a2_infect * dtCrit * dtCrit);
                 state.E -= q;
                 state.I += q;
             }
 
-            if (recoverIsCrit == false) {
+            if (!recoverIsCrit) {
                 int q = (int) Randomizer.nextPoisson(a_recover * dtCrit + 0.5 * a2_recover * dtCrit * dtCrit);
                 state.I -= q;
                 state.R += q;
