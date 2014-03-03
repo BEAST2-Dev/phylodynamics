@@ -95,119 +95,26 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
         update();
     }
     
-    protected abstract boolean update();
+    protected boolean update() {
 
+        if (!dirty)
+            return false;
+
+        return simulateTrajectory(betaParameter.get().getValue(),
+                gammaParameter.get().getValue(), n_S_Parameter.get().getValue());
+    }
+    
     /**
-     * Obtain dt for integration results at discrete locations
+     * Simulate a stochastic or deterministic trajectory.
      *
      * @param beta
      * @param gamma
      * @param NS0
      * @return
      */
-    public double simulateTrajectory(final double beta, final double gamma, final double NS0) {
+    public abstract boolean simulateTrajectory(final double beta,
+            final double gamma, final double NS0);
 
-        // Equations of motion:
-        FirstOrderDifferentialEquations ode = new FirstOrderDifferentialEquations() {
-
-            @Override
-            public int getDimension() {
-                return 2;
-            }
-
-            @Override
-            public void computeDerivatives(double t, double[] y, double[] ydot) throws MaxCountExceededException, DimensionMismatchException {
-                double S = y[0];
-                double I = y[1];
-                ydot[0] = -beta * S * I;
-                ydot[1] = beta * S * I - gamma * I;
-            }
-        };
-
-        try {
-            AdaptiveStepsizeIntegrator integrator = new HighamHall54Integrator(
-                    1E-10, // min step size (time)
-                    100,   // max step size (time)
-                    0.5,   // absolute tolerance
-                    0.01   // relative tolerance
-            );
-
-            integrationResults = new ContinuousOutputModel();
-            integrator.addStepHandler(integrationResults);
-
-            integrator.addEventHandler(new EventHandler() {
-
-                @Override
-                public void init(double t0, double[] y, double t) {
-                }
-
-                @Override
-                public double g(double t, double[] y) {
-                    // stop when population goes under the finishing threshold
-                    return y[1] - finishingThresholdInput.get();
-                }
-
-                @Override
-                public EventHandler.Action eventOccurred(double t, double[] y, boolean increasing) {
-                    if (!increasing)
-                        return Action.STOP;
-                    else
-                        return Action.CONTINUE;
-                }
-
-                @Override
-                public void resetState(double d, double[] doubles) {
-                }
-            },
-                    1.0, // maxCheckInterval
-                    0.1, // convergence,
-                    10   // maxIterationCount
-            );
-
-            integrator.addEventHandler(new EventHandler() {
-
-                @Override
-                public void init(double t0, double[] y, double t) {
-                }
-
-                @Override
-                public double g(double t, double[] y) {
-                    return y[1];
-                }
-
-                @Override
-                public EventHandler.Action eventOccurred(double t, double[] y, boolean increasing) {
-                    return EventHandler.Action.STOP;
-                }
-
-                @Override
-                public void resetState(double d, double[] doubles) {
-                }
-
-            }, 0.1, 0.1, 10);
-
-
-            double[] y0 = new double[2];
-            y0[0] = NS0;
-            y0[1] = 1.0;
-            double[] y = new double[2];
-
-            // Integrate SIR model ODEs:
-            try {
-                integrator.integrate(ode, 0, y0, maxSimLengthInput.get(), y);
-            } catch (MaxCountExceededException e) {
-                reject = true;
-            }
-
-        } catch (NumberIsTooSmallException tse) {
-            reject = true;
-        }
-
-        // Obtain integration results at discrete locations
-        dt = integrationResults.getFinalTime() / integrationStepCount.get();
-
-        return dt;
-    }
 
     /**
      * "Effective" population size for calculating coalescent likelihood

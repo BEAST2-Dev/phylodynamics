@@ -35,7 +35,7 @@ public class StochasticSIR extends VolzSIR {
     }
 
     public boolean simulateStochasticTrajectory() {
-        return simulateStochasticTrajectory(betaParameter.get().getValue(),
+        return simulateTrajectory(betaParameter.get().getValue(),
                 gammaParameter.get().getValue(), n_S_Parameter.get().getValue());
     }
 
@@ -47,7 +47,8 @@ public class StochasticSIR extends VolzSIR {
      * @param NS0
      * @return true if simulated stochastic trajectory should force a reject
      */
-    private boolean simulateStochasticTrajectory(final double beta, final double gamma, double NS0) {
+    @Override
+    public boolean simulateTrajectory(final double beta, final double gamma, double NS0) {
 
         NStraj.clear();
         NItraj.clear();
@@ -146,25 +147,6 @@ public class StochasticSIR extends VolzSIR {
         super.store();
         storedTotalItime = totalItime;
         dirty = true;
-    }
-
-    /**
-     * Update stochastic trajectory.
-     * @return 
-     */
-    @Override
-    protected boolean update() {
-
-        if (!dirty) {
-            // if not dirty succeed without work
-            return false;
-        }
-
-        final double beta = betaParameter.get().getValue();
-        final double gamma = gammaParameter.get().getValue();
-        double NS0 = n_S_Parameter.get().getValue();
-
-        return simulateStochasticTrajectory(beta, gamma, NS0);
     }
 
     @Override
