@@ -32,9 +32,10 @@ df <- read.table('VolzSIRgamma_saveTrajectories.log', header=T, as.is=T)
 t0 <- df$volz.origin[[1]]
 trajectories <- getTrajectories(df)
 
-deltaT <- c()
+Iend <- c()
 for (idx in 1:length(trajectories)) {
-    deltaT[idx] <- trajectories[[idx]]$t[1]-(t0-treeHeight)
+    n <- length(trajectories[[idx]]$I)
+    Iend[idx] <- trajectories[[idx]]$I[n]
 }
 
 
@@ -43,14 +44,21 @@ pdf('TreeAndTraj.pdf', width=7, height=5)
 par(mar=c(3,3,1,1))
 par(mgp=c(2,0.5,0))
 
+layout(matrix(c(1,2), nrow=1, ncol=2), widths=c(1,.5))
+
 plot(tree, show.tip.label=F, y.lim=c(-1000,1000), x.lim=c(0,44))
 title(xlab='Time since MRCA')
 
 box()
-for (idx in 1:length(trajectories)) {
-    lines(trajectories[[idx]]$t - (t0-treeHeight), 2*(trajectories[[idx]]$I - 500), col=rgb(0,0,0,.2))
+nTraj <- min(length(trajectories), 500)
+for (idx in 1:nTraj) {
+    lines(trajectories[[idx]]$t - (t0-treeHeight), 2*(trajectories[[idx]]$I - 500), col=rgb(0,0,0,.1))
 }
 lines(c(treeHeight, treeHeight), c(-1000,1000), col='red', lty=2)
 axis(side=1)
+
+hist(Iend, breaks=seq(-.5,20.5,by=1), xlim=c(0,5.5), prob=T,
+     xlab="Final count", ylab="Probability", main="",
+     col="green")
 
 dev.off()
