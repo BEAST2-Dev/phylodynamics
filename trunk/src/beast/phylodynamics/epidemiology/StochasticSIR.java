@@ -30,8 +30,8 @@ public class StochasticSIR extends VolzSIR {
     public StochasticSIR() {
     }
 
-    public StochasticSIR(RealParameter nSO, RealParameter beta, RealParameter gamma, RealParameter origin) throws Exception {
-        initByName("n_S0", nSO, "beta", beta, "gamma", gamma, "origin", origin);
+    public StochasticSIR(RealParameter nSO, RealParameter beta, RealParameter gamma, RealParameter origin, int integrationStepCount, int numSamplesFromTrajectory) throws Exception {
+        initByName("n_S0", nSO, "beta", beta, "gamma", gamma, "origin", origin, "integrationStepCount", integrationStepCount, "numSamplesFromTrajectory", numSamplesFromTrajectory);
     }
 
     public boolean simulateStochasticTrajectory() {
@@ -52,6 +52,7 @@ public class StochasticSIR extends VolzSIR {
         NStraj.clear();
         NItraj.clear();
         effectivePopSizeTraj.clear();
+        intensityTraj.clear();
 
         totalItime = 0.0;
 
@@ -123,7 +124,6 @@ public class StochasticSIR extends VolzSIR {
         Collections.reverse(effectivePopSizeTraj);
 
         // Estimate intensity on integration lattice:
-        intensityTraj.clear();
 
         double intensity = 0.0;
         intensityTraj.add(intensity);
