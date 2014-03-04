@@ -102,8 +102,7 @@ simSIRTrajCondTL <- function(beta, gamma, S0, T, k, steps=1000) {
 
 getCoalescentTreeDensity <- function(tree, beta, gamma, S0, origin, Ntraj=1000) {
 
-    logDensity <- 0
-    logDensitySq <- 0
+    logDensity <- rep(0,Ntraj)
 
     treeEvents <- getNodeHeights(tree)
 
@@ -118,32 +117,37 @@ getCoalescentTreeDensity <- function(tree, beta, gamma, S0, origin, Ntraj=1000) 
         Ivec <- rev(traj$I)
         tvec <- origin - rev(traj$t)
         
-        trajIdx <- 1
+        tidx <- 1
         t <- 0
 
         for (idx in 1:length(treeEvents$heights)) {
-            while (treeEvents$heights[idx]>tvec[trajIdx]) {
-                rate <- choose(treeEvents$lineages[idx],2)*2*beta*Svec[trajIdx]/Ivec[trajIdx]
-                thisLogDensity <- thisLogDensity + -(tvec[trajIdx]-t)*rate
-                t <- tvec[trajIdx]
-                trajIdx <- trajIdx + 1
+            while (treeEvents$heights[idx]>tvec[tidx]) {
+                rate <- choose(treeEvents$lineages[idx],2)*2*beta*Svec[tidx]/Ivec[tidx]
+                thisLogDensity <- thisLogDensity + -(tvec[tidx]-t)*rate
+                t <- tvec[tidx]
+                tidx <- tidx + 1
             }
 
-            rate <- choose(treeEvents$lineages[idx],2)*2*beta*Svec[trajIdx]/Ivec[trajIdx]
+            rate <- choose(treeEvents$lineages[idx],2)*2*beta*Svec[tidx]/Ivec[tidx]
             thisLogDensity <- thisLogDensity + -(treeEvents$heights[idx]-t)*rate
-            thisLogDensity <- thisLogDensity + log(2*beta*Svec[trajIdx]/Ivec[trajIdx])
+            thisLogDensity <- thisLogDensity + log(2*beta*Svec[tidx]/Ivec[tidx])
 
             t <- treeEvents$heights[idx]
         }
 
-        logDensity <- logDensity + thisLogDensity
-        logDensitySq <- logDensitySq + thisLogDensity^2
+        logDensity[trajIdx] <- thisLogDensity
     }
 
+    # Calculate log of mean of densities
+    
+    maxLogDensity <- max(logDensity)
+
+    logDensityShifted <- logDensity - maxLogDensity
+    meanScaledDensity <- mean(exp(logDensityShifted))
+
     res <- list()
-    res$mean <- logDensity/Ntraj
-    res$sd <- sqrt(logDensitySq/Ntraj - res$mean^2)
-    res$SEM <- res$sd/sqrt(Ntraj)
+    res$mean <- log(meanScaledDensity) + maxLogDensity
+    res$logDensity <- logDensity
 
     return (res)
 }
@@ -158,18 +162,17 @@ origin <- 47.1834399026
 
 tree <- read.tree('VolzSIRgamma_truth.tree')
 
-gammaVec <- seq(.1,.5,by=.05)
-ll <- rep(0, length(gammaVec))
-llsd <- rep(0, length(gammaVec))
-llSEM <- rep(0, length(gammaVec))
+gammaVec <- seq(.1,.7,by=.05)
+llmean <- rep(0, length(gammaVec))
+llres <- list()
 
-Ntraj <- 100
+
+Ntraj <- 500
 
 for (i in 1:length(gammaVec)) {
     res <- getCoalescentTreeDensity(tree, beta, gammaVec[i], S0, origin, Ntraj)
     ll[i] <- res$mean
-    llsd[i] <- res$sd
-    llSEM[i] <- res$SEM
+    llres[[i]] <- res
 }
 
 
@@ -181,8 +184,8 @@ plot(gammaVec, ll, 'o',
      ylab='Log likelihood',
      main=paste('Log likelihoods from simulated tree (',Ntraj,' trajectories)',sep=''))
 lines(c(0.3,0.3), c(-1e10,1e10), lty=2, col='blue', lwd=2)
-lines(gammaVec, ll+llSEM*2, lty=2)
-lines(gammaVec, ll-llSEM*2, lty=2)
-legend('bottomleft', inset=.05, c('Truth', '+/- 2*SEM'), lty=2, lwd=c(2,1), col=c('blue', 'black'))
+#lines(gammaVec, ll+llSEM*2, lty=2)
+#lines(gammaVec, ll-llSEM*2, lty=2)
+legend('bottomleft', inset=.05, c('Truth'), lty=2, lwd=2, col='blue')
 
 dev.off()
