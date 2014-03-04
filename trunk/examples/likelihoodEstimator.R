@@ -131,7 +131,7 @@ simSIRTraj <- function(beta, gamma, S0, T) {
 
 
 # Stochastic likelihood estimate using a number of simulated SIR epidemics
-getCoalescentTreeDensity <- function(tree, beta, gamma, S0, origin, Ntraj=1000) {
+getCoalescentTreeDensity <- function(tree, beta, gamma, S0, origin, Ntraj=1000, Nensembles=10) {
 
     logDensity <- rep(0,Ntraj)
 
@@ -198,15 +198,8 @@ getCoalescentTreeDensity <- function(tree, beta, gamma, S0, origin, Ntraj=1000) 
     logDensityShifted <- logDensity - maxLogDensity
     scaledDensities <- exp(logDensityShifted)
     meanScaledDensity <- mean(scaledDensities)
-    quantiles <- quantile(scaledDensities, probs=c(0.025, 0.975))
 
-    res <- list()
-    res$mean <- log(meanScaledDensity) + maxLogDensity
-    res$lower <- log(quantiles[1]) + maxLogDensity
-    res$upper <- log(quantiles[1]) + maxLogDensity    
-    res$logDensity <- logDensity
-
-    return (res)
+    return(log(meanScaledDensity) + maxLogDensity)
 }
 
 
@@ -220,19 +213,35 @@ origin <- 12.7808530307
 
 tree <- read.tree('VolzSIRgamma_truth.tree')
 
+gammaVec <- seq(.1,.7,by=.05)
+
 # Estimate STOCHASTIC coalescent likelihoods for different gammas
 
-gammaVec <- seq(.1,.7,by=.05)
-llmean <- rep(0, length(gammaVec))
-llres <- list()
-
 Ntraj <- 1000
+Nensemb <- 10
+
+llensemb <- list()
+for (e in 1:Nensemb)
+    llensemb[[e]] <- rep(0,length(gammaVec))
 
 for (i in 1:length(gammaVec)) {
-    res <- getCoalescentTreeDensity(tree, beta, gammaVec[i], S0, origin, Ntraj)
-    llmean[i] <- res$mean
-    llres[[i]] <- res
+    for (e in 1:Nensemb) {
+        llensemb[[e]][i] <- getCoalescentTreeDensity(tree, beta, gammaVec[i], S0, origin, Ntraj)
+    }
 }
+
+llmean <- rep(0,length(gammaVec))
+llsd <- rep(0, length(gammaVec))
+for (i in 1:length(gammaVec)) {
+    thisEnsemble <- rep(0, Nensemb)
+    for (e in 1:Nensemb) {
+        thisEnsemble[e] <- llensemb[[e]][i]
+    }
+    #llmean[i] <- log(mean(exp(thisEnsemble-max(thisEnsemble)))) + max(thisEnsemble)
+    llmean[i] <- mean(thisEnsemble)
+    llsd[i] <- sd(thisEnsemble)
+}
+
 
 # Estimate DETERMINISTIC coalescent likelihoods for different gammas
 
@@ -243,9 +252,10 @@ for (i in 1:length(gammaVecDet)) {
 }
 
 # Load in Java code results for same tree:
-df10000 <- read.table('alex_likelihood10000.txt')
-df1000 <- read.table('alex_likelihood1000.txt')
-df100 <- read.table('alex_likelihood100.txt')
+df <- read.table('likelihoodCurveForStochasticSIR_1001.txt', header=T)
+javaGamma <- df$gamma
+javaLogP <- df$logP
+javaSD <- apply(df[,3:12], 1, sd)
 
 # Create figure
 pdf('gammaLikelihoodFromR.pdf', width=7, height=5)
@@ -253,12 +263,19 @@ pdf('gammaLikelihoodFromR.pdf', width=7, height=5)
 plot(gammaVec, llmean, 'o', ylim=c(-440,-400),
      xlab=expression(gamma),
      ylab='Log likelihood',
-     main=paste('Log likelihoods from simulated tree (',Ntraj,' full trajectories)',sep=''),
+     main='Log likelihoods from simulated tree',
      col='blue')
-lines(df10000[[1]], df10000[[3]], 'o', col='red')
+lines(gammaVec, llmean+2*llsd, lty=2, col='blue')
+lines(gammaVec, llmean-2*llsd, lty=2, col='blue')
+
+lines(javaGamma, javaLogP, 'o', col='red')
+lines(javaGamma, javaLogP+2*javaSD, lty=2, col='red')
+lines(javaGamma, javaLogP-2*javaSD, lty=2, col='red')
+
 lines(gammaVecDet, lldet, 'o', col='purple')
              
 lines(c(0.3,0.3), c(-1e10,1e10), lty=2, col='grey', lwd=2)
 legend('bottomright', inset=.05, c('R','Java (10000)','R (det.)', 'Truth'), lty=c(1,1,1,2), pch=c(1,1,1,NA), lwd=c(1,1,1,2), col=c('blue','red','purple','grey'))
+#legend('bottomright', inset=.05, c('R','Java (10000)', '+/- 2*SD', 'Truth'), lty=c(1,1,2,2), pch=c(1,1,NA,NA), lwd=c(1,1,1,2), col=c('blue','red','black','grey'))
 
 dev.off()
