@@ -167,25 +167,34 @@ llmean <- rep(0, length(gammaVec))
 llres <- list()
 
 
-Ntraj <- 500
+Ntraj <- 100
 
 for (i in 1:length(gammaVec)) {
     res <- getCoalescentTreeDensity(tree, beta, gammaVec[i], S0, origin, Ntraj)
-    ll[i] <- res$mean
+    llmean[i] <- res$mean
     llres[[i]] <- res
 }
-
 
 # Create figure
 pdf('gammaLikelihoodFromR.pdf', width=7, height=5)
 
-plot(gammaVec, ll, 'o',
+plot(gammaVec, llmean, 'o',
      xlab=expression(gamma),
      ylab='Log likelihood',
      main=paste('Log likelihoods from simulated tree (',Ntraj,' trajectories)',sep=''))
 lines(c(0.3,0.3), c(-1e10,1e10), lty=2, col='blue', lwd=2)
 #lines(gammaVec, ll+llSEM*2, lty=2)
 #lines(gammaVec, ll-llSEM*2, lty=2)
-legend('bottomleft', inset=.05, c('Truth'), lty=2, lwd=2, col='blue')
+legend('bottomright', inset=.05, c('Truth'), lty=2, lwd=2, col='blue')
 
 dev.off()
+
+# Non-zero scaled density counts
+nzc <- c()
+scaledll <- c()
+for (i in 1:length(llres)) {
+    maxLogDensity <- max(llres[[i]]$logDensity)
+    scaledLogDensity <- llres[[i]]$logDensity - maxLogDensity
+    nzc[i] <- sum(exp(scaledLogDensity)>0)
+    scaledll[i] <- log(mean(exp(scaledLogDensity))) + maxLogDensity
+}
