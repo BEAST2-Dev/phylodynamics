@@ -46,57 +46,6 @@ simSIRTraj <- function(beta, gamma, S0, T) {
     return(res)
 }
 
-simSIRTrajCond <- function(beta, gamma, S0, T, k) {
-
-    while (TRUE) {
-        res <- simSIRTraj(beta, gamma, S0, T)
-        if (tail(res$I,n=1)>=k)
-            return(res)
-    }
-}
-
-simSIRTrajTL <- function(beta, gamma, S0, T, steps=1000) {
-
-    dt <- T/(steps-1)
-    
-    t <- seq(0, T, length.out=steps)
-    S <- S0
-    I <- 1
-    
-    for (tidx in 2:steps) {
-        ainfect <- beta*S[tidx-1]*I[tidx-1]
-        aremove <- gamma*I[tidx-1]
-
-        ninfect <- rpois(1, ainfect*dt)
-        nremove <- rpois(1, aremove*dt)
-
-        S[tidx] <- S[tidx-1] - ninfect
-        I[tidx] <- I[tidx-1] + ninfect - nremove
-
-        if (S[tidx]<0)
-            S[tidx] <- 0 # hack to avoid -ve pops due to finite time-step errors
-        
-        if (I[tidx]<0)
-            I[tidx] <- 0 # hack to avoid -ve pops due to finite time-step errors
-    }
-
-    res <- list()
-    res$t <- t
-    res$S <- S
-    res$I <- I
-
-    return(res)
-}
-
-simSIRTrajCondTL <- function(beta, gamma, S0, T, k, steps=1000) {
-
-    while (TRUE) {
-        res <- simSIRTrajTL(beta, gamma, S0, T, steps)
-        if (tail(res$I,n=1)>=k)
-            return(res)
-    }
-}
-
 
 # Likelihood estimate
 
@@ -106,12 +55,23 @@ getCoalescentTreeDensity <- function(tree, beta, gamma, S0, origin, Ntraj=1000) 
 
     treeEvents <- getNodeHeights(tree)
 
-    for (trajIdx in 1:Ntraj) {
-        cat(paste("beta:",beta,"gamma:",gamma,"S0:",S0,"origin:",origin,"Trajectory",trajIdx,"of",Ntraj,"\n"))
+    trajIdx <- 0
+    goodTrajIdx <- 0
+    while (goodTrajIdx<Ntraj) {
+        trajIdx <- trajIdx + 1
+        cat(paste("beta:",beta,"gamma:",gamma,"S0:",S0,"origin:",origin,"Trajectory",goodTrajIdx,"of",Ntraj,"\n"))
 
         thisLogDensity <- 0
 
-        traj <- simSIRTrajCond(beta, gamma, S0, origin, 1)
+        traj <- simSIRTraj(beta, gamma, S0, origin)
+
+        # Check for trajectories shorter than tree
+        if (traj$I[length(traj$I)]==0) {
+            logDensity[trajIdx] <- -Inf
+            next
+        } else {
+            goodTrajIdx <- goodTrajIdx + 1
+        }
 
         Svec <- rev(traj$S)
         Ivec <- rev(traj$I)
@@ -120,17 +80,27 @@ getCoalescentTreeDensity <- function(tree, beta, gamma, S0, origin, Ntraj=1000) 
         tidx <- 1
         t <- 0
 
-        for (idx in 1:length(treeEvents$heights)) {
+        for (idx in 2:length(treeEvents$heights)) {
             while (treeEvents$heights[idx]>tvec[tidx]) {
-                rate <- choose(treeEvents$lineages[idx],2)*2*beta*Svec[tidx]/Ivec[tidx]
-                thisLogDensity <- thisLogDensity + -(tvec[tidx]-t)*rate
+                
+                rate <- 2*beta*Svec[tidx]/Ivec[tidx]
+
+                # Waiting time contribution
+                thisLogDensity <- thisLogDensity + -(tvec[tidx]-t)*choose(treeEvents$lineages[idx-1],2)*rate
+                
                 t <- tvec[tidx]
                 tidx <- tidx + 1
             }
 
-            rate <- choose(treeEvents$lineages[idx],2)*2*beta*Svec[tidx]/Ivec[tidx]
-            thisLogDensity <- thisLogDensity + -(treeEvents$heights[idx]-t)*rate
-            thisLogDensity <- thisLogDensity + log(2*beta*Svec[tidx]/Ivec[tidx])
+            rate <- 2*beta*Svec[tidx]/Ivec[tidx]
+
+            # Waiting time contribution
+            thisLogDensity <- thisLogDensity +
+                -(treeEvents$heights[idx]-t)*choose(treeEvents$lineages[idx-1],2)*rate
+
+            # Event time contribution (only if coalescence)
+            if (treeEvents$lineages[idx]<treeEvents$lineages[idx-1])
+                thisLogDensity <- thisLogDensity + log(rate)
 
             t <- treeEvents$heights[idx]
         }
@@ -143,10 +113,14 @@ getCoalescentTreeDensity <- function(tree, beta, gamma, S0, origin, Ntraj=1000) 
     maxLogDensity <- max(logDensity)
 
     logDensityShifted <- logDensity - maxLogDensity
-    meanScaledDensity <- mean(exp(logDensityShifted))
+    scaledDensities <- exp(logDensityShifted)
+    meanScaledDensity <- mean(scaledDensities)
+    quantiles <- quantile(scaledDensities, probs=c(0.025, 0.975))
 
     res <- list()
     res$mean <- log(meanScaledDensity) + maxLogDensity
+    res$lower <- log(quantiles[1]) + maxLogDensity
+    res$upper <- log(quantiles[1]) + maxLogDensity    
     res$logDensity <- logDensity
 
     return (res)
@@ -158,7 +132,7 @@ getCoalescentTreeDensity <- function(tree, beta, gamma, S0, origin, Ntraj=1000) 
 gamma <- 0.3
 beta <- 0.00075
 S0 <- 999
-origin <- 47.1834399026
+origin <- 12.7808530307
 
 tree <- read.tree('VolzSIRgamma_truth.tree')
 
@@ -166,8 +140,7 @@ gammaVec <- seq(.1,.7,by=.05)
 llmean <- rep(0, length(gammaVec))
 llres <- list()
 
-
-Ntraj <- 100
+Ntraj <- 1000
 
 for (i in 1:length(gammaVec)) {
     res <- getCoalescentTreeDensity(tree, beta, gammaVec[i], S0, origin, Ntraj)
@@ -175,26 +148,25 @@ for (i in 1:length(gammaVec)) {
     llres[[i]] <- res
 }
 
+# Load in Java code results for same tree:
+df10000 <- read.table('alex_likelihood10000.txt')
+df1000 <- read.table('alex_likelihood1000.txt')
+df100 <- read.table('alex_likelihood100.txt')
+
 # Create figure
 pdf('gammaLikelihoodFromR.pdf', width=7, height=5)
 
 plot(gammaVec, llmean, 'o',
      xlab=expression(gamma),
      ylab='Log likelihood',
-     main=paste('Log likelihoods from simulated tree (',Ntraj,' trajectories)',sep=''))
-lines(c(0.3,0.3), c(-1e10,1e10), lty=2, col='blue', lwd=2)
+     main=paste('Log likelihoods from simulated tree (',Ntraj,' full trajectories)',sep=''),
+     col='blue')
+lines(df10000[[1]], df10000[[3]], 'o', col='red')
+#lines(df1000[[1]], df1000[[3]], 'o', col='red')
+#lines(df100[[1]], df100[[3]], 'o', col='red')
+lines(c(0.3,0.3), c(-1e10,1e10), lty=2, col='grey', lwd=2)
 #lines(gammaVec, ll+llSEM*2, lty=2)
 #lines(gammaVec, ll-llSEM*2, lty=2)
-legend('bottomright', inset=.05, c('Truth'), lty=2, lwd=2, col='blue')
+legend('bottomright', inset=.05, c('R','Java (10000)','Truth'), lty=c(1,1,2), pch=c(1,1,NA), lwd=c(1,1,2), col=c('blue','red','grey'))
 
 dev.off()
-
-# Non-zero scaled density counts
-nzc <- c()
-scaledll <- c()
-for (i in 1:length(llres)) {
-    maxLogDensity <- max(llres[[i]]$logDensity)
-    scaledLogDensity <- llres[[i]]$logDensity - maxLogDensity
-    nzc[i] <- sum(exp(scaledLogDensity)>0)
-    scaledll[i] <- log(mean(exp(scaledLogDensity))) + maxLogDensity
-}
