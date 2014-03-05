@@ -21,11 +21,8 @@ import java.util.List;
 public class StochasticSIR extends VolzSIR {
 
     public Input<Integer> numSamplesFromTrajectory = new Input<Integer>("numSamplesFromTrajectory",
-            "number of samples taken from trajectory to use in piecewise-constant coalescent pop-size function " +
+            "number of samples taken from the trajectory to use in the piecewise-constant coalescent pop-size function " +
                     "(defaults to 100). integrationStepCount should be an integer multiple of this.", 100);
-    
-    public double totalItime = 0;
-    double storedTotalItime = 0;
 
     public StochasticSIR() {
     }
@@ -54,8 +51,6 @@ public class StochasticSIR extends VolzSIR {
         NItraj.clear();
         effectivePopSizeTraj.clear();
         intensityTraj.clear();
-
-        totalItime = 0.0;
 
         int Nt = integrationStepCount.get();
         int Nsamples = numSamplesFromTrajectory.get();
@@ -145,7 +140,6 @@ public class StochasticSIR extends VolzSIR {
     @Override
     public void store() {
         super.store();
-        storedTotalItime = totalItime;
         dirty = true;
     }
 
@@ -154,11 +148,6 @@ public class StochasticSIR extends VolzSIR {
 
         // logs R0
         super.log(nSample, out);
-
-        // now log the integral of infecteds
-
-        out.format("%g\t", totalItime);
-
     }
 
     @Override
@@ -166,14 +155,11 @@ public class StochasticSIR extends VolzSIR {
 
         // inits R0
         super.init(out);
-
-        out.print("totalItime\t");
     }
 
     @Override
     public void restore() {
         super.restore();
-        totalItime = storedTotalItime;
         dirty = true;
     }
 
