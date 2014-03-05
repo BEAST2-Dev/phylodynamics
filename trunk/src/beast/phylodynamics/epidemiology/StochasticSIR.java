@@ -24,6 +24,8 @@ public class StochasticSIR extends VolzSIR {
             "number of samples taken from the trajectory to use in the piecewise-constant coalescent pop-size function " +
                     "(defaults to 100). integrationStepCount should be an integer multiple of this.", 100);
 
+    public Input<Boolean> minusOne = new Input<Boolean>("minusOne", "true if (I-1) should be used in the denominator of the coalescent rate instead of I. Default is false.", false);
+
     public StochasticSIR() {
     }
 
@@ -54,6 +56,8 @@ public class StochasticSIR extends VolzSIR {
 
         int Nt = integrationStepCount.get();
         int Nsamples = numSamplesFromTrajectory.get();
+
+        boolean minus1 = minusOne.get();
 
         int Ntraj = 1;
         double T = originParameter.get().getValue();
@@ -105,13 +109,14 @@ public class StochasticSIR extends VolzSIR {
 
                 SEIRState state = traj.get(j);
 
-                if (state.I < 1.0 || state.S < 0.0) {
+                if (state.I < (minus1 ? 2 : 1) || state.S < 0) {
                     // trajectory failed to reach big T
                     return true;
                 }
                 NStraj.add(state.S);
                 NItraj.add(state.I);
-                effectivePopSizeTraj.add((state.I - 1) / (2.0 * beta * state.S));
+
+                effectivePopSizeTraj.add((minus1 ? state.I - 1 : state.I) / (2.0 * beta * state.S));
 
             }
         }
@@ -162,5 +167,4 @@ public class StochasticSIR extends VolzSIR {
         super.restore();
         dirty = true;
     }
-
 }
