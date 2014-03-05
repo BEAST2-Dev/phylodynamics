@@ -8,7 +8,8 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 
 /**
- * @author Alex
+ * @author Alex Popinga
+ * @author Alexei Drummond
  */
 public class LikelihoodCurveForStochasticSIR {
 
@@ -33,12 +34,16 @@ public class LikelihoodCurveForStochasticSIR {
         String outfileName = args.length > 0 ? args[0] : "likelihoodCurveForStochasticSIR_" + Nt + ".txt";
         System.out.println("Writing output to '" + outfileName + "'");
 
-        // read second argument as the ensemble size if present, otherwise default to 10000
-        int ensembleSizeForLikelihoodCalculation = args.length > 1 ? Integer.parseInt(args[1]) : 100000;
-        System.out.println("Using ensemble size of " + ensembleSizeForLikelihoodCalculation);
+        // read second argument as the minimum ensemble size if present, otherwise default to 1000
+        int minEnsembleSize = args.length > 1 ? Integer.parseInt(args[1]) : 1000;
+        System.out.println("Using minimum ensemble size of " + minEnsembleSize);
+
+        // read second argument as the minimum number of successful trajectories if present, otherwise default to 1000
+        int minTrajSuccess = args.length > 2 ? Integer.parseInt(args[2]) : 1000;
+        System.out.println("Using minimum number of successful trajectories of " + minTrajSuccess);
 
         // read third argument as number of ensembles size if present, otherwise default to 10
-        int numberEnsemblesPerStep = args.length > 2 ? Integer.parseInt(args[2]) : 10;
+        int numberEnsemblesPerStep = args.length > 3 ? Integer.parseInt(args[3]) : 10;
         System.out.println("Number of ensembles per step " + numberEnsemblesPerStep);
 
         PrintWriter writer = new PrintWriter(new FileWriter(outfileName));
@@ -50,6 +55,11 @@ public class LikelihoodCurveForStochasticSIR {
             writer.print("\tensemble_" + i);
             System.out.print("\tensemble_" + i);
         }
+        for (int i = 0; i < numberEnsemblesPerStep; i++) {
+            writer.print("\tensembleSize_" + i);
+            System.out.print("\tensembleSize_" + i);
+        }
+
         writer.println();
         System.out.println();
 
@@ -61,14 +71,16 @@ public class LikelihoodCurveForStochasticSIR {
             System.out.print(g);
 
             double[] logP = new double[numberEnsemblesPerStep];
+            int[] ensembleSize = new int[numberEnsemblesPerStep];
             double maxLogP = Double.NEGATIVE_INFINITY;
             for (int i = 0; i < numberEnsemblesPerStep; i++) {
                 StochasticSIR ssir = new StochasticSIR(n_S0, beta, gamma, origin, Nt, Nt);
                 StochasticSIRPopulationFunction ssirPopFun = new StochasticSIRPopulationFunction(ssir);
 
-                StochasticCoalescent c = new StochasticCoalescent(intervals, ssirPopFun, ensembleSizeForLikelihoodCalculation);
+                StochasticCoalescent c = new StochasticCoalescent(intervals, ssirPopFun, minEnsembleSize, minTrajSuccess);
 
                 logP[i] = c.calculateLogP();
+                ensembleSize[i] = c.getLastEnsembleSize();
                 if (logP[i] > maxLogP) maxLogP = logP[i];
             }
 
@@ -83,6 +95,11 @@ public class LikelihoodCurveForStochasticSIR {
             for (int i = 0; i < numberEnsemblesPerStep; i++) {
                 writer.print("\t" + logP[i]);
                 System.out.print("\t" + logP[i]);
+            }
+
+            for (int i = 0; i < numberEnsemblesPerStep; i++) {
+                writer.print("\t" + ensembleSize[i]);
+                System.out.print("\t" + ensembleSize[i]);
             }
 
             writer.println();

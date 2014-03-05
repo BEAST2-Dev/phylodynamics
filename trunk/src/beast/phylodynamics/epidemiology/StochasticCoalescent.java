@@ -28,18 +28,29 @@ import beast.evolution.tree.coalescent.IntervalType;
 public class StochasticCoalescent extends TreeDistribution {
 
     public Input<PopulationFunction> popSizeInput = new Input<PopulationFunction>("populationModel", "A population size model", Validate.REQUIRED);
-    public Input<Integer> REP = new Input<Integer>("REP", "Average probabilities, i.e. a value of 1 means no averaging is done, (defaults 1).", 1);
-    public Input<Boolean> allowNaN = new Input<Boolean>("allowNaN", "Indicate whether to allow NaN likelihoods (defaults false).", false);
+    public Input<Integer> minimumNumberOfTrajectories = new Input<Integer>("minTraj", "The minimum number of trajectories over which to average the coalescent probability, i.e. a value of 1 means one trajectory is used, (defaults 1).", 1);
+    public Input<Integer> minimumNumberOfSuccesses = new Input<Integer>("minTrajSuccess",
+            "minimum number of trajectories that must span the entire tree. (i.e. default is 1)", 1);
 
     TreeIntervals treeIntervals;
 
-    public int REPS = 1;
-    public boolean allowNaNs = false;
+    public int minTraj = 1;
+    public int minTrajSuccess = 1;
+
+    private int lastEnsembleSize = 0;
 
     public StochasticCoalescent() {}
 
-    public StochasticCoalescent(TreeIntervals treeIntervals, PopulationFunction populationModel, int ensembleSize) throws Exception {
-        initByName("treeIntervals", treeIntervals, "populationModel", populationModel, "REP", ensembleSize);
+    /**
+     *
+     * @param treeIntervals the tree intervals to calculate coalescent probability for
+     * @param populationModel the population function
+     * @param minEnsembleSize the minimum number of trajectories to simulation from the population function
+     * @param minSuccessfulTraj the minimum number of "successful" trajectories, i.e that have population sizes that are strictly positive over the whole tree.
+     * @throws Exception
+     */
+    public StochasticCoalescent(TreeIntervals treeIntervals, PopulationFunction populationModel, int minEnsembleSize, int minSuccessfulTraj) throws Exception {
+        initByName("treeIntervals", treeIntervals, "populationModel", populationModel, "minTraj", minEnsembleSize, "minTrajSuccess", minSuccessfulTraj);
     }
 
     @Override
@@ -49,12 +60,17 @@ public class StochasticCoalescent extends TreeDistribution {
             throw new Exception("Expected treeIntervals to be specified");
         }
 
-        REPS = REP.get();
-        allowNaNs = allowNaN.get();
-
+        minTraj = minimumNumberOfTrajectories.get();
+        minTrajSuccess = minimumNumberOfSuccesses.get();
         calculateLogP();
     }
 
+    /**
+     * @return the size of the ensemble used to calculate the last probability density (i.e. last call to calculateLogP).
+     */
+    public int getLastEnsembleSize() {
+        return lastEnsembleSize;
+    }
 
     /**
      * do the actual calculation *
@@ -71,7 +87,9 @@ public class StochasticCoalescent extends TreeDistribution {
 
             ArrayList<Double> logps = new ArrayList<Double>();
 
-            for (int i = 0; i < REPS; i++) {
+            int numTraj = 0;
+
+            while (numTraj < minTraj || logps.size() < minTrajSuccess) {
                 boolean fail = scSIR.simulateStochasticTrajectory();
 
                 double logp = Double.NEGATIVE_INFINITY;
@@ -79,29 +97,31 @@ public class StochasticCoalescent extends TreeDistribution {
                     logp = calculateLogLikelihood(treeIntervals, popSizeInput.get());
                 }
 
-                if (allowNaNs || (!Double.isNaN(logp) && !Double.isInfinite(logp))) {
+                if (!Double.isNaN(logp) && !Double.isInfinite(logp)) {
                     logps.add(logp);
                 }
+                numTraj += 1;
             }
+            lastEnsembleSize = numTraj;
+
             if (logps.size() == 0) return Double.NEGATIVE_INFINITY;
 
             // find maximum likelihood, make it the 'new zero'
             double ML = Collections.max(logps);
-            double newML = 0.0 - ML;
 
             Collections.sort(logps);
             double sum = 0.0;
 
             // shift array elements according to newML and exponentiate all the things
             for (int j = 0; j < logps.size(); j++) {
-                logps.set(j, Math.exp(logps.get(j) + newML));
+                logps.set(j, Math.exp(logps.get(j) - ML));
 
                 double logp = logps.get(j);
                 sum += logp;
             }
 
             // average probability
-            double logAve = Math.log(sum/REPS);
+            double logAve = Math.log(sum/lastEnsembleSize);
 
             logP = logAve + ML;
 
