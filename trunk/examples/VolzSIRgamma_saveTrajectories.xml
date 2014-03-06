@@ -30,7 +30,7 @@
     <run spec="MCMC" id="mcmc" chainLength="10000000" noLikelihoodCheck="true">
 
         <distribution spec="CompoundDistribution" id="posterior">
-            <distribution id="coalescent" spec="StochasticCoalescent" allowNaN="false" REP="30">
+            <distribution id="coalescent" spec="StochasticCoalescent" minTraj="30" minTrajSuccess="3">
                 <treeIntervals spec='TreeIntervals' id='treeIntervals'>
                     <tree idref="tree"/>
                 </treeIntervals>
