@@ -109,7 +109,7 @@ public class StochasticSIR extends VolzSIR {
 
                 SEIRState state = traj.get(j);
 
-                if (state.I < (minus1 ? 2 : 1) || state.S < 0) {
+                if (state.I < 1 || state.S < 0) {
                     // trajectory failed to reach big T
                     return true;
                 }

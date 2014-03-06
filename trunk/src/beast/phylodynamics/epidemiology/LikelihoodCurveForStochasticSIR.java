@@ -35,11 +35,11 @@ public class LikelihoodCurveForStochasticSIR {
         System.out.println("Writing output to '" + outfileName + "'");
 
         // read second argument as the minimum ensemble size if present, otherwise default to 1000
-        int minEnsembleSize = args.length > 1 ? Integer.parseInt(args[1]) : 1000;
+        int minEnsembleSize = args.length > 1 ? Integer.parseInt(args[1]) : 10000;
         System.out.println("Using minimum ensemble size of " + minEnsembleSize);
 
         // read second argument as the minimum number of successful trajectories if present, otherwise default to 1000
-        int minTrajSuccess = args.length > 2 ? Integer.parseInt(args[2]) : 1000;
+        int minTrajSuccess = args.length > 2 ? Integer.parseInt(args[2]) : 10000;
         System.out.println("Using minimum number of successful trajectories of " + minTrajSuccess);
 
         // read third argument as number of ensembles size if present, otherwise default to 10
@@ -63,6 +63,7 @@ public class LikelihoodCurveForStochasticSIR {
         writer.println();
         System.out.println();
 
+        long startTime = System.currentTimeMillis();
         for (double g = 0.10; g <= 0.80; g += 0.025) {
 
             RealParameter gamma = new RealParameter(new Double[]{g});
@@ -107,5 +108,8 @@ public class LikelihoodCurveForStochasticSIR {
             writer.flush();
         }
         writer.close();
+        long totalTime = System.currentTimeMillis() - startTime;
+        System.out.println("Took " + totalTime/1000 + " seconds (" + (double)totalTime/60000.0 + " minutes).");
+
     }
 }
