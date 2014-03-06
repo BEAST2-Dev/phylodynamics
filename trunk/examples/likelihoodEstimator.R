@@ -40,50 +40,6 @@ deterministicSIR <- function(beta, gamma, S0, T, steps, maxIter=3) {
 }
 
 
-# Likelihood estimate from the deterministic solution
-getDeterministicCoalescentTreeDensity <- function(tree, beta, gamma, S0, origin, steps=1000) {
-
-    treeEvents <- getNodeHeights(tree)
-
-    logDensity <- 0
-
-    traj <- deterministicSIR(beta, gamma, S0, origin, steps)
-
-    Svec <- rev(traj$S)
-    Ivec <- rev(traj$I)
-    tvec <- origin - rev(traj$t)
-        
-    tidx <- 1
-    t <- 0
-
-    for (idx in 2:length(treeEvents$heights)) {
-        while (treeEvents$heights[idx]>tvec[tidx]) {
-                
-            rate <- 2*beta*Svec[tidx]/Ivec[tidx]
-
-            # Waiting time contribution
-            logDensity <- logDensity + -(tvec[tidx]-t)*choose(treeEvents$lineages[idx-1],2)*rate
-                
-            t <- tvec[tidx]
-            tidx <- tidx + 1
-        }
-
-        rate <- 2*beta*Svec[tidx]/Ivec[tidx]
-
-        # Waiting time contribution
-        logDensity <- logDensity +
-            -(treeEvents$heights[idx]-t)*choose(treeEvents$lineages[idx-1],2)*rate
-        
-        # Event time contribution (only if coalescence)
-        if (treeEvents$lineages[idx]<treeEvents$lineages[idx-1])
-            logDensity <- logDensity + log(rate)
-        
-        t <- treeEvents$heights[idx]
-    }
-
-    return (logDensity)
-}
-
 
 # Stochastic simulation of an SIR trajectory
 simSIRTraj <- function(beta, gamma, S0, T) {
@@ -129,9 +85,69 @@ simSIRTraj <- function(beta, gamma, S0, T) {
     return(res)
 }
 
+getEffectivePopSize <- function(beta,S,I) {
+    return ((I-1)/(2*beta*S))
+}
+
+# Calculate probability density of tree event sequence given trajectory
+getCoalescentTreeDensityForTraj <- function(treeEvents, traj, beta, origin) {
+
+    # Check for trajectories shorter than tree
+    if (traj$I[length(traj$I)]==0) {
+        return (-Inf)
+    }
+
+    logDensity <- 0
+    
+    Svec <- rev(traj$S)
+    Ivec <- rev(traj$I)
+    tvec <- origin - rev(traj$t)
+    
+    tidx <- 1
+    t <- 0
+    
+    for (idx in 2:length(treeEvents$heights)) {
+        while (treeEvents$heights[idx]>tvec[tidx]) {
+            
+            rate <- 1.0/getEffectivePopSize(beta, Svec[tidx], Ivec[tidx])
+            
+            # Waiting time contribution
+            logDensity <- logDensity + -(tvec[tidx]-t)*choose(treeEvents$lineages[idx-1],2)*rate
+            
+            t <- tvec[tidx]
+            tidx <- tidx + 1
+        }
+
+        rate <- 1.0/getEffectivePopSize(beta,Svec[tidx],Ivec[tidx])
+        
+        # Waiting time contribution
+        logDensity <- logDensity +
+            -(treeEvents$heights[idx]-t)*choose(treeEvents$lineages[idx-1],2)*rate
+        
+        # Event time contribution (only if coalescence)
+        if (treeEvents$lineages[idx]<treeEvents$lineages[idx-1])
+            logDensity <- logDensity + log(rate)
+        
+        t <- treeEvents$heights[idx]
+    }
+
+    return (logDensity)
+}
+
+
+# Likelihood estimate from the deterministic solution
+getDeterministicCoalescentTreeDensity <- function(tree, beta, gamma, S0, origin, steps=1000) {
+
+    treeEvents <- getNodeHeights(tree)
+    traj <- deterministicSIR(beta, gamma, S0, origin, steps)
+    logDensity <- getCoalescentTreeDensityForTraj(tree, traj, beta, gamma, origin)
+
+    return (logDensity)
+}
+
 
 # Stochastic likelihood estimate using a number of simulated SIR epidemics
-getCoalescentTreeDensity <- function(tree, beta, gamma, S0, origin, Ntraj=1000, Nensembles=10) {
+getStochasticCoalescentTreeDensity <- function(tree, beta, gamma, S0, origin, Ntraj=1000) {
 
     logDensity <- rep(0,Ntraj)
 
@@ -144,50 +160,15 @@ getCoalescentTreeDensity <- function(tree, beta, gamma, S0, origin, Ntraj=1000, 
         if (trajIdx%%100 == 0)
             cat(paste("beta:",beta,"gamma:",gamma,"S0:",S0,"origin:",origin,"Trajectory",goodTrajIdx,"of",Ntraj,"\n"))
 
-        thisLogDensity <- 0
-
         traj <- simSIRTraj(beta, gamma, S0, origin)
 
-        # Check for trajectories shorter than tree
-        if (traj$I[length(traj$I)]==0) {
-            logDensity[trajIdx] <- -Inf
-            next
-        } else {
+        thisLogDensity <- getCoalescentTreeDensityForTraj(treeEvents, traj, beta, gamma, origin)
+        
+        # Increment goodTrajIdx when trajectory encompasses tree
+        if (thisLogDensity>-Inf) {
             goodTrajIdx <- goodTrajIdx + 1
         }
-
-        Svec <- rev(traj$S)
-        Ivec <- rev(traj$I)
-        tvec <- origin - rev(traj$t)
         
-        tidx <- 1
-        t <- 0
-
-        for (idx in 2:length(treeEvents$heights)) {
-            while (treeEvents$heights[idx]>tvec[tidx]) {
-                
-                rate <- 2*beta*Svec[tidx]/Ivec[tidx]
-
-                # Waiting time contribution
-                thisLogDensity <- thisLogDensity + -(tvec[tidx]-t)*choose(treeEvents$lineages[idx-1],2)*rate
-                
-                t <- tvec[tidx]
-                tidx <- tidx + 1
-            }
-
-            rate <- 2*beta*Svec[tidx]/Ivec[tidx]
-
-            # Waiting time contribution
-            thisLogDensity <- thisLogDensity +
-                -(treeEvents$heights[idx]-t)*choose(treeEvents$lineages[idx-1],2)*rate
-
-            # Event time contribution (only if coalescence)
-            if (treeEvents$lineages[idx]<treeEvents$lineages[idx-1])
-                thisLogDensity <- thisLogDensity + log(rate)
-
-            t <- treeEvents$heights[idx]
-        }
-
         logDensity[trajIdx] <- thisLogDensity
     }
 
@@ -217,7 +198,12 @@ gammaVec <- seq(.1,.7,by=.05)
 
 # Estimate STOCHASTIC coalescent likelihoods for different gammas
 
-Ntraj <- 1000
+Ntraj <- 10000
+Nensemb <- 10
+
+llensemb <- list()
+for (e in 1:Nensemb)
+    llensemb[[e]] <- rep(0,length(gammaVec))
 Nensemb <- 10
 
 llensemb <- list()
@@ -251,16 +237,21 @@ for (i in 1:length(gammaVecDet)) {
     lldet[i] <- getDeterministicCoalescentTreeDensity(tree, beta, gammaVecDet[i], S0, origin)
 }
 
+#load(file='likelihoodResultsFromR10000.RData', verbose=T)
+
 # Load in Java code results for same tree:
-df <- read.table('likelihoodCurveForStochasticSIR_1001.txt', header=T)
+df <- read.table('likelihoodCurveForStochasticSIR_1001_M5000_N5000_S10.txt', header=T)
 javaGamma <- df$gamma
 javaLogP <- df$logP
 javaSD <- apply(df[,3:12], 1, sd)
 
+
+
+
 # Create figure
 pdf('gammaLikelihoodFromR.pdf', width=7, height=5)
 
-plot(gammaVec, llmean, 'o', ylim=c(-440,-400),
+plot(gammaVec, llmean, 'o', #ylim=c(-440,-400),
      xlab=expression(gamma),
      ylab='Log likelihood',
      main='Log likelihoods from simulated tree',
@@ -272,10 +263,11 @@ lines(javaGamma, javaLogP, 'o', col='red')
 lines(javaGamma, javaLogP+2*javaSD, lty=2, col='red')
 lines(javaGamma, javaLogP-2*javaSD, lty=2, col='red')
 
-lines(gammaVecDet, lldet, 'o', col='purple')
+#lines(gammaVecDet, lldet, 'o', col='purple')
              
 lines(c(0.3,0.3), c(-1e10,1e10), lty=2, col='grey', lwd=2)
-legend('bottomright', inset=.05, c('R','Java (10000)','R (det.)', 'Truth'), lty=c(1,1,1,2), pch=c(1,1,1,NA), lwd=c(1,1,1,2), col=c('blue','red','purple','grey'))
+#legend('bottomright', inset=.05, c('R','Java (10000)','R (det.)', 'Truth'), lty=c(1,1,1,2), pch=c(1,1,1,NA), lwd=c(1,1,1,2), col=c('blue','red','purple','grey'))
+legend('bottomright', inset=.05, c('R 10*(10^4+)','Java 10*(5*10^3+)', '+/- 2*SD', 'Truth'), lty=c(1,1,2,2), pch=c(1,1,NA,NA), lwd=c(1,1,1,2), col=c('blue','red','black','grey'))
 #legend('bottomright', inset=.05, c('R','Java (10000)', '+/- 2*SD', 'Truth'), lty=c(1,1,2,2), pch=c(1,1,NA,NA), lwd=c(1,1,1,2), col=c('blue','red','black','grey'))
 
 dev.off()
