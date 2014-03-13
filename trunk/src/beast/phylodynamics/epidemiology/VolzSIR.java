@@ -115,6 +115,17 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
     public abstract boolean simulateTrajectory(final double beta,
             final double gamma, final double NS0);
 
+    
+    /**
+     * Simulate trajectory using values of parameters found in Inputs.
+     * 
+     * @return true if the simulated epidemic continues for the entire
+     * interval, false otherwise.
+     */
+    public boolean simulateTrajectory() {
+        return simulateTrajectory(betaParameter.get().getValue(),
+                gammaParameter.get().getValue(), n_S_Parameter.get().getValue());
+    }
 
     /**
      * "Effective" population size for calculating coalescent likelihood

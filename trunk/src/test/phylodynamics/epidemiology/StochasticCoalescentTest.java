@@ -66,7 +66,7 @@ public class StochasticCoalescentTest {
         to be set to false, which doesn't happen unless a "good" trajectory
         is generated.
         */
-        while(!stochasticSIR.simulateStochasticTrajectory());
+        while(!stochasticSIR.simulateTrajectory());
         
         // Load in pre-generated trajectory from file
         List<Double> trajTime = new ArrayList<Double>();

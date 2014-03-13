@@ -38,11 +38,6 @@ public class DeterministicSIR extends VolzSIR {
         initByName("n_S0", nSO, "beta", beta, "gamma", gamma, "origin", origin);
     }
 
-    public boolean simulateDeterministicTrajectory() {
-        return simulateTrajectory(betaParameter.get().getValue(),
-                gammaParameter.get().getValue(), n_S_Parameter.get().getValue());
-    }
-
     /**
      * Simulate a deterministic trajectory using coalescent rate described by Volz (2012)
      *

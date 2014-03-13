@@ -34,7 +34,7 @@ public class StochasticSIRPopulationFunction extends PopulationFunction.Abstract
      * @return true if the stochastic simulation failed
      */
     public boolean simulateStochasticTrajectory() {
-        return stochasticSIR.get().simulateStochasticTrajectory();
+        return stochasticSIR.get().simulateTrajectory();
     }
 
     // Implementation of abstract methods
