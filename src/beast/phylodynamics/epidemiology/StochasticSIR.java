@@ -20,22 +20,31 @@ import java.util.List;
 
 public class StochasticSIR extends VolzSIR {
 
-    public Input<Integer> numSamplesFromTrajectory = new Input<Integer>("numSamplesFromTrajectory",
-            "number of samples taken from the trajectory to use in the piecewise-constant coalescent pop-size function " +
-                    "(defaults to 100). integrationStepCount should be an integer multiple of this.", 100);
+    public Input<Integer> numSamplesFromTrajectory = new Input<Integer>(
+            "numSamplesFromTrajectory",
+            "number of samples taken from the trajectory to use in the "
+                    + "piecewise-constant coalescent pop-size function "
+                    + "(defaults to 100). integrationStepCount should be "
+                    + "an integer multiple of this.", 100);
 
-    public Input<Boolean> minusOne = new Input<Boolean>("minusOne", "true if (I-1) should be used in the denominator of the coalescent rate instead of I. Default is false.", false);
+    public Input<Boolean> minusOne = new Input<Boolean>("minusOne",
+            "true if (I-1) should be used in the denominator of the coalescent "
+                    + "rate instead of I. Default is false.", false);
 
     public StochasticSIR() {
     }
 
-    public StochasticSIR(RealParameter nSO, RealParameter beta, RealParameter gamma, RealParameter origin, int integrationStepCount, int numSamplesFromTrajectory) throws Exception {
-        initByName("n_S0", nSO, "beta", beta, "gamma", gamma, "origin", origin, "integrationStepCount", integrationStepCount, "numSamplesFromTrajectory", numSamplesFromTrajectory);
-    }
-
-    public boolean simulateStochasticTrajectory() {
-        return simulateTrajectory(betaParameter.get().getValue(),
-                gammaParameter.get().getValue(), n_S_Parameter.get().getValue());
+    public StochasticSIR(RealParameter nSO,
+            RealParameter beta, RealParameter gamma,
+            RealParameter origin, int integrationStepCount,
+            int numSamplesFromTrajectory) throws Exception {
+        initByName(
+                "n_S0", nSO,
+                "beta", beta,
+                "gamma", gamma,
+                "origin", origin,
+                "integrationStepCount", integrationStepCount,
+                "numSamplesFromTrajectory", numSamplesFromTrajectory);
     }
 
     /**
@@ -63,7 +72,8 @@ public class StochasticSIR extends VolzSIR {
         double T = originParameter.get().getValue();
         double[] times = {T};
 
-        // USE SEIR_simulator to populate the following variables: NStraj, NItraj, effectivePopSizeTraj, intensityTraj
+        // USE SEIR_simulator to populate the following variables:
+        // NStraj, NItraj, effectivePopSizeTraj, intensityTraj
 
         SEIRState state0 = new SEIRState(
                 NS0,       // susceptibles
@@ -116,7 +126,8 @@ public class StochasticSIR extends VolzSIR {
                 NStraj.add(state.S);
                 NItraj.add(state.I);
 
-                effectivePopSizeTraj.add((minus1 ? state.I - 1 : state.I) / (2.0 * beta * state.S));
+                effectivePopSizeTraj.add(
+                        (minus1 ? state.I - 1 : state.I) / (2.0 * beta * state.S));
 
             }
         }
@@ -135,7 +146,8 @@ public class StochasticSIR extends VolzSIR {
         }
 
         // Start of integral is 0.5*dt from end of forward-time integration.
-        tIntensityTrajStart = originParameter.get().getValue() - dt * (effectivePopSizeTraj.size() - 1) - 0.5 * dt;
+        tIntensityTrajStart = originParameter.get().getValue()
+                - dt * (effectivePopSizeTraj.size() - 1) - 0.5 * dt;
 
         dirty = false;
 
