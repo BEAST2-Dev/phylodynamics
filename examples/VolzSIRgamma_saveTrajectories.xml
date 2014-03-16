@@ -35,8 +35,8 @@
                     <tree idref="tree"/>
                 </treeIntervals>
                 
-                <populationModel spec="StochasticSIRPopulationFunction" id='popFunc'>
-                    <stochasticSIR spec="StochasticSIR" id="volzSIR"
+                <populationModel spec="SIRPopulationFunction" id='popFunc'>
+                    <volzSIR spec="StochasticSIR" id="volzSIR"
 				   integrationStepCount='1001'
 				   numSamplesFromTrajectory='1001'
 				   logTrajectories="true">
@@ -44,7 +44,7 @@
                         <gamma idref="volz.gamma"/>
                         <n_S0 idref="volz.n_S0"/>
                         <origin idref="volz.origin"/>
-                    </stochasticSIR>
+                    </volzSIR>
                 </populationModel>
                 
             </distribution>

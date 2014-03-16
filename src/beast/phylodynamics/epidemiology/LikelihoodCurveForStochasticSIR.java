@@ -76,9 +76,9 @@ public class LikelihoodCurveForStochasticSIR {
             double maxLogP = Double.NEGATIVE_INFINITY;
             for (int i = 0; i < numberEnsemblesPerStep; i++) {
                 StochasticSIR ssir = new StochasticSIR(n_S0, beta, gamma, origin, Nt, Nt);
-                StochasticSIRPopulationFunction ssirPopFun = new StochasticSIRPopulationFunction(ssir);
+                SIRPopulationFunction sirPopFun = new SIRPopulationFunction(ssir);
 
-                StochasticCoalescent c = new StochasticCoalescent(intervals, ssirPopFun, minEnsembleSize, minTrajSuccess);
+                StochasticCoalescent c = new StochasticCoalescent(intervals, sirPopFun, minEnsembleSize, minTrajSuccess);
 
                 logP[i] = c.calculateLogP();
                 ensembleSize[i] = c.getLastEnsembleSize();

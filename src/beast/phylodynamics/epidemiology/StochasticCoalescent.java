@@ -27,7 +27,7 @@ import beast.evolution.tree.coalescent.IntervalType;
         "to unity is not calculated (partly, because we don't know how for sequentially sampled data).")
 public class StochasticCoalescent extends TreeDistribution {
 
-    public Input<PopulationFunction> popSizeInput = new Input<PopulationFunction>("populationModel", "A population size model", Validate.REQUIRED);
+    public Input<SIRPopulationFunction> popSizeInput = new Input<SIRPopulationFunction>("populationModel", "A population size model", Validate.REQUIRED);
     public Input<Integer> minimumNumberOfTrajectories = new Input<Integer>("minTraj", "The minimum number of trajectories over which to average the coalescent probability, i.e. a value of 1 means one trajectory is used, (defaults 1).", 1);
     public Input<Integer> minimumNumberOfSuccesses = new Input<Integer>("minTrajSuccess",
             "minimum number of trajectories that must span the entire tree. (i.e. default is 1)", 1);
@@ -49,7 +49,7 @@ public class StochasticCoalescent extends TreeDistribution {
      * @param minSuccessfulTraj the minimum number of "successful" trajectories, i.e that have population sizes that are strictly positive over the whole tree.
      * @throws Exception
      */
-    public StochasticCoalescent(TreeIntervals treeIntervals, PopulationFunction populationModel, int minEnsembleSize, int minSuccessfulTraj) throws Exception {
+    public StochasticCoalescent(TreeIntervals treeIntervals, SIRPopulationFunction populationModel, int minEnsembleSize, int minSuccessfulTraj) throws Exception {
         initByName("treeIntervals", treeIntervals, "populationModel", populationModel, "minTraj", minEnsembleSize, "minTrajSuccess", minSuccessfulTraj);
     }
 
@@ -74,27 +74,28 @@ public class StochasticCoalescent extends TreeDistribution {
 
     /**
      * do the actual calculation *
+     * 
+     * @return log of HR
+     * @throws java.lang.Exception
      */
     @Override
     public double calculateLogP() throws Exception {
 
-        PopulationFunction popFunction = popSizeInput.get();
+        SIRPopulationFunction popFunction = popSizeInput.get();
 
         // if stochastic, average log-likelihoods
-        if (popFunction instanceof StochasticSIRPopulationFunction) {
-
-            StochasticSIRPopulationFunction scSIR = (StochasticSIRPopulationFunction)popFunction;
+        if (popFunction.volzSIR.get() instanceof StochasticSIR) {
 
             ArrayList<Double> logps = new ArrayList<Double>();
 
             int numTraj = 0;
 
             while (numTraj < minTraj || logps.size() < minTrajSuccess) {
-                boolean fail = scSIR.simulateStochasticTrajectory();
+                boolean fail = popFunction.simulateTrajectory();
 
                 double logp = Double.NEGATIVE_INFINITY;
                 if (!fail) {
-                    logp = calculateLogLikelihood(treeIntervals, popSizeInput.get());
+                    logp = calculateLogLikelihood(treeIntervals, popFunction);
                 }
 
                 if (!Double.isNaN(logp) && !Double.isInfinite(logp)) {
@@ -126,7 +127,7 @@ public class StochasticCoalescent extends TreeDistribution {
             logP = logAve + ML;
 
         } else {
-            logP = calculateLogLikelihood(treeIntervals, popSizeInput.get());
+            logP = calculateLogLikelihood(treeIntervals, popFunction);
         }
 
         if (Double.isInfinite(logP)) {
