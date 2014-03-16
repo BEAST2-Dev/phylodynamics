@@ -189,6 +189,7 @@ public class DeterministicSIR extends VolzSIR {
         return false;
     }
     
+    @Override
     public void store() {
         super.store();
         dirty = true;
