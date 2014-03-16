@@ -44,7 +44,7 @@ public class DeterministicSIR extends VolzSIR {
      * @param beta
      * @param gamma
      * @param NS0
-     * @return true if simulated stochastic trajectory should force a reject
+     * @return true if simulated trajectory should force a reject
      */
     @Override
     public boolean simulateTrajectory(final double beta, final double gamma, double NS0) {

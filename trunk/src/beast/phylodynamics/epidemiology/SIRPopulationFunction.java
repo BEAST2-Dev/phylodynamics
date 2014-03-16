@@ -14,25 +14,37 @@ import java.util.List;
  */
 
 @Description("Population function for performing likelihood calculations based on Volz 2012.")
-public class DeterministicSIRPopulationFunction extends PopulationFunction.Abstract {
+public class SIRPopulationFunction extends PopulationFunction.Abstract {
 
 
-    public Input<DeterministicSIR> deterministicSIR = new Input<DeterministicSIR>("deterministicSIR", "Volz parameters");
+    public Input<VolzSIR> volzSIR = new Input<VolzSIR>("volzSIR", "Volz parameters");
 
     public Input<Boolean> oldMethodInput = new Input<Boolean>(
             "oldMethod",
             "Use old (slow) method to evaluate intensity.  Default false.", false);
 
+    public SIRPopulationFunction() {
+    }
 
+    public SIRPopulationFunction(VolzSIR ssir) throws Exception {
+        initByName("volzSIR", ssir);
+    }
+
+    /**
+     * @return true if the stochastic simulation failed
+     */
+    public boolean simulateTrajectory() {
+        return volzSIR.get().simulateTrajectory();
+    }
 
     // Implementation of abstract methods
     public List<String> getParameterIds() {
 
         String[] parameterIds = new String[]{
-               deterministicSIR.get().betaParameter.get().getID(),
-               deterministicSIR.get().originParameter.get().getID(),
-               deterministicSIR.get().n_S_Parameter.get().getID(),
-               deterministicSIR.get().gammaParameter.get().getID(),
+                volzSIR.get().betaParameter.get().getID(),
+                volzSIR.get().originParameter.get().getID(),
+                volzSIR.get().n_S_Parameter.get().getID(),
+                volzSIR.get().gammaParameter.get().getID(),
         };
 
         return Arrays.asList(parameterIds);
@@ -49,7 +61,7 @@ public class DeterministicSIRPopulationFunction extends PopulationFunction.Abstr
     @Override
     public double getPopSize(double t) {
 
-        return deterministicSIR.get().getPopSize(t);
+        return volzSIR.get().getPopSize(t);
 
     }
 
@@ -58,9 +70,8 @@ public class DeterministicSIRPopulationFunction extends PopulationFunction.Abstr
     public double getIntegral(double start, double finish) {
 
         // Approximation for the case of very small intervals:
-
         if (finish - start < 1e-15)
-            return (finish-start)/getPopSize(0.5*(start+finish));
+            return (finish - start) / getPopSize(0.5 * (start + finish));
 
         if (oldMethodInput.get())
             return getNumericalIntegral(start, finish);
@@ -81,17 +92,16 @@ public class DeterministicSIRPopulationFunction extends PopulationFunction.Abstr
     @Override
     public double getIntensity(double t) {
 
-        if (deterministicSIR.get().reject == true)
-                return Double.NEGATIVE_INFINITY;
-
-        else return deterministicSIR.get().getIntensity(t);
-
+        if (volzSIR.get().reject)
+            return Double.NEGATIVE_INFINITY;
+        else
+            return volzSIR.get().getIntensity(t);
     }
 
     @Override
     public double getInverseIntensity(final double intensity) {
 
-        return deterministicSIR.get().getInverseIntensity(intensity);
+        return volzSIR.get().getInverseIntensity(intensity);
     }
 
 }

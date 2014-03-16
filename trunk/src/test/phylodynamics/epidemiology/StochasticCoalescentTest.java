@@ -8,21 +8,17 @@ package test.phylodynamics.epidemiology;
 
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.coalescent.TreeIntervals;
+import beast.phylodynamics.epidemiology.SIRPopulationFunction;
 import beast.phylodynamics.epidemiology.StochasticCoalescent;
 import beast.phylodynamics.epidemiology.StochasticSIR;
-import beast.phylodynamics.epidemiology.StochasticSIRPopulationFunction;
 import beast.util.TreeParser;
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -168,9 +164,9 @@ public class StochasticCoalescentTest {
         
         // Set up 
         StochasticCoalescent stochasticCoalescent = new StochasticCoalescent();
-        StochasticSIRPopulationFunction popFunction =
-                new StochasticSIRPopulationFunction();
-        popFunction.initByName("stochasticSIR", stochasticSIR);
+        SIRPopulationFunction popFunction =
+                new SIRPopulationFunction();
+        popFunction.initByName("volzSIR", stochasticSIR);
 
         // Calculate probability denstiy of tree given trajectory
         double logP = stochasticCoalescent.calculateLogLikelihood(
