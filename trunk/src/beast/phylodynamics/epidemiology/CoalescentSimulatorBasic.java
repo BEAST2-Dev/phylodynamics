@@ -57,28 +57,38 @@ public class CoalescentSimulatorBasic extends beast.core.Runnable {
         if (!timeTraitSet.isDateTrait())
             throw new IllegalArgumentException("Trait set must be a date "
                     + "(forward or backward) trait set.");
+        
+        for (int i=0; i<timeTraitSet.taxaInput.get().asStringList().size(); i++) {
+            if (Double.isInfinite(populationFunction.getPopSize(timeTraitSet.getValue(i))))
+                throw new IllegalStateException("Intensity is non-finite at "
+                        + "one or more sample times.");
+        }
     }
 
     @Override
     public void run() throws Exception {
 
-        // Write output to stdout or file
-        PrintStream pstream;
-        if (outputFileName == null)
-            pstream = System.out;
-        else
-            pstream = new PrintStream(outputFileName);
+        PrintStream pstream = null;
 
         for (int i = 0; i < replicates; i++) {
+            
             RandomTree tree = new RandomTree();
             tree.initByName(
                     "taxonset", timeTraitSet.taxaInput.get(),
                     "trait", timeTraitSet,
                     "populationModel", populationFunction);
-
+                    
+            // Write output to stdout or file
+            if (pstream == null) {
+                if (outputFileName == null)
+                    pstream = System.out;
+                else
+                    pstream = new PrintStream(outputFileName);
+            }
+            
             pstream.print(tree.toString() + ";\n");
         }
-
+        
         if (outputFileName != null) {
             pstream.flush();
             pstream.close();
