@@ -21,8 +21,7 @@ import java.util.List;
 /**
  * @author remco@cs.waikato.ac.nz
  */
-@Description("Performs random sequence generation for a given site model. " +
-        "Sequences for the leaf nodes in the tree are returned as an alignment.")
+@Description("Performs random sequence generation for a given site model. ")
 public class CoalescentSimulator extends beast.core.Runnable {
     public Input<PopulationFunction> populationFunctionInput
             = new Input<PopulationFunction>("populationFunction", "the population function", Input.Validate.REQUIRED);
