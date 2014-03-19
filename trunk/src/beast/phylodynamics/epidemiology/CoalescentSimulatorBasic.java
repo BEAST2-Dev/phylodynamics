@@ -36,9 +36,18 @@ public class CoalescentSimulatorBasic extends beast.core.Runnable {
             "If provided, simulated trees are written to this file rather "
                     + "than to standard out.");
 
-    public Input<TraitSet> timeTraitInput = new Input<TraitSet>("trait",
+    public Input<TraitSet> timeTraitInput = new Input<TraitSet>(
+            "trait",
             "trait information for initializing traits (like node dates) in the tree",
             Input.Validate.REQUIRED);
+    
+    public Input<Double> maxHeightInput = new Input<Double>(
+            "maxHeight",
+            "Used to optionally constrain the height of the generated tree "
+                    + "to be below the start of the epidemic.  Trees will "
+                    + "be generated until the height is found to be smaller "
+                    + "than this value.",
+            Double.POSITIVE_INFINITY);
 
     PopulationFunction populationFunction;
     TraitSet timeTraitSet;
@@ -73,10 +82,12 @@ public class CoalescentSimulatorBasic extends beast.core.Runnable {
         for (int i = 0; i < replicates; i++) {
             
             RandomTree tree = new RandomTree();
-            tree.initByName(
-                    "taxonset", timeTraitSet.taxaInput.get(),
-                    "trait", timeTraitSet,
-                    "populationModel", populationFunction);
+            do {
+                tree.initByName(
+                        "taxonset", timeTraitSet.taxaInput.get(),
+                        "trait", timeTraitSet,
+                        "populationModel", populationFunction);
+            } while (!(tree.getRoot().getHeight()<maxHeightInput.get()));
                     
             // Write output to stdout or file
             if (pstream == null) {
