@@ -230,4 +230,9 @@ public class StochasticCoalescent extends TreeDistribution {
     protected boolean requiresRecalculation() {
         return ((CalculationNode) popSizeInput.get()).isDirtyCalculation() || super.requiresRecalculation();
     }
+
+    @Override
+    public boolean isStochastic() {
+        return popSizeInput.get().volzSIR.get() instanceof StochasticSIR;
+    }
 }
