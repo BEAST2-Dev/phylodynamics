@@ -3,7 +3,6 @@ package beast.phylodynamics.epidemiology;
 import beast.core.Description;
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.Arrays;
 
@@ -39,7 +38,7 @@ public class SeasonalSIRSEpidemic extends HybridSEIREpidemic {
 
         SEIRState x0 = new SEIRState((int) S0.get().getArrayValue() - e0 - i0 - r0, e0, i0, r0, 0.0);
 
-        if (simulationType.get().equals("hybrid"))  throw new NotImplementedException();  // Seasonal SIRS is only implemented with SAL simulator
+        if (simulationType.get().equals("hybrid"))  throw new UnsupportedOperationException();  // Seasonal SIRS is only implemented with SAL simulator
 
         hybridTauleapSEIR = new SeasonalSALTauleapSIRS(x0, expose, infect, recover, loseImmunity, false, alpha, isDeterministic.get(), birthTimes);
 

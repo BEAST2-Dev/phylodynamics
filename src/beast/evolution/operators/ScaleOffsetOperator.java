@@ -1,7 +1,6 @@
 package beast.evolution.operators;
 
 import beast.core.Description;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import beast.core.parameter.RealParameter;
 import beast.core.parameter.BooleanParameter;
 import beast.core.Input;
@@ -31,7 +30,7 @@ public class ScaleOffsetOperator extends ScaleOperator{
 
         super.initAndValidate();
 
-        if (m_bIsTreeScaler) throw new NotImplementedException();
+        if (m_bIsTreeScaler) throw new UnsupportedOperationException();
 
         if (offsetTree.get() !=null) offset = offsetTree.get().getRoot().getHeight();
 
@@ -68,11 +67,11 @@ public class ScaleOffsetOperator extends ScaleOperator{
 
             if (bScaleAllIndependently) {
 
-                throw new NotImplementedException();
+                throw new UnsupportedOperationException();
 
             } else if (bScaleAll) {
 
-                throw new NotImplementedException();
+                throw new UnsupportedOperationException();
 
                 }
 //            } else {

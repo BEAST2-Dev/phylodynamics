@@ -2,8 +2,6 @@ package beast.phylodynamics.epidemiology;
 
 import beast.phylodynamics.util.Stuff;
 import beast.util.Randomizer;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -251,7 +249,7 @@ public class SALTauleapSEIR implements SEIR_simulator {
     public boolean step_exposed(double dt, int index) {
 
 
-        if (loseImmunityRate > 0) throw new NotImplementedException(); //    SEIRS is not yet implemented!
+        if (loseImmunityRate > 0) throw new UnsupportedOperationException(); //    SEIRS is not yet implemented!
 
         double t = 0.0;
 
