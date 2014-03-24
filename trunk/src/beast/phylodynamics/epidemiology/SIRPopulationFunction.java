@@ -61,22 +61,33 @@ public class SIRPopulationFunction extends PopulationFunction.Abstract {
     @Override
     public double getPopSize(double t) {
 
-        return volzSIR.get().getPopSize(t);
-
+        double popSize = volzSIR.get().getPopSize(t);
+        if (!volzSIR.get().reject)
+            return popSize;
+        else
+            return Double.POSITIVE_INFINITY; // Causes -infinity coalescent prob.
     }
 
 
     @Override
     public double getIntegral(double start, double finish) {
-
+        
+        double res;
+        
         // Approximation for the case of very small intervals:
         if (finish - start < 1e-15)
-            return (finish - start) / getPopSize(0.5 * (start + finish));
-
-        if (oldMethodInput.get())
-            return getNumericalIntegral(start, finish);
+            res = (finish - start) / getPopSize(0.5 * (start + finish));
+        else {
+            if (oldMethodInput.get())
+                res = getNumericalIntegral(start, finish);
+            else
+                res = super.getIntegral(start, finish);
+        }
+        
+        if (!volzSIR.get().reject)
+            return res;
         else
-            return super.getIntegral(start, finish);
+            return Double.POSITIVE_INFINITY; // causes -infinity coalescent prob.
     }
 
     /**
@@ -91,16 +102,11 @@ public class SIRPopulationFunction extends PopulationFunction.Abstract {
 
     @Override
     public double getIntensity(double t) {
-
-        if (volzSIR.get().reject)
-            return Double.NEGATIVE_INFINITY;
-        else
-            return volzSIR.get().getIntensity(t);
+        return volzSIR.get().getIntensity(t);
     }
 
     @Override
     public double getInverseIntensity(final double intensity) {
-
         return volzSIR.get().getInverseIntensity(intensity);
     }
 
