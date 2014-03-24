@@ -96,9 +96,9 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
     }
     
     protected boolean update() {
-
+        
         if (!dirty)
-            return false;
+            return reject;
 
         return simulateTrajectory(betaParameter.get().getValue(),
                 gammaParameter.get().getValue(), n_S_Parameter.get().getValue());
@@ -165,7 +165,7 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
 
     public double getIntensity(double t) {
         update();
-
+        
         if (t < tIntensityTrajStart) {
             return -(tIntensityTrajStart - t) / effectivePopSizeTraj.get(0);
         } else {
@@ -184,9 +184,15 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
         }
     }
 
+    /**
+     * Return inverse intensity for use in coalescent simulation.
+     *
+     * @param intensity
+     * @return
+     */
     public double getInverseIntensity(final double intensity) {
         update();
-
+                
         // given a value for the intensity, find a time
         UnivariateRealFunction intensityFunction = new UnivariateRealFunction() {
 
@@ -281,15 +287,5 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
     @Override
     public void close(PrintStream out) {
     }
-
-    /**
-     * DEBUG: Dump intensities estimated at a given
-     * number of times ranging between the extreme values of the provided
-     * interval list.
-     *
-     * @param tree tree used to determine range of times to use
-     * @param n number of times to use
-     * @param ps PrintStream to send results to
-     */
-
+    
 }

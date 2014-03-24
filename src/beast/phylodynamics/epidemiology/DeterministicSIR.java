@@ -11,6 +11,7 @@ import org.apache.commons.math3.ode.ContinuousOutputModel;
 import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
 import org.apache.commons.math3.ode.events.EventHandler;
 import org.apache.commons.math3.ode.nonstiff.AdaptiveStepsizeIntegrator;
+import org.apache.commons.math3.ode.nonstiff.DormandPrince853Integrator;
 import org.apache.commons.math3.ode.nonstiff.HighamHall54Integrator;
 
 
@@ -48,6 +49,8 @@ public class DeterministicSIR extends VolzSIR {
      */
     @Override
     public boolean simulateTrajectory(final double beta, final double gamma, double NS0) {
+        
+        reject = false;
 
                 // Equations of motion:
         FirstOrderDifferentialEquations ode = new FirstOrderDifferentialEquations() {
@@ -70,9 +73,10 @@ public class DeterministicSIR extends VolzSIR {
             AdaptiveStepsizeIntegrator integrator = new HighamHall54Integrator(
                     1E-10, // min step size (time)
                     100,   // max step size (time)
-                    0.5,   // absolute tolerance
-                    0.01   // relative tolerance
+                    1e-4,  // absolute tolerance
+                    1e-4   // relative tolerance
             );
+            
 
             integrationResults = new ContinuousOutputModel();
             integrator.addStepHandler(integrationResults);
@@ -114,7 +118,7 @@ public class DeterministicSIR extends VolzSIR {
 
                 @Override
                 public double g(double t, double[] y) {
-                    return y[1];
+                    return Math.min(y[0],y[1]);
                 }
 
                 @Override
@@ -126,7 +130,11 @@ public class DeterministicSIR extends VolzSIR {
                 public void resetState(double d, double[] doubles) {
                 }
 
-            }, 0.1, 0.1, 10);
+            },
+                    0.1, // maxCheckInterval
+                    0.1, // convergence,
+                    10   // maxIterationCount
+            ); 
 
 
             double[] y0 = new double[2];
@@ -186,7 +194,7 @@ public class DeterministicSIR extends VolzSIR {
 
         dirty = false;
 
-        return false;
+        return reject;
     }
     
     @Override
