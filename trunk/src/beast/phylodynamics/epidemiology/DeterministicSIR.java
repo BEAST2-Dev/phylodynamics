@@ -21,7 +21,7 @@ import org.apache.commons.math3.ode.nonstiff.HighamHall54Integrator;
  * @author Alex Popinga
  */
 @Description("Keeps track of trajectories for effective, infected, and susceptible populations," +
-        "used by Volz2009TreeDistribution and Volz2012PopulationFunction")
+        "used by Volz2009TreeDistribution and SIRPopulationFunction")
 
 public class DeterministicSIR extends VolzSIR {
 
@@ -173,6 +173,8 @@ public class DeterministicSIR extends VolzSIR {
 
             //if (thisy[1] < 1) { System.out.print(" Number of infecteds: " + thisy[1] + " " + "Time: " + integrationResults.getFinalTime());
             //}
+
+            //System.out.println("i: " + i + "   t: " + t + "   I: " + thisy[1]);
         }
 
 
