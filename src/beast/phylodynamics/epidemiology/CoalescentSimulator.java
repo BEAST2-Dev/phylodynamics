@@ -11,7 +11,7 @@ import beast.evolution.alignment.TaxonSet;
 import beast.evolution.tree.RandomTree;
 import beast.evolution.tree.TraitSet;
 import beast.evolution.tree.Tree;
-import beast.evolution.tree.TreeTraceAnalysis;
+//import beast.evolution.tree.TreeTraceAnalysis;
 import beast.evolution.tree.coalescent.PopulationFunction;
 
 import java.io.PrintStream;
@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * @author remco@cs.waikato.ac.nz
  */
-@Description("Performs random sequence generation for a given site model. ")
+@Description("Performs random tree generation for a given site model. ")
 public class CoalescentSimulator extends beast.core.Runnable {
     public Input<PopulationFunction> populationFunctionInput
             = new Input<PopulationFunction>("populationFunction", "the population function", Input.Validate.REQUIRED);
@@ -92,12 +92,12 @@ public class CoalescentSimulator extends beast.core.Runnable {
             tree.initByName("taxonset", taxa, "trait", timeTraitSet, "populationModel", populationFunction);
 
             treeAnalysis.add(tree);
-            //pstream.print(tree.toString() + "\n");
+            pstream.print(tree.toString() + "\n");
         }
 
         // Use TreeTraceAnalysis to report topologies
-        TreeTraceAnalysis tta = new TreeTraceAnalysis(treeAnalysis, 0.0, 95.0);
-        tta.report(pstream);
+        //TreeTraceAnalysis tta = new TreeTraceAnalysis(treeAnalysis, 0.0, 95.0);
+        //tta.report(pstream);
 
         if (outputFileName != null) {
             pstream.flush();
