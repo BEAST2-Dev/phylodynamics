@@ -8,14 +8,7 @@ import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.MaxIterationsExceededException;
 import org.apache.commons.math.analysis.UnivariateRealFunction;
 import org.apache.commons.math.analysis.solvers.BrentSolver;
-import org.apache.commons.math3.exception.DimensionMismatchException;
-import org.apache.commons.math3.exception.MaxCountExceededException;
-import org.apache.commons.math3.exception.NumberIsTooSmallException;
 import org.apache.commons.math3.ode.ContinuousOutputModel;
-import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
-import org.apache.commons.math3.ode.events.EventHandler;
-import org.apache.commons.math3.ode.nonstiff.AdaptiveStepsizeIntegrator;
-import org.apache.commons.math3.ode.nonstiff.HighamHall54Integrator;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -31,8 +24,13 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
 
     public Input<RealParameter> n_S_Parameter = new Input<RealParameter>("n_S0",
             "the number of susceptibles at time of origin (defaults to 1000).", Input.Validate.REQUIRED);
+
     public Input<RealParameter> betaParameter = new Input<RealParameter>("beta",
             "the mass action rate of infection.", Input.Validate.REQUIRED);
+
+    public Input<RealParameter> R0 =
+            new Input<RealParameter>("R0", "The basic reproduction number", Input.Validate.XOR, betaParameter);
+
     public Input<RealParameter> gammaParameter = new Input<RealParameter>("gamma",
             "the per-infected rate of recovery + sampling rate.", Input.Validate.REQUIRED);
     public Input<RealParameter> originParameter = new Input<RealParameter>("origin",
@@ -69,6 +67,13 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
                     Math.max(0.0, betaParameter.get().getLower()),
                     betaParameter.get().getUpper());
         }
+
+        if (R0.get() != null) {
+            R0.get().setBounds(
+                    Math.max(0.0, R0.get().getLower()),
+                    R0.get().getUpper());
+        }
+
         if (gammaParameter.get() != null) {
             gammaParameter.get().setBounds(
                     Math.max(0.0, gammaParameter.get().getLower()),
@@ -94,13 +99,29 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
         dirty = true;
         update();
     }
-    
+
+    /**
+     * @return beta (birth rate) value, possibly calculating from R0, gamma and S0, thereby catering for both parameterizations.
+     */
+    private double beta() {
+        if (betaParameter != null) return betaParameter.get().getValue();
+        return R0.get().getValue() * gammaParameter.get().getValue() / n_S_Parameter.get().getValue();
+    }
+
+    /**
+     * @return R0 (fundamental reproductive number) value, possibly calculating from beta, gamma and S0, thereby catering for both parameterizations.
+     */
+    private double R0() {
+        if (R0 != null) return R0.get().getValue();
+        return betaParameter.get().getValue() * n_S_Parameter.get().getValue() / gammaParameter.get().getValue();
+    }
+
     protected boolean update() {
         
         if (!dirty)
             return reject;
 
-        return simulateTrajectory(betaParameter.get().getValue(),
+        return simulateTrajectory(beta(),
                 gammaParameter.get().getValue(), n_S_Parameter.get().getValue());
     }
     
@@ -123,7 +144,7 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
      * interval, false otherwise.
      */
     public boolean simulateTrajectory() {
-        return simulateTrajectory(betaParameter.get().getValue(),
+        return simulateTrajectory(beta(),
                 gammaParameter.get().getValue(), n_S_Parameter.get().getValue());
     }
 
@@ -204,7 +225,7 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
 
         BrentSolver solver = new BrentSolver();
         try {
-            return solver.solve(intensityFunction, 0, n_S_Parameter.get().getValue() / betaParameter.get().getValue());
+            return solver.solve(intensityFunction, 0, n_S_Parameter.get().getValue() / beta());
         } catch (MaxIterationsExceededException e) {
             throw new RuntimeException("Max iterations (" + e.getMaxIterations() + ") exceeded:" + e.getMessage());
         } catch (FunctionEvaluationException e) {
@@ -249,8 +270,7 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
 
         //out.format("%g\t", dt);
 
-        out.format("%g\t", betaParameter.get().getValue() * n_S_Parameter.get().getValue()
-                / gammaParameter.get().getValue());
+        out.format("%g\t", R0());
 
         //double tend = NStraj.size() * dt;
         //double delta = tend / (statesToLogInput.get() - 1);
