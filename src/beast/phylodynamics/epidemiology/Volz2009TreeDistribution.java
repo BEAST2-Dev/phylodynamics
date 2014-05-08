@@ -2,6 +2,7 @@ package beast.phylodynamics.epidemiology;
 
 import beast.core.Description;
 import beast.core.Input;
+import beast.core.parameter.RealParameter;
 import beast.evolution.tree.TreeDistribution;
 import beast.evolution.tree.coalescent.IntervalType;
 import beast.evolution.tree.coalescent.TreeIntervals;
@@ -25,6 +26,13 @@ public class Volz2009TreeDistribution extends TreeDistribution {
 
     TreeIntervals intervals;
 
+    /**
+     * @return beta (birth rate) value, possibly calculating from R0, gamma and S0, thereby catering for both parameterizations.
+     */
+    private double beta() {
+        return volzSIRInput.get().R0.get().getValue() * volzSIRInput.get().gammaParameter.get().getValue()
+                / volzSIRInput.get().n_S_Parameter.get().getValue();
+    }
 
     @Override
     public void initAndValidate() throws Exception {
@@ -127,7 +135,7 @@ public class Volz2009TreeDistribution extends TreeDistribution {
         public void computeDerivatives(double t, double[] A, double[] Adot)
                 throws MaxCountExceededException, DimensionMismatchException {
 
-            double beta = volzSIRInput.get().betaParameter.get().getValue();
+            double beta = beta();
 
             double S = volzSIRInput.get().getNS(t);
             double I = volzSIRInput.get().getNI(t);
