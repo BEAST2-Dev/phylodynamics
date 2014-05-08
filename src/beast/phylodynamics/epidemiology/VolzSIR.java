@@ -43,7 +43,7 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
             "Integration will finish when infected pop drops below this.", 1.0);
     public Input<Double> maxSimLengthInput = new Input<Double>("maxSimLength",
             "Maximum length of simulation. (Default 1000.)", 1000.0);
-    
+
     public Input<Boolean> logTrajectoriesInput = new Input<Boolean>("logTrajectories",
             "Log entire trajectories. Default false.", false);
 
@@ -103,17 +103,23 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
     /**
      * @return beta (birth rate) value, possibly calculating from R0, gamma and S0, thereby catering for both parameterizations.
      */
-    private double beta() {
-        if (betaParameter != null) return betaParameter.get().getValue();
-        return R0.get().getValue() * gammaParameter.get().getValue() / n_S_Parameter.get().getValue();
+    public double beta() {
+        if (betaParameter.get() != null) {
+            return betaParameter.get().getValue();
+        } else {
+            return R0.get().getValue() * gammaParameter.get().getValue() / n_S_Parameter.get().getValue();
+        }
     }
 
     /**
      * @return R0 (fundamental reproductive number) value, possibly calculating from beta, gamma and S0, thereby catering for both parameterizations.
      */
     private double R0() {
-        if (R0 != null) return R0.get().getValue();
-        return betaParameter.get().getValue() * n_S_Parameter.get().getValue() / gammaParameter.get().getValue();
+        if (R0.get() != null) {
+            return R0.get().getValue();
+        } else {
+            return betaParameter.get().getValue() * n_S_Parameter.get().getValue() / gammaParameter.get().getValue();
+        }
     }
 
     protected boolean update() {
@@ -124,7 +130,7 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
         return simulateTrajectory(beta(),
                 gammaParameter.get().getValue(), n_S_Parameter.get().getValue());
     }
-    
+
     /**
      * Simulate a stochastic or deterministic trajectory.
      *
@@ -136,10 +142,10 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
     public abstract boolean simulateTrajectory(final double beta,
             final double gamma, final double NS0);
 
-    
+
     /**
      * Simulate trajectory using values of parameters found in Inputs.
-     * 
+     *
      * @return true if the simulated epidemic continues for the entire
      * interval, false otherwise.
      */
@@ -260,7 +266,7 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
         //    out.format("I%d\t", i);
         //    out.format("t%d\t", i);
         //}
-        
+
         if (logTrajectoriesInput.get())
             out.print("trajI\ttrajTime\t");
     }
@@ -285,7 +291,7 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
         //    out.format("%g\t", NItraj.get(tidx));
         //    out.format("%g\t", t);
         // }
-        
+
         if (logTrajectoriesInput.get()) {
             out.print("\"");
             for (int idx=0; idx<NItraj.size(); idx++) {
