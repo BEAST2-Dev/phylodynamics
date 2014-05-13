@@ -34,12 +34,13 @@ public class StochasticSIR extends VolzSIR {
     public StochasticSIR() {
     }
 
-    public StochasticSIR(RealParameter nSO,
+    public StochasticSIR(RealParameter nSO, RealParameter R0,
             RealParameter beta, RealParameter gamma,
             RealParameter origin, int integrationStepCount,
             int numSamplesFromTrajectory) throws Exception {
         initByName(
                 "n_S0", nSO,
+                "R0", R0,
                 "beta", beta,
                 "gamma", gamma,
                 "origin", origin,
@@ -70,7 +71,8 @@ public class StochasticSIR extends VolzSIR {
 
         int Ntraj = 1;
         double T = originParameter.get().getValue();
-        double[] times = {T};
+        //double[] times = {T};
+        double[] times = {Double.POSITIVE_INFINITY};
 
         // USE SEIR_simulator to populate the following variables:
         // NStraj, NItraj, effectivePopSizeTraj, intensityTraj

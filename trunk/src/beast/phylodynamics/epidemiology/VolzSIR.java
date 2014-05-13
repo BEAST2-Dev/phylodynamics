@@ -127,8 +127,7 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
         if (!dirty)
             return reject;
 
-        return simulateTrajectory(beta(),
-                gammaParameter.get().getValue(), n_S_Parameter.get().getValue());
+        return simulateTrajectory(beta(), gammaParameter.get().getValue(), n_S_Parameter.get().getValue());
     }
 
     /**
