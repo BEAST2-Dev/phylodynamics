@@ -57,7 +57,7 @@ public class StochasticCoalescentTest {
 
         /*
         Generate trajectories until stochasticSIR is no longer "dirty". 
-        This is a hack, becaues we don't actually care about this simulated
+        This is a hack, because we don't actually care about this simulated
         trajectory - we have our own.  However, we require the dirty flag
         to be set to false, which doesn't happen unless a "good" trajectory
         is generated.
