@@ -148,8 +148,7 @@ public class StochasticSIR extends VolzSIR {
         }
 
         // Start of integral is 0.5*dt from end of forward-time integration.
-        tIntensityTrajStart = originParameter.get().getValue()
-                - dt * (effectivePopSizeTraj.size() - 1) - 0.5 * dt;
+        tIntensityTrajStart = T - dt * (effectivePopSizeTraj.size() - 1) - 0.5 * dt;
 
         dirty = false;
 
