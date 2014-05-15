@@ -31,6 +31,9 @@ public class StochasticCoalescent extends TreeDistribution {
     public Input<Integer> minimumNumberOfTrajectories = new Input<Integer>("minTraj", "The minimum number of trajectories over which to average the coalescent probability, i.e. a value of 1 means one trajectory is used, (defaults 1).", 1);
     public Input<Integer> minimumNumberOfSuccesses = new Input<Integer>("minTrajSuccess",
             "minimum number of trajectories that must span the entire tree. (i.e. default is 1)", 1);
+    public Input<Integer> maxTries = new Input<Integer>("maxTries",
+            "maximum number of trajectory simulations attempted. (i.e. default is 10000). Reject if reached.", 10000);
+
 
     TreeIntervals treeIntervals;
 
@@ -89,6 +92,7 @@ public class StochasticCoalescent extends TreeDistribution {
             ArrayList<Double> logps = new ArrayList<Double>();
 
             int numTraj = 0;
+            int maxTriesBeforeReject = maxTries.get();
 
             while (numTraj < minTraj || logps.size() < minTrajSuccess) {
                 boolean fail = popFunction.simulateTrajectory();
@@ -102,6 +106,12 @@ public class StochasticCoalescent extends TreeDistribution {
                     logps.add(logp);
                 }
                 numTraj += 1;
+
+                if (numTraj >= maxTriesBeforeReject) {
+                    // skip the party early, no luck here
+                    logP = Double.NEGATIVE_INFINITY;
+                    return logP;
+                }
             }
             lastEnsembleSize = numTraj;
 
@@ -113,7 +123,7 @@ public class StochasticCoalescent extends TreeDistribution {
             Collections.sort(logps);
             double sum = 0.0;
 
-            // shift array elements according to newML and exponentiate all the things
+            // shift array elements according to newML and exponentiate
             for (int j = 0; j < logps.size(); j++) {
                 logps.set(j, Math.exp(logps.get(j) - ML));
 
