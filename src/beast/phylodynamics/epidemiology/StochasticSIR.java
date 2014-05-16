@@ -34,13 +34,12 @@ public class StochasticSIR extends VolzSIR {
     public StochasticSIR() {
     }
 
-    public StochasticSIR(RealParameter nSO, RealParameter R0,
+    public StochasticSIR(RealParameter nSO,
             RealParameter beta, RealParameter gamma,
             RealParameter origin, int integrationStepCount,
             int numSamplesFromTrajectory) throws Exception {
         initByName(
                 "n_S0", nSO,
-                "R0", R0,
                 "beta", beta,
                 "gamma", gamma,
                 "origin", origin,
