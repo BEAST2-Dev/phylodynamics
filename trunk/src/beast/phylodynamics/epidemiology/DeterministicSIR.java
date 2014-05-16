@@ -11,7 +11,6 @@ import org.apache.commons.math3.ode.ContinuousOutputModel;
 import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
 import org.apache.commons.math3.ode.events.EventHandler;
 import org.apache.commons.math3.ode.nonstiff.AdaptiveStepsizeIntegrator;
-import org.apache.commons.math3.ode.nonstiff.DormandPrince853Integrator;
 import org.apache.commons.math3.ode.nonstiff.HighamHall54Integrator;
 
 
