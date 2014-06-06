@@ -16,10 +16,10 @@ import java.util.Arrays;
 
 @Description("Phylodynamic tree prior that couples compartmental models (e.g. SIR, SIRS) " +
         "with a piecewise constant birth-death-sampling process.")
-@Citation("Kuehnert, D., Stadler, T., Vaughan, T. G., and Drummond, A. J. 2013. " +
-        "“Simultaneous reconstruction of evolutionary history and epidemiological " +
-        "dynamics from viral sequences with the birth-death sir model.” " +
-        "In revision. Preprint: http://arxiv.org/abs/1308.5140.")
+@Citation("Simultaneous reconstruction of evolutionary history and epidemiological "
+        + "dynamics from viral sequences with the birth–death SIR model. "
+        + "Denise Kuehnert, Tanja Stadler, Timothy Vaughan, and Alexei Drummond, "
+        + "J. R. Soc. Interface, 11:20131106 (2014). ")
 public class BDSIR extends BirthDeathSkylineModel {
 
 
