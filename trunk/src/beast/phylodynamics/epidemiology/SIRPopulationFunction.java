@@ -17,7 +17,7 @@ import java.util.List;
 public class SIRPopulationFunction extends PopulationFunction.Abstract {
 
 
-    public Input<VolzSIR> volzSIR = new Input<VolzSIR>("volzSIR", "Volz parameters");
+    public Input<EPICSIR> volzSIR = new Input<EPICSIR>("volzSIR", "Volz parameters");
 
     public Input<Boolean> oldMethodInput = new Input<Boolean>(
             "oldMethod",
@@ -26,7 +26,7 @@ public class SIRPopulationFunction extends PopulationFunction.Abstract {
     public SIRPopulationFunction() {
     }
 
-    public SIRPopulationFunction(VolzSIR ssir) throws Exception {
+    public SIRPopulationFunction(EPICSIR ssir) throws Exception {
         initByName("volzSIR", ssir);
     }
 
