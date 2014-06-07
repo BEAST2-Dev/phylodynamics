@@ -18,7 +18,7 @@ import java.util.List;
 @Description("Keeps track of trajectories for effective, infected, and susceptible populations," +
         "used by Volz2009TreeDistribution and DeterministicSIRPopulationFunction")
 
-public class StochasticSIR extends VolzSIR {
+public class StochasticSIR extends EPICSIR {
 
     public Input<Integer> numSamplesFromTrajectory = new Input<Integer>(
             "numSamplesFromTrajectory",

@@ -32,7 +32,7 @@ public class StochasticCoalescent extends TreeDistribution {
     public Input<Integer> minimumNumberOfSuccesses = new Input<Integer>("minTrajSuccess",
             "minimum number of trajectories that must span the entire tree. (i.e. default is 1)", 1);
     public Input<Integer> maxTries = new Input<Integer>("maxTries",
-            "maximum number of trajectory simulations attempted. (i.e. default is 10000). Reject if reached.", 10000);
+            "maximum number of trajectory simulations attempted. (i.e. default is 10000). Reject if reached.", 1000);
 
 
     TreeIntervals treeIntervals;

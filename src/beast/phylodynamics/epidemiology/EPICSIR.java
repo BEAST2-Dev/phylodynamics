@@ -20,7 +20,7 @@ import java.util.List;
  * @author Alexei Drummond
  * @author Alex Popinga
  */
-public abstract class VolzSIR extends CalculationNode implements Loggable {
+public abstract class EPICSIR extends CalculationNode implements Loggable {
 
     public Input<RealParameter> n_S_Parameter = new Input<RealParameter>("n_S0",
             "the number of susceptibles at time of origin (defaults to 1000).", Input.Validate.REQUIRED);
@@ -169,7 +169,7 @@ public abstract class VolzSIR extends CalculationNode implements Loggable {
         int tidx = (int) Math.floor((t - tIntensityTrajStart) / dt);
 
         // Use initial or final state of trajectory if t outside the bounds of the
-        // simulation.  This is a CLUDEGE to deal with trees which don't fit
+        // simulation.  This is a kludge to deal with trees which don't fit
         // the trajectories at all.
         if (tidx >= effectivePopSizeTraj.size())
             return 1e-10 * effectivePopSizeTraj.get(effectivePopSizeTraj.size() - 1);
