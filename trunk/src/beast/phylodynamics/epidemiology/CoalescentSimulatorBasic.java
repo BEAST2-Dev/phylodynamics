@@ -2,14 +2,10 @@ package beast.phylodynamics.epidemiology;
 
 import beast.core.Description;
 import beast.core.Input;
-import beast.core.parameter.RealParameter;
-import beast.evolution.alignment.Taxon;
-import beast.evolution.alignment.TaxonSet;
+import beast.core.Logger;
 import beast.evolution.tree.RandomTree;
 import beast.evolution.tree.TraitSet;
-import beast.evolution.tree.coalescent.ConstantPopulation;
 import beast.evolution.tree.coalescent.PopulationFunction;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,11 +25,6 @@ public class CoalescentSimulatorBasic extends beast.core.Runnable {
     public Input<Integer> replicatesInput = new Input<Integer>(
             "replicates",
             "the number of replicates", Input.Validate.REQUIRED);
-    
-    public Input<String> outputFileNameInput = new Input<String>(
-            "outputFileName",
-            "If provided, simulated trees are written to this file rather "
-                    + "than to standard out.");
 
     public Input<TraitSet> timeTraitInput = new Input<TraitSet>(
             "trait",
@@ -47,6 +38,12 @@ public class CoalescentSimulatorBasic extends beast.core.Runnable {
                     + "be generated until the height is found to be smaller "
                     + "than this value.",
             Double.POSITIVE_INFINITY);
+    
+        
+    public Input<List<Logger>> loggersInput = new Input<List<Logger>>(
+            "logger",
+            "Logger used to write results to screen or disk.",
+            new ArrayList<Logger>());    
 
     PopulationFunction populationFunction;
     PopulationFunction.Abstract fullPopFunc;
@@ -61,7 +58,6 @@ public class CoalescentSimulatorBasic extends beast.core.Runnable {
 
         replicates = replicatesInput.get();
         populationFunction = populationFunctionInput.get();
-        outputFileName = outputFileNameInput.get();
         timeTraitSet = timeTraitInput.get();
 
         if (!timeTraitSet.isDateTrait())
@@ -82,10 +78,15 @@ public class CoalescentSimulatorBasic extends beast.core.Runnable {
     @Override
     public void run() throws Exception {
 
-        PrintStream pstream = null;
+        // Initialise loggers
+        for (Logger logger : loggersInput.get()) {
+            logger.init();
+        }
 
         RandomTree tree = new RandomTree();
         for (int i = 0; i < replicates; i++) {
+            
+            // Iterate until we get a tree meeting the requirements.
             do {
                 if (fullPopFunc != null)
                     fullPopFunc.prepare();
@@ -95,67 +96,16 @@ public class CoalescentSimulatorBasic extends beast.core.Runnable {
                         "populationModel", populationFunction);
             } while (!(tree.getRoot().getHeight()<maxHeightInput.get()));
                     
-            // Write output to stdout or file
-            if (pstream == null) {
-                if (outputFileName == null)
-                    pstream = System.out;
-                else
-                    pstream = new PrintStream(outputFileName);
+            // Log state
+            for (Logger logger : loggersInput.get()) {
+                logger.log(i);
             }
-            
-            pstream.print(tree.toString() + ";\n");
         }
         
-        if (pstream != null) {
-            pstream.flush();
-            pstream.close();
+        // Finalize loggers
+        for (Logger logger : loggersInput.get()) {
+            logger.close();
         }
-    }
-    
-    
-    /**
-     * Main method for debugging.
-     * 
-     * @param args 
-     * @throws java.lang.Exception 
-     */
-    public static void main(String[] args) throws Exception {
-        
-        int nLeaves = 2;
-        int nTrees = 100000;
-        
-        ConstantPopulation popFun = new ConstantPopulation();
-        popFun.initByName("popSize", new RealParameter("1.0"));
-        
-        List<Taxon> taxonList = new ArrayList<Taxon>();
-        for (int i=0; i<nLeaves; i++) {
-            String taxonName = "t" + String.valueOf(i+1);
-            taxonList.add(new Taxon(taxonName));
-        }
-        TaxonSet taxonSet = new TaxonSet(taxonList);
-        
-        StringBuilder traitListBuilder = new StringBuilder();
-        for (int i=0; i<taxonList.size(); i++) {
-            if (i>0)
-                traitListBuilder.append(",");
-            
-            traitListBuilder.append(taxonList.get(i).getID()).append("=0.0");
-        }
-        
-        TraitSet traitSet = new TraitSet();
-        traitSet.initByName(
-                "traitname", "date-backward",
-                "value", traitListBuilder.toString(),
-                "taxa", taxonSet);
-        
-        CoalescentSimulatorBasic coalSim = new CoalescentSimulatorBasic();
-        coalSim.initByName(
-                "populationFunction", popFun,
-                "replicates", nTrees,
-                "outputFileName", "trees.txt",
-                "trait", traitSet);
-        
-        coalSim.run();
     }
 }
 
