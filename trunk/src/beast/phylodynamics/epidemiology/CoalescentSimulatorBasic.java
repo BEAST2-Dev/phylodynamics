@@ -16,20 +16,12 @@ import java.util.List;
 @Description("Simulate coalescent trees given a population function.")
 public class CoalescentSimulatorBasic extends beast.core.Runnable {
     
-    public Input<PopulationFunction> populationFunctionInput
-            = new Input<PopulationFunction>(
-                    "populationFunction",
-                    "the population function",
-                    Input.Validate.REQUIRED);
+    public Input<RandomTree> randomTreeInput = new Input<RandomTree>(
+            "randomTree", "Element representing random tree class.");
     
     public Input<Integer> replicatesInput = new Input<Integer>(
             "replicates",
             "the number of replicates", Input.Validate.REQUIRED);
-
-    public Input<TraitSet> timeTraitInput = new Input<TraitSet>(
-            "trait",
-            "trait information for initializing traits (like node dates) in the tree",
-            Input.Validate.REQUIRED);
     
     public Input<Double> maxHeightInput = new Input<Double>(
             "maxHeight",
@@ -45,31 +37,27 @@ public class CoalescentSimulatorBasic extends beast.core.Runnable {
             "Logger used to write results to screen or disk.",
             new ArrayList<Logger>());    
 
+    RandomTree randomTree;
     PopulationFunction populationFunction;
     PopulationFunction.Abstract fullPopFunc;
 
-    TraitSet timeTraitSet;
     int replicates;
-    String outputFileName;
-
 
     @Override
     public void initAndValidate() throws Exception {
 
+        randomTree = randomTreeInput.get();
         replicates = replicatesInput.get();
-        populationFunction = populationFunctionInput.get();
-        timeTraitSet = timeTraitInput.get();
+        populationFunction =randomTree.populationFunctionInput.get();
 
-        if (!timeTraitSet.isDateTrait())
-            throw new IllegalArgumentException("Trait set must be a date "
-                    + "(forward or backward) trait set.");
-        
-        for (int i=0; i<timeTraitSet.taxaInput.get().asStringList().size(); i++) {
-            if (Double.isInfinite(populationFunction.getPopSize(timeTraitSet.getValue(i))))
-                throw new IllegalStateException("Intensity is non-finite at "
-                        + "one or more sample times.");
+        if (randomTree.hasDateTrait()) {
+            TraitSet dateTrait = randomTree.getDateTrait();
+            for (int i=0; i<dateTrait.taxaInput.get().asStringList().size(); i++) {
+                if (Double.isInfinite(populationFunction.getPopSize(dateTrait.getValue(i))))
+                    throw new IllegalStateException("Intensity is non-finite at "
+                            + "one or more sample times.");
+            }
         }
-        
         
         if (populationFunction instanceof PopulationFunction.Abstract)
             fullPopFunc = (PopulationFunction.Abstract)populationFunction;
@@ -83,18 +71,14 @@ public class CoalescentSimulatorBasic extends beast.core.Runnable {
             logger.init();
         }
 
-        RandomTree tree = new RandomTree();
         for (int i = 0; i < replicates; i++) {
             
             // Iterate until we get a tree meeting the requirements.
             do {
                 if (fullPopFunc != null)
                     fullPopFunc.prepare();
-                tree.initByName(
-                        "taxonset", timeTraitSet.taxaInput.get(),
-                        "trait", timeTraitSet,
-                        "populationModel", populationFunction);
-            } while (!(tree.getRoot().getHeight()<maxHeightInput.get()));
+                randomTree.initAndValidate();
+            } while (!(randomTree.getRoot().getHeight()<maxHeightInput.get()));
                     
             // Log state
             for (Logger logger : loggersInput.get()) {
