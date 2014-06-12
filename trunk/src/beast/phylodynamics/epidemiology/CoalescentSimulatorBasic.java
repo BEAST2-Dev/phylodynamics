@@ -9,7 +9,6 @@ import beast.evolution.tree.RandomTree;
 import beast.evolution.tree.TraitSet;
 import beast.evolution.tree.coalescent.ConstantPopulation;
 import beast.evolution.tree.coalescent.PopulationFunction;
-
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +49,8 @@ public class CoalescentSimulatorBasic extends beast.core.Runnable {
             Double.POSITIVE_INFINITY);
 
     PopulationFunction populationFunction;
+    PopulationFunction.Abstract fullPopFunc;
+
     TraitSet timeTraitSet;
     int replicates;
     String outputFileName;
@@ -72,6 +73,10 @@ public class CoalescentSimulatorBasic extends beast.core.Runnable {
                 throw new IllegalStateException("Intensity is non-finite at "
                         + "one or more sample times.");
         }
+        
+        
+        if (populationFunction instanceof PopulationFunction.Abstract)
+            fullPopFunc = (PopulationFunction.Abstract)populationFunction;
     }
 
     @Override
@@ -79,10 +84,11 @@ public class CoalescentSimulatorBasic extends beast.core.Runnable {
 
         PrintStream pstream = null;
 
+        RandomTree tree = new RandomTree();
         for (int i = 0; i < replicates; i++) {
-            
-            RandomTree tree = new RandomTree();
             do {
+                if (fullPopFunc != null)
+                    fullPopFunc.prepare();
                 tree.initByName(
                         "taxonset", timeTraitSet.taxaInput.get(),
                         "trait", timeTraitSet,
@@ -100,7 +106,7 @@ public class CoalescentSimulatorBasic extends beast.core.Runnable {
             pstream.print(tree.toString() + ";\n");
         }
         
-        if (outputFileName != null) {
+        if (pstream != null) {
             pstream.flush();
             pstream.close();
         }
