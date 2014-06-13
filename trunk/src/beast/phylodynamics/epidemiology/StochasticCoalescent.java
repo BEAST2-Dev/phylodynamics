@@ -115,7 +115,7 @@ public class StochasticCoalescent extends TreeDistribution {
             }
             lastEnsembleSize = numTraj;
 
-            if (logps.size() == 0) return Double.NEGATIVE_INFINITY;
+            if (logps.isEmpty()) return Double.NEGATIVE_INFINITY;
 
             // find maximum likelihood, make it the 'new zero'
             double ML = Collections.max(logps);
