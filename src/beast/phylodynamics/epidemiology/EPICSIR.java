@@ -129,7 +129,7 @@ public abstract class EPICSIR extends CalculationNode implements Loggable {
 
         return simulateTrajectory(beta(), gammaParameter.get().getValue(), n_S_Parameter.get().getValue());
     }
-
+    
     /**
      * Simulate a stochastic or deterministic trajectory.
      *
@@ -258,7 +258,7 @@ public abstract class EPICSIR extends CalculationNode implements Loggable {
     public void init(PrintStream out) throws Exception {
         //out.print("dt\t");
 
-        out.print("R_0\t");
+        out.print("R_0\tpeak_I\t");
 
         //for (int i = 0; i < statesToLogInput.get(); i++) {
         //    out.format("S%d\t", i);
@@ -290,6 +290,12 @@ public abstract class EPICSIR extends CalculationNode implements Loggable {
         //    out.format("%g\t", NItraj.get(tidx));
         //    out.format("%g\t", t);
         // }
+        
+        double peakI = 0.0;
+        for (Double NItraj1 : NItraj) {
+            peakI = NItraj1 > peakI ? NItraj1 : peakI;
+        }
+        out.format("%g\t", peakI);
 
         if (logTrajectoriesInput.get()) {
             out.print("\"");
