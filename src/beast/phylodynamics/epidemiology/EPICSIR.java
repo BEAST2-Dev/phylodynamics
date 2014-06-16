@@ -267,7 +267,7 @@ public abstract class EPICSIR extends CalculationNode implements Loggable {
         //}
 
         if (logTrajectoriesInput.get())
-            out.print("trajI\ttrajTime\t");
+            out.print("trajI\ttrajS\ttrajTime\t");
     }
 
     @Override
@@ -303,6 +303,12 @@ public abstract class EPICSIR extends CalculationNode implements Loggable {
                 if (idx>0)
                     out.print(",");
                 out.print(NItraj.get(idx));
+            }
+            out.print("\"\t\"");
+            for (int idx=0; idx<NStraj.size(); idx++) {
+                if (idx>0)
+                    out.print(",");
+                out.print(NStraj.get(idx));
             }
             out.print("\"\t\"");
             for (int idx=0; idx<NItraj.size(); idx++) {
