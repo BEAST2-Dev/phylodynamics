@@ -31,14 +31,16 @@ public class SIRPopulationFunction extends PopulationFunction.Abstract {
     }
 
     /**
-     * @return true if the stochastic simulation failed
+     * Simulate a new trajectory, irrespective of dirtiness.
+     * 
+     * @return true if the simulation failed
      */
     public boolean simulateTrajectory() {
         return volzSIR.get().simulateTrajectory();
-        //return volzSIR.get().update();
     }
 
     // Implementation of abstract methods
+    @Override
     public List<String> getParameterIds() {
 
         String[] parameterIds = new String[]{

@@ -245,6 +245,12 @@ public abstract class EPICSIR extends CalculationNode implements Loggable {
     }
 
     @Override
+    public void store() {
+        dirty = true;
+        super.store();
+    }
+    
+    @Override
     public void restore() {
         dirty = true;
         super.restore();
@@ -325,4 +331,24 @@ public abstract class EPICSIR extends CalculationNode implements Loggable {
     public void close(PrintStream out) {
     }
     
+    // Useful for debugging
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("t height S I effectivePopSize intensity\n");
+
+        int trajLength = NStraj.size();
+        for (int i=0; i<trajLength; i++) {
+            sb.append(String.format("%g %g %g %g %g %g\n",
+                    i*dt,
+                    originParameter.get().getValue() - i*dt,
+                    NStraj.get(i),
+                    NItraj.get(i),
+                    effectivePopSizeTraj.get(trajLength-1-i),
+                    intensityTraj.get(trajLength-1-i)));
+        }
+        
+        return sb.toString();
+    }
 }

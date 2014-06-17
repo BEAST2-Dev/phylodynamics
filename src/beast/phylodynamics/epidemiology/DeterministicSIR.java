@@ -249,9 +249,4 @@ public class DeterministicSIR extends EPICSIR {
         }
     }
 
-    public void restore() {
-        super.restore();
-        dirty = true;
-    }
-
 }

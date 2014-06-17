@@ -3,7 +3,6 @@ package beast.phylodynamics.epidemiology;
 import beast.core.Description;
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
-import beast.evolution.tree.Tree;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,9 +29,6 @@ public class StochasticSIR extends EPICSIR {
     public Input<Boolean> minusOne = new Input<Boolean>("minusOne",
             "true if (I-1) should be used in the denominator of the coalescent "
                     + "rate instead of I. Default is false.", false);
-    
-    public Input<Tree> treeInput = new Input<Tree>("tree", "Tree input used "
-            + "to ensure trajectory is updated when tree is modified.");
     
     public StochasticSIR() {
     }
@@ -125,6 +121,7 @@ public class StochasticSIR extends EPICSIR {
 
                 if (state.I < 1 || state.S < 0) {
                     // trajectory failed to reach big T
+                    dirty = false;
                     return true;
                 }
                 NStraj.add(state.S);
@@ -158,12 +155,6 @@ public class StochasticSIR extends EPICSIR {
     }
 
     @Override
-    public void store() {
-        super.store();
-        //dirty = true;
-    }
-
-    @Override
     public void log(int nSample, PrintStream out) {
 
         // logs R0
@@ -175,12 +166,6 @@ public class StochasticSIR extends EPICSIR {
 
         // inits R0
         super.init(out);
-    }
-
-    @Override
-    public void restore() {
-        super.restore();
-        //dirty = true;
     }
 
     @Override
