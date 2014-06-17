@@ -34,7 +34,6 @@ public class StochasticCoalescent extends TreeDistribution {
     public Input<Integer> maxTries = new Input<Integer>("maxTries",
             "maximum number of trajectory simulations attempted. (i.e. default is 10000). Reject if reached.", 1000);
 
-
     TreeIntervals treeIntervals;
 
     public int minTraj = 1;
@@ -83,6 +82,9 @@ public class StochasticCoalescent extends TreeDistribution {
      */
     @Override
     public double calculateLogP() throws Exception {
+        
+        if (!isDirtyCalculation())
+            return logP;
 
         SIRPopulationFunction popFunction = popSizeInput.get();
 
