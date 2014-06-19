@@ -119,7 +119,7 @@ public class StochasticCoalescent extends TreeDistribution {
             // find maximum likelihood, make it the 'new zero'
             double ML = Collections.max(logps);
 
-            Collections.sort(logps);
+            Collections.sort(logps); // Why?
             double sum = 0.0;
 
             // shift array elements according to newML and exponentiate
