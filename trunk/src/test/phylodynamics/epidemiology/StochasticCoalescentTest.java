@@ -11,6 +11,7 @@ import beast.evolution.tree.coalescent.TreeIntervals;
 import beast.phylodynamics.epidemiology.SIRPopulationFunction;
 import beast.phylodynamics.epidemiology.StochasticCoalescent;
 import beast.phylodynamics.epidemiology.StochasticSIR;
+import beast.util.Randomizer;
 import beast.util.TreeParser;
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -36,13 +37,13 @@ public class StochasticCoalescentTest {
      * this.
      */
     @Test
-    public void trajectoryConditionedLikelihood() throws Exception {
+    public void testTrajectoryConditionedLikelihood() throws Exception {
 
         double origin = 12.7808530307;
         double S0 = 999;
         double beta = 0.00075;
         double gamma = 0.4;
-        int latticeSize = 1000;
+        int latticeSize = 100000; // 10^5, much higher than the default of 10^3
         
         // Set up trajectory object
         StochasticSIR stochasticSIR = new StochasticSIR();
@@ -177,7 +178,54 @@ public class StochasticCoalescentTest {
         System.out.println("logP: " + logP);
         System.out.println("True logP:" + logPtruth);
         
-        // Success if <1% error
-        assert(Math.abs(logP-logPtruth)/Math.abs(0.5*(logP+logPtruth))<1e-2);
+        // Success if <0.01% error
+        assert(Math.abs(logP-logPtruth)/Math.abs(0.5*(logP+logPtruth))<1e-4);
+    }
+    
+    /**
+     * Computes the full probability of a tree given the epidemiological
+     * parameters and compares with a known correct value.
+     * 
+     * @throws java.lang.Exception BEAST 2 objects like to throw these
+     */
+    @Test
+    public void testLikelihood() throws Exception {
+        
+        Randomizer.setSeed(42);
+        
+        double origin = 30.0;
+        double S0 = 999;
+        double beta = 0.00075;
+        double gamma = 0.3;
+        int latticeSize = 1000;
+        
+        String newickStr = "(((((1:23.201674279943926,3:21.201674279943926):2.7431760554195783,14:12.944850335363505):1.2575389333037634,((4:3.3051116149767834,7:0.3051116149767834):18.02597361151068,20:5.331085226487463):2.871304042179805):0.6103254377900278,((((5:20.875764555662627,12:13.875764555662627):0.4167891392779133,17:9.29255369494054):1.63903996381406,(10:9.766039351017923,16:3.7660393510179233):8.165554307736677):0.7197286663179412,(6:15.933403099522199,15:6.933403099522199):6.717919225550343):0.1613923813847542):0.3310475410146694,((((2:20.97070734376335,19:3.970707343763351):1.3074622585163276,(8:9.41339312649908,13:4.413393126499081):6.864776475780598):0.8823641166101801,18:7.160533718889859):1.0497844441524649,(9:4.853545654572189,11:2.853545654572189):12.356772508470135):2.9334440844296417):0.0;";
+        TreeParser tree = new TreeParser();
+        tree.initByName(
+                "adjustTipHeights", false,
+                "newick", newickStr);
+        TreeIntervals treeIntervals = new TreeIntervals(tree);
+        
+        StochasticSIR stochasticSIR = new StochasticSIR();
+        stochasticSIR.initByName(
+                "n_S0", new RealParameter(String.valueOf(S0)),
+                "beta", new RealParameter(String.valueOf(beta)),
+                "gamma", new RealParameter(String.valueOf(gamma)),
+                "origin", new RealParameter(String.valueOf(origin)),
+                "integrationStepCount", latticeSize);
+        
+        StochasticCoalescent stochasticCoalescent = new StochasticCoalescent();
+        stochasticCoalescent.initByName(
+                "treeIntervals", treeIntervals,
+                "populationModel", new SIRPopulationFunction(stochasticSIR),
+                "minTraj", 10000,
+                "maxTries", 100000);
+        
+        double logP = stochasticCoalescent.calculateLogP();
+        double logPtruth = -81.7;
+        System.out.println("logP: " + logP);
+        System.out.println("logPtruth: ~ " + logPtruth);
+        
+        assert(Math.abs(logP-logPtruth)/Math.abs(0.5*(logP+logPtruth))<1e-3);
     }
 }
