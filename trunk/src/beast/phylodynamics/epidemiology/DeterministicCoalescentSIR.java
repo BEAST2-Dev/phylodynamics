@@ -19,7 +19,7 @@ import org.apache.commons.math3.ode.nonstiff.HighamHall54Integrator;
  * @author Alexei Drummond
  * @author Alex Popinga
  */
-@Description("Keeps track of trajectories for effective, infected, and susceptible populations," +
+@Description("Keeps track of deterministic trajectories for effective, infected, and susceptible populations," +
         "used by Volz2009TreeDistribution and SIRPopulationFunction")
 
 public class DeterministicCoalescentSIR extends CoalescentSIR {

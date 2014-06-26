@@ -14,8 +14,8 @@ import java.util.List;
  * @author Alexei Drummond
  * @author Timothy Vaughan
  */
-@Description("Keeps track of trajectories for effective, infected, and susceptible populations," +
-        "used by Volz2009TreeDistribution and DeterministicSIRPopulationFunction")
+@Description("Keeps track of stochastic trajectories for effective, infected, and susceptible populations," +
+        "used by SIRPopulationFunction")
 
 public class StochasticCoalescentSIR extends CoalescentSIR {
 
