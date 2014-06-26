@@ -17,7 +17,7 @@ import java.util.List;
 @Description("Keeps track of trajectories for effective, infected, and susceptible populations," +
         "used by Volz2009TreeDistribution and DeterministicSIRPopulationFunction")
 
-public class StochasticSIR extends CoalescentSIR {
+public class StochasticCoalescentSIR extends CoalescentSIR {
 
     public Input<Integer> numSamplesFromTrajectory = new Input<Integer>(
             "numSamplesFromTrajectory",
@@ -30,13 +30,13 @@ public class StochasticSIR extends CoalescentSIR {
             "true if (I-1) should be used in the denominator of the coalescent "
                     + "rate instead of I. Default is false.", false);
     
-    public StochasticSIR() {
+    public StochasticCoalescentSIR() {
     }
 
-    public StochasticSIR(RealParameter nSO,
-            RealParameter beta, RealParameter gamma,
-            RealParameter origin, int integrationStepCount,
-            int numSamplesFromTrajectory) throws Exception {
+    public StochasticCoalescentSIR(RealParameter nSO,
+                                   RealParameter beta, RealParameter gamma,
+                                   RealParameter origin, int integrationStepCount,
+                                   int numSamplesFromTrajectory) throws Exception {
         initByName(
                 "n_S0", nSO,
                 "beta", beta,

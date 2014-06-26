@@ -3,7 +3,7 @@ package beast.phylodynamics.marsden;
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.coalescent.TreeIntervals;
 import beast.evolution.tree.coalescent.Coalescent;
-import beast.phylodynamics.epidemiology.DeterministicSIR;
+import beast.phylodynamics.epidemiology.DeterministicCoalescentSIR;
 import beast.util.TreeParser;
 import beast.core.parameter.RealParameter;
 import beast.phylodynamics.epidemiology.Volz2009TreeDistribution;
@@ -41,7 +41,7 @@ public class LikelihoodSurfaces {
         coordGamma.close();
         coordS0.close();
 
-        DeterministicSIR volzSIR = new DeterministicSIR();
+        DeterministicCoalescentSIR volzSIR = new DeterministicCoalescentSIR();
         Volz2009TreeDistribution volzSIR2009 = new Volz2009TreeDistribution();
 
         double[] paramCurrent = new double[3];

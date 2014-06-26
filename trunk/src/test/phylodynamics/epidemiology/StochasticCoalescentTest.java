@@ -10,7 +10,7 @@ import beast.core.parameter.RealParameter;
 import beast.evolution.tree.coalescent.TreeIntervals;
 import beast.phylodynamics.epidemiology.SIRPopulationFunction;
 import beast.phylodynamics.epidemiology.StochasticCoalescent;
-import beast.phylodynamics.epidemiology.StochasticSIR;
+import beast.phylodynamics.epidemiology.StochasticCoalescentSIR;
 import beast.util.Randomizer;
 import beast.util.TreeParser;
 import java.io.BufferedReader;
@@ -46,7 +46,7 @@ public class StochasticCoalescentTest {
         int latticeSize = 100000; // 10^5, much higher than the default of 10^3
         
         // Set up trajectory object
-        StochasticSIR stochasticSIR = new StochasticSIR();
+        StochasticCoalescentSIR stochasticSIR = new StochasticCoalescentSIR();
         
         stochasticSIR.initByName(
                 "n_S0", new RealParameter(String.valueOf(S0)),
@@ -206,7 +206,7 @@ public class StochasticCoalescentTest {
                 "newick", newickStr);
         TreeIntervals treeIntervals = new TreeIntervals(tree);
         
-        StochasticSIR stochasticSIR = new StochasticSIR();
+        StochasticCoalescentSIR stochasticSIR = new StochasticCoalescentSIR();
         stochasticSIR.initByName(
                 "n_S0", new RealParameter(String.valueOf(S0)),
                 "beta", new RealParameter(String.valueOf(beta)),

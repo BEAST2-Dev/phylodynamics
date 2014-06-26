@@ -86,7 +86,7 @@ public class StochasticCoalescent extends TreeDistribution {
         SIRPopulationFunction popFunction = popSizeInput.get();
 
         // if stochastic, average log-likelihoods
-        if (popFunction.volzSIR.get() instanceof StochasticSIR) {
+        if (popFunction.volzSIR.get() instanceof StochasticCoalescentSIR) {
 
             ArrayList<Double> logps = new ArrayList<Double>();
 
@@ -242,6 +242,6 @@ public class StochasticCoalescent extends TreeDistribution {
 
     @Override
     public boolean isStochastic() {
-        return popSizeInput.get().volzSIR.get() instanceof StochasticSIR;
+        return popSizeInput.get().volzSIR.get() instanceof StochasticCoalescentSIR;
     }
 }
