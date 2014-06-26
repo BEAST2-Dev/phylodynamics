@@ -2,7 +2,6 @@ package beast.phylodynamics.epidemiology;
 
 import beast.core.Description;
 import beast.core.Input;
-import beast.core.parameter.RealParameter;
 import beast.evolution.tree.TreeDistribution;
 import beast.evolution.tree.coalescent.IntervalType;
 import beast.evolution.tree.coalescent.TreeIntervals;
@@ -22,7 +21,7 @@ import org.apache.commons.math3.ode.nonstiff.ClassicalRungeKuttaIntegrator;
 @Description("Calculates the Volz-2009 probability of a beast.tree.")
 public class Volz2009TreeDistribution extends TreeDistribution {
 
-    public Input<DeterministicSIR> volzSIRInput = new Input<DeterministicSIR>("volzSIR", "Volz parameters", Input.Validate.REQUIRED);
+    public Input<DeterministicCoalescentSIR> volzSIRInput = new Input<DeterministicCoalescentSIR>("volzSIR", "Volz parameters", Input.Validate.REQUIRED);
 
     TreeIntervals intervals;
 
