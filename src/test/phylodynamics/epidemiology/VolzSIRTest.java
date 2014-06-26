@@ -4,7 +4,7 @@ import beast.evolution.alignment.Alignment;
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.coalescent.Coalescent;
 import beast.evolution.tree.coalescent.TreeIntervals;
-import beast.phylodynamics.epidemiology.DeterministicSIR;
+import beast.phylodynamics.epidemiology.DeterministicCoalescentSIR;
 import beast.phylodynamics.epidemiology.Volz2009TreeDistribution;
 import test.beast.BEASTTestCase;
 
@@ -31,7 +31,7 @@ public class VolzSIRTest extends BEASTTestCase {
         TreeIntervals treeIntervals = new TreeIntervals();
         treeIntervals.initByName("tree", tree);
 
-        DeterministicSIR cp = new DeterministicSIR();
+        DeterministicCoalescentSIR cp = new DeterministicCoalescentSIR();
         cp.initByName(
                 "n_S0", Double.toString(n_S0),
                 "beta", Double.toString(beta),

@@ -22,7 +22,7 @@ import org.apache.commons.math3.ode.nonstiff.HighamHall54Integrator;
 @Description("Keeps track of trajectories for effective, infected, and susceptible populations," +
         "used by Volz2009TreeDistribution and SIRPopulationFunction")
 
-public class DeterministicSIR extends CoalescentSIR {
+public class DeterministicCoalescentSIR extends CoalescentSIR {
 
     // index checkers
     int NScounter = 0;
@@ -31,10 +31,10 @@ public class DeterministicSIR extends CoalescentSIR {
     double decay_x = -0.1;
     double decay_y = -0.1;
 
-    public DeterministicSIR() {
+    public DeterministicCoalescentSIR() {
     }
 
-    public DeterministicSIR(RealParameter nSO, RealParameter beta, RealParameter gamma, RealParameter origin) throws Exception {
+    public DeterministicCoalescentSIR(RealParameter nSO, RealParameter beta, RealParameter gamma, RealParameter origin) throws Exception {
         initByName("n_S0", nSO, "beta", beta, "gamma", gamma, "origin", origin);
     }
 
