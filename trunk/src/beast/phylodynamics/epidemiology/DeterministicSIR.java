@@ -22,7 +22,7 @@ import org.apache.commons.math3.ode.nonstiff.HighamHall54Integrator;
 @Description("Keeps track of trajectories for effective, infected, and susceptible populations," +
         "used by Volz2009TreeDistribution and SIRPopulationFunction")
 
-public class DeterministicSIR extends EPICSIR {
+public class DeterministicSIR extends CoalescentSIR {
 
     // index checkers
     int NScounter = 0;

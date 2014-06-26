@@ -20,7 +20,7 @@ import java.util.List;
  * @author Alexei Drummond
  * @author Alex Popinga
  */
-public abstract class EPICSIR extends CalculationNode implements Loggable {
+public abstract class CoalescentSIR extends CalculationNode implements Loggable {
 
     public Input<RealParameter> n_S_Parameter = new Input<RealParameter>("n_S0",
             "the number of susceptibles at time of origin (defaults to 1000).", Input.Validate.REQUIRED);
