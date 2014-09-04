@@ -181,7 +181,7 @@
                 </treeIntervals>
 
                 <populationModel spec="SIRPopulationFunction" id='popFunc'>
-                    <volzSIR spec="StochasticSIR" id="volzSIR" integrationStepCount='1001'
+                    <volzSIR spec="StochasticCoalescentSIR" id="volzSIR" integrationStepCount='1001'
                              numSamplesFromTrajectory='101'>
                         <R0 idref="volz.R0"/>
                         <gamma idref="volz.gamma"/>
