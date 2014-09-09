@@ -243,7 +243,7 @@
 
         <!-- Logger -->
 
-        <logger logEvery="10000" fileName="StochasticSIR_CL1.log">
+        <logger logEvery="10000" fileName="StochCoalSIR_HIVcluster1.log">
             <model idref='posterior'/>
             <log idref="posterior"/>
             <log idref="treeLikelihood"/>
@@ -264,7 +264,7 @@
             <log idref="rateGT"/>
         </logger>
 
-        <logger fileName="StochasticSIR_CL1.trees" id="treelog" logEvery="10000" mode="tree">
+        <logger fileName="StochCoalSIR_HIVcluster1.trees" id="treelog" logEvery="10000" mode="tree">
             <log spec='beast.evolution.tree.TreeWithMetaDataLogger' tree='@tree'>
                 <metadata idref="posterior"/>
             </log>
