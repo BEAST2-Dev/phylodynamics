@@ -67,7 +67,7 @@
        </operator>
 
 
-        <logger logEvery="1000" fileName="DeterCoalSIR_MASTERtree_1.log">
+        <logger logEvery="1000" fileName="DeterCoalSIR_MASTERtree.log">
    	        <model idref='posterior'/>
             <log idref="posterior"/>
             <log idref="volz.n_S0"/>
