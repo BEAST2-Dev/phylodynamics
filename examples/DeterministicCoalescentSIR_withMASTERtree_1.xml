@@ -67,7 +67,7 @@
        </operator>
 
 
-        <logger logEvery="1000" fileName="DeterministicSIR_MASTER_1.log">
+        <logger logEvery="1000" fileName="DeterministicCoalescentSIR_withMASTERtree_1.log">
    	        <model idref='posterior'/>
             <log idref="posterior"/>
             <log idref="volz.n_S0"/>
