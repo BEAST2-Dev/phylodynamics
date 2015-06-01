@@ -19,6 +19,7 @@
 	<property name="beast2classpath" location="${beast2path}/build" />
     <property name="beastiiclasspath" location="../beastii/build" />	
     <property name="bdskyclasspath" location="../bdsky/build" />
+    <property name="masterclasspath" location="../MASTER/build" />
 	<property name="Add_on_dir" value="${release_dir}/add-on" />
 
     <import file="${beast2path}/build.xml" />
@@ -36,6 +37,7 @@
         <pathelement path="${beast2classpath}"/>
         <pathelement path="${beastiiclasspath}"/>
         <pathelement path="${bdskyclasspath}"/>
+        <pathelement path="${masterclasspath}"/>
 	</path>
 
 	<!-- start -->
@@ -80,8 +82,8 @@
 		       memoryinitialsize="256m"
 		       memorymaximumsize="256m"
 			   includeAntRuntime='false'
-			   source="1.6"
-		       target="1.6">
+			   source="1.8"
+		       target="1.8">
 			<include name="beast/**/**" />
 			<!-- compile JUnit test classes -->
 			<include name="test/beast/**" />
