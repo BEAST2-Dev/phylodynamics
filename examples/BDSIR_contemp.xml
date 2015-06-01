@@ -30,7 +30,6 @@
         <parameter id="kappa.s:3" lower="0.0" name="stateNode">2.0</parameter>
         <parameter id="originEc.t:3" lower="0.0" name="stateNode" upper="1000.0">10.0</parameter>
         <parameter id="rhoEc.t:3" lower="0.0" name="stateNode" upper="1.0">0.1</parameter>
-        <parameter id="samplingEc.t:3" lower="0.0" name="stateNode" upper="1.0">0.0</parameter>
         <parameter id="becomeUninfectiousRateEc.t:3" lower="0.0" name="stateNode" upper="10.0">1.0</parameter>
         <parameter id="R0Ec.t:3" lower="0.0" name="stateNode" upper="10.0">2.0</parameter>
         <parameter id="S0Ec.t:3" lower="0.0" name="stateNode" upper="1.0E7">300000.0</parameter>
@@ -47,7 +46,9 @@
 
     <distribution id="posterior" spec="util.CompoundDistribution">
         <distribution id="prior" spec="util.CompoundDistribution">
-            <distribution R0="@R0Ec.t:3" S0="@S0Ec.t:3" becomeUninfectiousRate="@becomeUninfectiousRateEc.t:3" contemp="true" dR="@dR.t:3" dS="@dS.t:3" id="BDSIRcontemp.t:3" origin="@originEc.t:3" rho="@rhoEc.t:3" samplingProportion="@samplingEc.t:3" spec="beast.phylodynamics.BDSIR" tree="@Tree.t:3"/>
+            <distribution R0="@R0Ec.t:3" S0="@S0Ec.t:3" becomeUninfectiousRate="@becomeUninfectiousRateEc.t:3" contemp="true" dR="@dR.t:3" dS="@dS.t:3" id="BDSIRcontemp.t:3" origin="@originEc.t:3" rho="@rhoEc.t:3" spec="beast.phylodynamics.BDSIR" tree="@Tree.t:3">
+		        <parameter id="samplingEc.t:3" lower="0.0" name="samplingProportion" upper="1.0">0.0</parameter>
+            </distribution>	
             <prior id="R0PriorEc.t:3" name="distribution" x="@R0Ec.t:3">
                 <LogNormal id="LogNormalDistributionModel.0" name="distr">
                     <parameter id="RealParameter.0" lower="0.0" name="M" upper="0.0">0.0</parameter>

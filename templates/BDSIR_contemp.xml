@@ -47,7 +47,7 @@ suppressInputs='beast.phylodynamics.BDSIR.intervalTimes,
 		<parameter name="samplingProportion" id="samplingEc.t:$(n)" value="0." lower="0." upper="1." dimension ="1"/> 
 	</BDSIR>
 
-	<distribution  id='origRootPriorEc.t:$(n)' x="@originEc.t:$(n)" spec='beast.math.distributions.Prior'>
+	<distribution  id='originPriorEc.t:$(n)' x="@originEc.t:$(n)" spec='beast.math.distributions.Prior'>
 		<distr spec='beast.math.distributions.Uniform' lower="0." upper="1000."/>
 	</distribution>
 	<distribution id="S0_priorEc.t:$(n)" spec="beast.math.distributions.Prior" x="@S0Ec.t:$(n)">
@@ -95,6 +95,13 @@ suppressInputs='beast.phylodynamics.BDSIR.intervalTimes,
             <affectingOperator spec='SubtreeSlide' weight="1" gaussian="true" size="1.0" tree="@Tree.t:$(n)"/>
 		</operator> 
 	
+	<!-- standard tree operators -->	
+	
+	<operator id='BDSIR_contempUniformOperator.t:$(n)' spec='Uniform' weight="30" tree="@Tree.t:$(n)"/>
+	<operator id='BDSIR_contempnarrow.t:$(n)' spec='Exchange' isNarrow='true' weight="15" tree="@Tree.t:$(n)"/>
+	<operator id='BDSIR_contempwide.t:$(n)' spec='Exchange' isNarrow='false' weight="3" tree="@Tree.t:$(n)"/>
+	<operator id='BDSIR_contempWilsonBalding.t:$(n)' spec='WilsonBalding' weight="3" tree="@Tree.t:$(n)"/>
+	
 ]]>
 
             
@@ -107,13 +114,19 @@ suppressInputs='beast.phylodynamics.BDSIR.intervalTimes,
             <connect srcID='R0PriorEc.t:$(n)' targetID='prior' inputName='distribution' if='inposterior(BDSIRcontemp.t:$(n)) and R0Ec.t:$(n)/estimate=true'>prior on R0Ec.t:$(n)</connect>
 
             <connect srcID='SIR_tree_operator.t:$(n)' targetID='mcmc' inputName='operator'     if='inposterior(BDSIRcontemp.t:$(n)) and Tree.t:$(n)/estimate=true'/>
-            <connect srcID='treeScaler.t:$(n)' targetID='mcmc' inputName='operator' if='inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true and nooperator(SIR_tree_operator.t:$(n))' />
+            <!--connect srcID='treeScaler.t:$(n)' targetID='mcmc' inputName='operator' if='inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true and nooperator(SIR_tree_operator.t:$(n))' /-->
 
             <connect srcID='SIR_treeRoot_operator.t:$(n)' targetID='mcmc' inputName='operator'     if='inposterior(BDSIRcontemp.t:$(n)) and Tree.t:$(n)/estimate=true'/>
-            <connect srcID='treeRootScaler.t:$(n)' targetID='mcmc' inputName='operator' if='inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true and nooperator(SIR_treeRoot_operator.t:$(n))' />
+            <!--connect srcID='treeRootScaler.t:$(n)' targetID='mcmc' inputName='operator' if='inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true and nooperator(SIR_treeRoot_operator.t:$(n))' /-->
 
             <connect srcID='SIR_subtreeslide_operator.t:$(n)' targetID='mcmc' inputName='operator'     if='inposterior(BDSIRcontemp.t:$(n)) and Tree.t:$(n)/estimate=true'/>
-            <connect srcID='SubtreeSlide.t:$(n)' targetID='mcmc' inputName='operator' if='inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true and nooperator(SIR_subtreeslide_operator.t:$(n))' />
+            <!--connect srcID='SubtreeSlide.t:$(n)' targetID='mcmc' inputName='operator' if='inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true and nooperator(SIR_subtreeslide_operator.t:$(n))' /-->
+
+            <connect srcID='BDSIR_contempUniformOperator.t:$(n)'           targetID='mcmc' inputName='operator' if='inposterior(BDSIRcontemp.t:$(n)) and inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true'>Draws new internal node heights uniformally for tree t:$(n)</connect>
+            <connect srcID='BDSIR_contempSubtreeSlide.t:$(n)'              targetID='mcmc' inputName='operator' if='inposterior(BDSIRcontemp.t:$(n)) and inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true'>Performs subtree slide rearrangement of tree t:$(n)</connect>
+            <connect srcID='BDSIR_contempnarrow.t:$(n)'                    targetID='mcmc' inputName='operator' if='inposterior(BDSIRcontemp.t:$(n)) and inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true'>Narrow exchange performs local rearrangement of tree t:$(n)</connect>
+            <connect srcID='BDSIR_contempwide.t:$(n)'                      targetID='mcmc' inputName='operator' if='inposterior(BDSIRcontemp.t:$(n)) and inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true'>Wide exchange performs global rearrangement of tree t:$(n)</connect>
+            <connect srcID='BDSIR_contempWilsonBalding.t:$(n)'             targetID='mcmc' inputName='operator' if='inposterior(BDSIRcontemp.t:$(n)) and inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true'>Performs Wilson-Balding global rearrangement of tree t:$(n)</connect>
 
     <plate var='p' range='origin,rho,becomeUninfectiousRate,R0,S0'>
 

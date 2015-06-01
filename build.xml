@@ -17,7 +17,7 @@
 	<property name="libBeast2" location="${beast2path}/lib" />
 	<property name="srcBeast2" location="${beast2path}/src" />
 	<property name="beast2classpath" location="${beast2path}/build" />
-    <property name="beastiiclasspath" location="../beastii/build" />	
+    <property name="beastlabsclasspath" location="../BEASTLabs/build" />
     <property name="bdskyclasspath" location="../bdsky/build" />
     <property name="masterclasspath" location="../MASTER/build" />
 	<property name="Add_on_dir" value="${release_dir}/add-on" />
@@ -35,7 +35,7 @@
 		<fileset dir="${libBeast2}" includes="beagle.jar"/>
 		<fileset dir="${libBeast2}" includes="commons-math3-3.1.1.jar"/>
         <pathelement path="${beast2classpath}"/>
-        <pathelement path="${beastiiclasspath}"/>
+        <pathelement path="${beastlabsclasspath}"/>
         <pathelement path="${bdskyclasspath}"/>
         <pathelement path="${masterclasspath}"/>
 	</path>
