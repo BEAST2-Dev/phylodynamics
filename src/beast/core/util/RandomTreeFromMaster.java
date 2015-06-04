@@ -6,7 +6,7 @@ import beast.core.StateNodeInitialiser;
 import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.TaxonSet;
 import beast.evolution.tree.*;
-import master.beast.BeastTreeFromMaster;
+import master.BeastTreeFromMaster;
 
 import java.util.List;
 
