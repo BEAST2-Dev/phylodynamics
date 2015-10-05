@@ -22,17 +22,21 @@ import java.util.List;
  */
 public abstract class CoalescentSIR extends CalculationNode implements Loggable {
 
-    public Input<RealParameter> n_S_Parameter = new Input<RealParameter>("n_S0",
-            "the number of susceptibles at time of origin (defaults to 1000).", Input.Validate.REQUIRED);
-
     public Input<RealParameter> betaParameter = new Input<RealParameter>("beta",
-            "the mass action rate of infection.", Input.Validate.REQUIRED);
+            "the mass action rate of infection.");
 
     public Input<RealParameter> R0 =
-            new Input<RealParameter>("R0", "The basic reproduction number", Input.Validate.XOR, betaParameter);
+            new Input<RealParameter>("R0", "The basic reproduction number");
 
     public Input<RealParameter> gammaParameter = new Input<RealParameter>("gamma",
             "the per-infected rate of recovery + sampling rate.", Input.Validate.REQUIRED);
+
+    public Input<RealParameter> growthRateParameter = new Input<RealParameter>("g",
+            "the growth rate g = (beta*S0) - gamma");
+
+    public Input<RealParameter> n_S_Parameter = new Input<RealParameter>("n_S0",
+            "the number of susceptibles at time of origin (defaults to 1000).", Input.Validate.REQUIRED);
+
     public Input<RealParameter> originParameter = new Input<RealParameter>("origin",
             "the time before the root that the first infection occurred.", Input.Validate.REQUIRED);
 
@@ -79,15 +83,23 @@ public abstract class CoalescentSIR extends CalculationNode implements Loggable 
                     Math.max(0.0, gammaParameter.get().getLower()),
                     gammaParameter.get().getUpper());
         }
-        if (originParameter.get() != null) {
-            originParameter.get().setBounds(
-                    Math.max(0.0, originParameter.get().getLower()),
-                    originParameter.get().getUpper());
+
+        if (growthRateParameter.get() != null) {
+            growthRateParameter.get().setBounds(
+                    Math.max(0.0, growthRateParameter.get().getLower()),
+                    growthRateParameter.get().getUpper());
         }
+
         if (n_S_Parameter.get() != null) {
             n_S_Parameter.get().setBounds(
                     Math.max(1.0, n_S_Parameter.get().getLower()),
                     n_S_Parameter.get().getUpper());
+        }
+
+        if (originParameter.get() != null) {
+            originParameter.get().setBounds(
+                    Math.max(0.0, originParameter.get().getLower()),
+                    originParameter.get().getUpper());
         }
 
         effectivePopSizeTraj = new ArrayList<Double>();
@@ -106,19 +118,29 @@ public abstract class CoalescentSIR extends CalculationNode implements Loggable 
     public double beta() {
         if (betaParameter.get() != null) {
             return betaParameter.get().getValue();
-        } else {
+        } else if (growthRateParameter.get() == null) {
             return R0.get().getValue() * gammaParameter.get().getValue() / n_S_Parameter.get().getValue();
+        } else {
+            return (growthRateParameter.get().getValue() + gammaParameter.get().getValue())
+                    / n_S_Parameter.get().getValue();
         }
     }
 
     /**
-     * @return R0 (fundamental reproductive number) value, possibly calculating from beta, gamma and S0, thereby catering for both parameterizations.
+     * @return R0 (fundamental reproductive number) value - possibly calculating from beta, gamma and S0,
+     * or from the growth rate and gamma - thereby catering for multiple parameterizations.
      */
     private double R0() {
         if (R0.get() != null) {
-            return R0.get().getValue();
+                return R0.get().getValue();
         } else {
-            return betaParameter.get().getValue() * n_S_Parameter.get().getValue() / gammaParameter.get().getValue();
+            if (growthRateParameter.get() != null) {
+                double gamma = gammaParameter.get().getValue();
+                double g = growthRateParameter.get().getValue();
+                return (g + gamma) / gamma;
+            } else {
+                return betaParameter.get().getValue() * n_S_Parameter.get().getValue() / gammaParameter.get().getValue();
+            }
         }
     }
 
