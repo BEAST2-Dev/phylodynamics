@@ -1,11 +1,11 @@
 package beast.phylodynamics.epidemiology;
 
-import beast.core.Operator;
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.Function;
+import beast.core.*;
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Tree;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -174,6 +174,23 @@ public class CompoundSIROperator extends Operator {
 
         }
         return hastingsRatio;
+    }
+
+
+    /**
+     * return list of state nodes that this operator operates on.
+     * state nodes that are input to the operator but are never changed
+     * in a proposal should not be listed
+     */
+    @Override
+    public List<StateNode> listStateNodes() throws Exception {
+
+        final List<StateNode> list = affectingOperator.get().listStateNodes();
+
+        list.add(dS_input.get());
+        list.add(dR_input.get());
+
+        return list;
     }
 
     public static void main(String[] args){
