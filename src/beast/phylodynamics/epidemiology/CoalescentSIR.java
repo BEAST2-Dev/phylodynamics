@@ -65,7 +65,7 @@ public abstract class CoalescentSIR extends CalculationNode implements Loggable 
     protected ContinuousOutputModel integrationResults;
 
     @Override
-    public void initAndValidate() throws Exception {
+    public void initAndValidate() {
         if (betaParameter.get() != null) {
             betaParameter.get().setBounds(
                     Math.max(0.0, betaParameter.get().getLower()),
@@ -283,7 +283,7 @@ public abstract class CoalescentSIR extends CalculationNode implements Loggable 
      */
 
     @Override
-    public void init(PrintStream out) throws Exception {
+    public void init(PrintStream out) {
         //out.print("dt\t");
 
         out.print("R_0\tpeak_I\t");
