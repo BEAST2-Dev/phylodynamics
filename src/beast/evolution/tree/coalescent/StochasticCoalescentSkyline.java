@@ -44,14 +44,14 @@ public class StochasticCoalescentSkyline extends TreeDistribution {
     boolean m_bIsPrepared = false;
 
 
-    public void initAndValidate() throws Exception {
+    public void initAndValidate() {
         if (treeInput.get() != null) {
-            throw new Exception("only tree intervals (not tree) should not be specified");
+            throw new RuntimeException("only tree intervals (not tree) should not be specified");
         }
         intervals = treeIntervalsInput.get();
 
         if (infectedPopulationInput.get().getDimension()!=eventTimeInput.get().getDimension()) {
-            throw new Exception("infectedPopulation size input should have same dimension as eventTime input");
+            throw new RuntimeException("infectedPopulation size input should have same dimension as eventTime input");
         }
 
         prepare();
@@ -135,7 +135,7 @@ public class StochasticCoalescentSkyline extends TreeDistribution {
      * Calculates the log likelihood of this set of coalescent intervals
      */
     @Override
-    public double calculateLogP() throws Exception {
+    public double calculateLogP() {
         if (!m_bIsPrepared) {
             prepare();
         }

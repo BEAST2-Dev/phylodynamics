@@ -72,12 +72,12 @@ public class SIR_Initializer extends BEASTObject implements StateNodeInitialiser
 
 
     @Override
-    public void initAndValidate() throws Exception{
+    public void initAndValidate(){
          scaler = 1.;
     }
 
     @Override
-    public void initStateNodes() throws Exception {
+    public void initStateNodes() {
 
 
         S0 = (int) (S0_input.get().getArrayValue());

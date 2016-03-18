@@ -162,7 +162,7 @@ public class StochasticCoalescentSIR extends CoalescentSIR {
     }
 
     @Override
-    public void init(PrintStream out) throws Exception {
+    public void init(PrintStream out) {
 
         // inits R0
         super.init(out);

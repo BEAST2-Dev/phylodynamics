@@ -26,7 +26,7 @@ public class ScaleOffsetOperator extends ScaleOperator{
     double offset;
 
     @Override
-    public void initAndValidate() throws Exception {
+    public void initAndValidate() {
 
         super.initAndValidate();
 

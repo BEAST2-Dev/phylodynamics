@@ -39,7 +39,7 @@ public class MultiScaleOperator extends Operator {
     double m_fScaleFactor;
 
     @Override
-    public void initAndValidate() throws Exception {
+    public void initAndValidate() {
         m_fScaleFactor = m_scaleFactor.get();
         // sanity checks
         if (m_parameters.get().size() == 0) {

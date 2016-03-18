@@ -80,10 +80,10 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
 
     SEIR_simulator hybridTauleapSEIR;
 
-    public void initAndValidate() throws Exception {
+    public void initAndValidate() {
 
         useExposed = useExposedBoolean.get();
-        if (useExposed && (E0.get()==null || exposeRate.get() == null) ) throw new Exception("HybridSEIREpidemic: When useExposed=true, exposeRate and E0 must be specified.");
+        if (useExposed && (E0.get()==null || exposeRate.get() == null) ) throw new RuntimeException("HybridSEIREpidemic: When useExposed=true, exposeRate and E0 must be specified.");
         if (useExposed){
             expose = exposeRate.get().getValue();
             e0 = E0.get().getValue();
@@ -335,7 +335,7 @@ public class HybridSEIREpidemic extends CalculationNode implements Loggable {
         return true;
     }
 
-    public void init(PrintStream printStream) throws Exception {
+    public void init(PrintStream printStream) {
         printStream.print("breachCount\tnoBreachCount\tnoBreachProportion\t");
     }
 

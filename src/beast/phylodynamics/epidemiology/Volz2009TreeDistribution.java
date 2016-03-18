@@ -26,17 +26,17 @@ public class Volz2009TreeDistribution extends TreeDistribution {
     TreeIntervals intervals;
 
     @Override
-    public void initAndValidate() throws Exception {
+    public void initAndValidate() {
         intervals = treeIntervalsInput.get();
         if (intervals == null) {
-            throw new Exception("Expected treeIntervals to be specified");
+            throw new RuntimeException("Expected treeIntervals to be specified");
         }
 
         calculateLogP();
     }
 
 
-    public double calculateLogP() throws Exception {
+    public double calculateLogP() {
 
         boolean reject = volzSIRInput.get().update();
 

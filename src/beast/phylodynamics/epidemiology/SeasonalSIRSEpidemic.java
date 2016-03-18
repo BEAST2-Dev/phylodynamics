@@ -21,9 +21,9 @@ public class SeasonalSIRSEpidemic extends HybridSEIREpidemic {
     public double[] birthTimes;
 
     @Override
-    public void initAndValidate() throws Exception {
+    public void initAndValidate() {
 
-        if (birthRateScalar.get().getDimension()!=2) throw new Exception("birthrate should have dimesnion 2 (winter rate & summer rate)");
+        if (birthRateScalar.get().getDimension()!=2) throw new RuntimeException("birthrate should have dimesnion 2 (winter rate & summer rate)");
 
         birthTimes = new double[birthRateChangeTimesInput.get().getDimension()];
 

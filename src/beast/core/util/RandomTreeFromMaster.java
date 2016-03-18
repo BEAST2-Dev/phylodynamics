@@ -31,7 +31,7 @@ public class RandomTreeFromMaster extends Tree implements StateNodeInitialiser {
     StateNode tree;
 
     @Override
-    public void initAndValidate() throws Exception {
+    public void initAndValidate() {
 
 
         super.initAndValidate();
@@ -39,7 +39,7 @@ public class RandomTreeFromMaster extends Tree implements StateNodeInitialiser {
         initStateNodes();
     }
 
-    public void initStateNodes() throws Exception{
+    public void initStateNodes() {
 
         BeastTreeFromMaster masterTree = masterTreeInput.get();
 

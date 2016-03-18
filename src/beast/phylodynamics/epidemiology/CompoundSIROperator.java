@@ -69,7 +69,7 @@ public class CompoundSIROperator extends Operator {
 
 
     @Override
-    public void initAndValidate() throws Exception {
+    public void initAndValidate() {
 
 
         affectingOperator.get().initAndValidate();
@@ -183,7 +183,7 @@ public class CompoundSIROperator extends Operator {
      * in a proposal should not be listed
      */
     @Override
-    public List<StateNode> listStateNodes() throws Exception {
+    public List<StateNode> listStateNodes() {
 
         final List<StateNode> list = affectingOperator.get().listStateNodes();
 

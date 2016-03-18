@@ -44,7 +44,7 @@ public class CoalescentSimulatorBasic extends beast.core.Runnable {
     int replicates;
 
     @Override
-    public void initAndValidate() throws Exception {
+    public void initAndValidate() {
 
         randomTree = randomTreeInput.get();
         replicates = replicatesInput.get();

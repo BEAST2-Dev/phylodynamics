@@ -60,7 +60,7 @@ public class CoalescentSimulator extends beast.core.Runnable {
 
 
     @Override
-    public void initAndValidate() throws Exception {
+    public void initAndValidate() {
 
         replicates = replicatesInput.get();
         ntaxa = ntaxaInput.get();

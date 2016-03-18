@@ -56,10 +56,10 @@ public class StochasticCoalescent extends TreeDistribution {
     }
 
     @Override
-    public void initAndValidate() throws Exception {
+    public void initAndValidate() {
         treeIntervals = treeIntervalsInput.get();
         if (treeIntervals == null) {
-            throw new Exception("Expected treeIntervals to be specified");
+            throw new RuntimeException("Expected treeIntervals to be specified");
         }
 
         minTraj = minimumNumberOfTrajectories.get();
@@ -81,7 +81,7 @@ public class StochasticCoalescent extends TreeDistribution {
      * @throws java.lang.Exception
      */
     @Override
-    public double calculateLogP() throws Exception {
+    public double calculateLogP() {
 
         SIRPopulationFunction popFunction = popSizeInput.get();
 

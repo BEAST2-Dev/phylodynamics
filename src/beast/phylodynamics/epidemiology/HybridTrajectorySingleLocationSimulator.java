@@ -58,7 +58,7 @@ public class HybridTrajectorySingleLocationSimulator extends Operator {
 
 
     @Override
-    public void initAndValidate() throws Exception {
+    public void initAndValidate() {
 
         S0 = (int) (S0_input.get().getArrayValue());
 

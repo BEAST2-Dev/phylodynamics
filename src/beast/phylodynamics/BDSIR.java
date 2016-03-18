@@ -48,7 +48,7 @@ public class BDSIR extends BirthDeathSkylineModel {
 
 
     @Override
-    public void initAndValidate() throws Exception {
+    public void initAndValidate() {
 
         S0 = (S0_input.get().getArrayValue());
 

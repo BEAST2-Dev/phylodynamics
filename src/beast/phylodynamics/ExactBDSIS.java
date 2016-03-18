@@ -206,7 +206,7 @@ public class ExactBDSIS extends TreeDistribution {
     /******************************************************************************************************************/
 
 
-    public void initAndValidate() throws Exception {
+    public void initAndValidate() {
 
         super.initAndValidate();
 
@@ -266,11 +266,11 @@ public class ExactBDSIS extends TreeDistribution {
              (transform && (R0Parameter.getDimension()                     != totalIntervals ||
                             becomeUninfectiousRateParameter.getDimension() != totalIntervals ||
                             samplingProportionParameter.getDimension()     != totalIntervals))) {
-            throw new Exception("SIS model parameter dimensions not consistent");
+            throw new RuntimeException("SIS model parameter dimensions not consistent");
         }
 
         if (eventTypesParameter != null && eventTypesParameter.getDimension() != totalEvents) {
-            throw new Exception("Wrong number of node types (expected "+totalEvents+")");
+            throw new RuntimeException("Wrong number of node types (expected "+totalEvents+")");
         }
 
 
@@ -329,7 +329,7 @@ public class ExactBDSIS extends TreeDistribution {
      *
      * @throws Exception
      */
-    public void checkAbsoluteBounds() throws Exception {
+    public void checkAbsoluteBounds() {
 
         // Check if the limits set by the user are sensible
         if (rhoParameter != null) {
@@ -373,20 +373,20 @@ public class ExactBDSIS extends TreeDistribution {
         if (updateRatesAndTimes(tree) >= 0) {
 
             if (rho < 0 || rho > 1) {
-                throw new Exception("Illegal parameter value (rho = "+rho+")");
+                throw new RuntimeException("Illegal parameter value (rho = "+rho+")");
             }
 
             for (int i = 0; i < totalIntervals; i++) {
                 if (K[i] < 0 || beta[i] <= 0 ||  mu[i] < 0.0 || psi[i] < 0.0) {
-                    throw new Exception("Illegal parameter values\nK\tbeta\tmu\tpsi\n"+K[i]+"\t"+beta[i]+"\t"+mu[i]+"\t"+psi[i]);
+                    throw new RuntimeException("Illegal parameter values\nK\tbeta\tmu\tpsi\n"+K[i]+"\t"+beta[i]+"\t"+mu[i]+"\t"+psi[i]);
                 }
             }
 
             if (extantAtRoot < 0) {
-                throw new Exception("Illegal parameter value (extantAtRoot = "+extantAtRoot+")");
+                throw new RuntimeException("Illegal parameter value (extantAtRoot = "+extantAtRoot+")");
             }
         } else
-            throw new Exception("Illegal parameter value (origin > tree height)");
+            throw new RuntimeException("Illegal parameter value (origin > tree height)");
     }
 
 
