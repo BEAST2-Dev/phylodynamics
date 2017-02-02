@@ -59,7 +59,7 @@ public class BDSIR extends BirthDeathSkylineModel {
         super.initAndValidate();
 
         if (transform) {
-            if (R0.get().getDimension() != 1 && !isSeasonal.get())// || becomeUninfectiousRate.get().getDimension() != 1 || samplingProportion.get().getDimension() != 1)
+            if (reproductiveNumberInput.get().getDimension() != 1 && !isSeasonal.get())// || becomeUninfectiousRate.get().getDimension() != 1 || samplingProportion.get().getDimension() != 1)
                 throw new RuntimeException("R0, becomeUninfectiousRate and samplingProportion have to be 1-dimensional!");
         } else {
             if (birthRate.get().getDimension() != 1 && !isSeasonal.get())//  || death.length != 1 || psi.length != 1)
@@ -106,7 +106,7 @@ public class BDSIR extends BirthDeathSkylineModel {
         int initialSeason = season;
 
         if (isSeasonal.get())
-            birth[1] = transform ? (R0.get().getValue(1) * becomeUninfectiousRate.get().getValue()) : birthRate.get().getValue(1);
+            birth[1] = transform ? (reproductiveNumberInput.get().getValue(1) * becomeUninfectiousRate.get().getValue()) : birthRate.get().getValue(1);
 
         birthSIR[0] = birth[season] / S0 * cumS;
         for (int i = 0; i < dim - 1; i++) {

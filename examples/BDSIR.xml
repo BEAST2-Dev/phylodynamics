@@ -9,7 +9,7 @@
 
 	<BDSIR spec="beast.phylodynamics.BDSIR" id="birthDeath" tree="@tree" dS="@dS" dR="@dR" checkTreeConsistent="false">
 		<parameter name="origin" id="origin" value ="12.7808530307"/> 
-		<parameter name="R0" id="R0" value="2.5" lower="0." upper="10."/>
+		<parameter name="reproductiveNumber" id="reproductiveNumber" value="2.5" lower="0." upper="10."/>
 		<parameter name="becomeUninfectiousRate" id="becomeUninfectiousRate" value="0.25" lower="0."/>
 		<parameter name="samplingProportion" id="samplingProportion" value="0.10" lower="0." upper="1."/>
 		<parameter name="S0" id="S0" value="1000" lower="1"/>
@@ -18,9 +18,9 @@
 	<SIR spec="HybridSEIREpidemic" id="SIR" S0="@S0" Nt="10001" Nsamples="101" origin="@origin" birth="@birth" death="@death" sampling="@sampling" simulationType="SAL"/>
 
 	
-	<RPNcalculator spec="beast.math.statistic.RPNcalculator" id="birth" expression="R0 S0 / becomeUninfectiousRate *"> <!-- s/(d+s) -->
+	<RPNcalculator spec="beast.math.statistic.RPNcalculator" id="birth" expression="reproductiveNumber S0 / becomeUninfectiousRate *"> <!-- s/(d+s) -->
 		<parameter idref="becomeUninfectiousRate"/>
-		<parameter idref="R0"/>        
+		<parameter idref="reproductiveNumber"/>        
 		<parameter idref="S0"/>        
 	</RPNcalculator>
 	<RPNcalculator spec="beast.math.statistic.RPNcalculator" id="sampling" expression="becomeUninfectiousRate samplingProportion *"> 
@@ -37,7 +37,7 @@
 		<distribution id="S0_prior" spec="beast.math.distributions.Prior" x="@S0">
 			<distr spec="beast.math.distributions.LogNormalDistributionModel" M="7" S="1." offset="0."/>
 		</distribution>
-		<distribution id="R0_prior" spec="beast.math.distributions.Prior" x="@R0">
+		<distribution id="reproductiveNumber_prior" spec="beast.math.distributions.Prior" x="@reproductiveNumber">
 			<distr spec="beast.math.distributions.LogNormalDistributionModel" M="1." S="1." offset="0."/>
 		</distribution>
 		<distribution id="becomeUninf_prior" spec="beast.math.distributions.Prior" x="@becomeUninfectiousRate">
@@ -52,7 +52,7 @@
 	<run chainLength="100000" id="mcmc" spec="MCMC" storeEvery="10000">
      
 		<state id="state" storeEvery="10000">
-			<stateNode idref="R0"/>
+			<stateNode idref="reproductiveNumber"/>
 			<stateNode idref="becomeUninfectiousRate"/>
 			<stateNode idref="samplingProportion"/>
 			<stateNode idref="S0"/>
@@ -64,12 +64,12 @@
 	
 		<distribution idref="posterior"/>
 		
-		<operator spec="CompoundSIROperator" id="SIR_R0_operator"  weight="1" tree="@tree"
+		<operator spec="CompoundSIROperator" id="SIR_reproductiveNumber_operator"  weight="1" tree="@tree"
 		origin='@origin' birth="@birth" death="@death" sampling="@sampling" S0="@S0">
 			<SIR idref="SIR"/>
 			<dS spec="RealParameter" id="dS" value="0" dimension="100"/> <!-- will be initialised in operator -->
 			<dR spec="RealParameter" id="dR" value="0" dimension="100"/> <!-- will be initialised in operator -->
-			<affectingOperator id='R0Operator' spec='ScaleOperator' scaleFactor=".75" weight="1" parameter="@R0"/>
+			<affectingOperator id='reproductiveNumberOperator' spec='ScaleOperator' scaleFactor=".75" weight="1" parameter="@reproductiveNumber"/>
 		</operator> 
 
 		<operator spec="CompoundSIROperator" id="SIR_S0_operator"  weight="1" tree="@tree" SIR="@SIR"
@@ -84,22 +84,22 @@
 
 		<operator spec="CompoundSIROperator" id="SIR_updown1_operator"  weight="1" tree="@tree" SIR="@SIR"
 		origin='@origin' birth="@birth" death="@death" sampling="@sampling" S0="@S0" dS="@dS" dR="@dR">
-			<affectingOperator id="updown1" spec="UpDownOperator" scaleFactor=".75" weight="1" up="@R0" down="@becomeUninfectiousRate"/>
+			<affectingOperator id="updown1" spec="UpDownOperator" scaleFactor=".75" weight="1" up="@reproductiveNumber" down="@becomeUninfectiousRate"/>
 		</operator> 
 
 		<operator spec="CompoundSIROperator" id="SIR_updown2_operator"  weight="1" tree="@tree" SIR="@SIR"
 		origin='@origin' birth="@birth" death="@death" sampling="@sampling" S0="@S0" dS="@dS" dR="@dR">
-			<affectingOperator id="updown2" spec="UpDownOperator" scaleFactor=".75" weight="1" up="@R0" down="@samplingProportion"/>
+			<affectingOperator id="updown2" spec="UpDownOperator" scaleFactor=".75" weight="1" up="@reproductiveNumber" down="@samplingProportion"/>
 		</operator> 
 
 		<operator spec="CompoundSIROperator" id="SIR_updown3_operator"  weight="1" tree="@tree" SIR="@SIR"
 		origin='@origin' birth="@birth" death="@death" sampling="@sampling" S0="@S0" dS="@dS" dR="@dR">
-			<affectingOperator id="updown3" spec="UpDownOperator" scaleFactor=".95" weight="1" up="@R0" down="@S0"/>
+			<affectingOperator id="updown3" spec="UpDownOperator" scaleFactor=".95" weight="1" up="@reproductiveNumber" down="@S0"/>
 		</operator> 
 
 		<logger fileName="bdsir.log" id="log" logEvery="10000" mode="autodetect" model="@posterior">
 			<distribution idref="posterior" name="log"/>
-			<log idref="R0"/>
+			<log idref="reproductiveNumber"/>
 			<log idref="becomeUninfectiousRate"/>
 			<log idref="samplingProportion"/>
 			<log idref="birth"/>
@@ -114,7 +114,7 @@
 		<logger id="screenlog" logEvery="10000" mode="autodetect">
 			<distribution idref="posterior" name="log"/>
 			<log arg="@posterior" id="ESS.0" spec="util.ESS"/>
-			<log idref="R0"/>
+			<log idref="reproductiveNumber"/>
 			<log idref="becomeUninfectiousRate"/>
 			<log idref="samplingProportion"/>
 			<log idref="birth"/>

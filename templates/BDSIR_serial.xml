@@ -41,7 +41,7 @@ suppressInputs='beast.phylodynamics.BDSIR.intervalTimes,
 	<BDSIR spec="beast.phylodynamics.BDSIR" dS="@dSEs.t:$(n)" dR="@dREs.t:$(n)" id="BDSIRserial.t:$(n)" tree="@Tree.t:$(n)">
 		<parameter name="origin" id="originEs.t:$(n)" value="10" lower="0." upper="1000."/>  	
 		<parameter name="S0" id="S0Es.t:$(n)" value="300000" lower="0" upper="10000000"/> 		
-		<parameter name="R0" id="R0Es.t:$(n)" value="2" lower="0." dimension ="1" upper="10"/>
+		<parameter name="reproductiveNumber" id="reproductiveNumberEs.t:$(n)" value="2" lower="0." dimension ="1" upper="10"/>
 		<parameter name="becomeUninfectiousRate" id="becomeUninfectiousRateEs.t:$(n)" value="1." lower="0." upper="10." dimension ="1"/>
 		<parameter name="samplingProportion" id="samplingProportionEs.t:$(n)" value="0.1" lower="0." upper="1." dimension ="1"/> 
 	</BDSIR>
@@ -58,13 +58,13 @@ suppressInputs='beast.phylodynamics.BDSIR.intervalTimes,
 	<distribution id="becomeUninfectiousRatePriorEs.t:$(n)" spec="beast.math.distributions.Prior" x="@becomeUninfectiousRateEs.t:$(n)">
 		<distr spec='beast.math.distributions.LogNormalDistributionModel' M="0." S="1." offset="0.0" meanInRealSpace="false"/>
 	</distribution>
-	<distribution id="R0PriorEs.t:$(n)" spec="beast.math.distributions.Prior" x="@R0Es.t:$(n)">
+	<distribution id="reproductiveNumberPriorEs.t:$(n)" spec="beast.math.distributions.Prior" x="@reproductiveNumberEs.t:$(n)">
 		<distr spec='beast.math.distributions.LogNormalDistributionModel' M="0." S="1.25" offset="0.0" meanInRealSpace="false"/>
 	</distribution>
 
-	<RPNcalculator spec="beast.math.statistic.RPNcalculator" id="birthEs.t:$(n)" expression="R0Es.t:$(n) S0Es.t:$(n) / becomeUninfectiousRateEs.t:$(n) *"> 
+	<RPNcalculator spec="beast.math.statistic.RPNcalculator" id="birthEs.t:$(n)" expression="reproductiveNumberEs.t:$(n) S0Es.t:$(n) / becomeUninfectiousRateEs.t:$(n) *"> 
 		<parameter idref="becomeUninfectiousRateEs.t:$(n)"/>
-		<parameter idref="R0Es.t:$(n)"/>        
+		<parameter idref="reproductiveNumberEs.t:$(n)"/>        
 		<parameter idref="S0Es.t:$(n)"/>        
 	</RPNcalculator>
 	<RPNcalculator spec="beast.math.statistic.RPNcalculator" id="samplingEs.t:$(n)" expression="becomeUninfectiousRateEs.t:$(n) samplingProportionEs.t:$(n) *"> 
@@ -79,7 +79,7 @@ suppressInputs='beast.phylodynamics.BDSIR.intervalTimes,
 			<parameter name="dS" id="dSEs.t:$(n)" value="0" dimension="100"/>
 			<parameter name="dR" id="dREs.t:$(n)" value="0" dimension="100"/>		
 
-    <plate var='p' range='origin,samplingProportion,becomeUninfectiousRate,R0,S0'>
+    <plate var='p' range='origin,samplingProportion,becomeUninfectiousRate,reproductiveNumber,S0'>
 
 		<operator spec="beast.phylodynamics.epidemiology.CompoundSIROperator" id="SIR_$(p)_operatorEs.t:$(n)"  weight="3" tree="@Tree.t:$(n)" origin='@originEs.t:$(n)' birth="@birthEs.t:$(n)" death="@deathEs.t:$(n)" sampling="@samplingEs.t:$(n)" S0="@S0Es.t:$(n)" dS="@dSEs.t:$(n)" dR="@dREs.t:$(n)">
 			<SIR idref="SIRserial.t:$(n)"/>
@@ -118,7 +118,7 @@ suppressInputs='beast.phylodynamics.BDSIR.intervalTimes,
             <connect srcID='S0_priorEs.t:$(n)' targetID='prior' inputName='distribution' if='inposterior(BDSIRserial.t:$(n)) and S0Es.t:$(n)/estimate=true'>prior on S0Es.t:$(n)</connect>
             <connect srcID='samplingProportionPriorEs.t:$(n)' targetID='prior' inputName='distribution' if='inposterior(BDSIRserial.t:$(n)) and samplingProportionEs.t:$(n)/estimate=true'>prior on samplingProportionEs.t:$(n)</connect>
             <connect srcID='becomeUninfectiousRatePriorEs.t:$(n)' targetID='prior' inputName='distribution' if='inposterior(BDSIRserial.t:$(n)) and becomeUninfectiousRateEs.t:$(n)/estimate=true'>prior over becomeUninfectiousRateEs.t:$(n)</connect>
-            <connect srcID='R0PriorEs.t:$(n)' targetID='prior' inputName='distribution' if='inposterior(BDSIRserial.t:$(n)) and R0Es.t:$(n)/estimate=true'>prior on R0Es.t:$(n)</connect>
+            <connect srcID='reproductiveNumberPriorEs.t:$(n)' targetID='prior' inputName='distribution' if='inposterior(BDSIRserial.t:$(n)) and reproductiveNumberEs.t:$(n)/estimate=true'>prior on reproductiveNumberEs.t:$(n)</connect>
 
             <connect srcID='SIR_tree_operatorEs.t:$(n)' targetID='mcmc' inputName='operator'     if='inposterior(BDSIRserial.t:$(n)) and Tree.t:$(n)/estimate=true'/>
             <!--connect srcID='treeScaler.t:$(n)' targetID='mcmc' inputName='operator' if='inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true and nooperator(SIR_tree_operatorEs.t:$(n))' /-->
@@ -135,14 +135,14 @@ suppressInputs='beast.phylodynamics.BDSIR.intervalTimes,
             <connect srcID='BDSIR_serialwide.t:$(n)'                      targetID='mcmc' inputName='operator' if='inposterior(BDSIRserial.t:$(n)) and inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true'>Wide exchange performs global rearrangement of tree t:$(n)</connect>
             <connect srcID='BDSIR_serialWilsonBalding.t:$(n)'             targetID='mcmc' inputName='operator' if='inposterior(BDSIRserial.t:$(n)) and inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true'>Performs Wilson-Balding global rearrangement of tree t:$(n)</connect>
 
-    <plate var='p' range='origin,samplingProportion,becomeUninfectiousRate,R0,S0'>
+    <plate var='p' range='origin,samplingProportion,becomeUninfectiousRate,reproductiveNumber,S0'>
 
             <connect srcID='SIR_$(p)_operatorEs.t:$(n)' targetID='mcmc' inputName='operator'     if='inposterior(BDSIRserial.t:$(n)) and $(p)Es.t:$(n)/estimate=true'/>
 
     </plate>
 
             <connect srcID='BDSIRserial.t:$(n)' targetID='tracelog' inputName='log' if='inposterior(BDSIRserial.t:$(n))'/>
-            <plate var='p' range='origin,samplingProportion,becomeUninfectiousRate,R0,S0,dS,dR'>
+            <plate var='p' range='origin,samplingProportion,becomeUninfectiousRate,reproductiveNumber,S0,dS,dR'>
                     <connect srcID='$(p)Es.t:$(n)' targetID='state' inputName='stateNode' if='inposterior(BDSIRserial.t:$(n)) and $(p)Es.t:$(n)/estimate=true'/>
                     <connect srcID='$(p)Es.t:$(n)' targetID='tracelog' inputName='log' if='inposterior(BDSIRserial.t:$(n)) and $(p)Es.t:$(n)/estimate=true'/>
             </plate>

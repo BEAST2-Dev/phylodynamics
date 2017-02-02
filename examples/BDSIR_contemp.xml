@@ -31,7 +31,7 @@
         <parameter id="originEc.t:3" lower="0.0" name="stateNode" upper="1000.0">10.0</parameter>
         <parameter id="rhoEc.t:3" lower="0.0" name="stateNode" upper="1.0">0.1</parameter>
         <parameter id="becomeUninfectiousRateEc.t:3" lower="0.0" name="stateNode" upper="10.0">1.0</parameter>
-        <parameter id="R0Ec.t:3" lower="0.0" name="stateNode" upper="10.0">2.0</parameter>
+        <parameter id="reproductiveNumberEc.t:3" lower="0.0" name="stateNode" upper="10.0">2.0</parameter>
         <parameter id="S0Ec.t:3" lower="0.0" name="stateNode" upper="1.0E7">300000.0</parameter>
         <parameter dimension="100" id="dS.t:3" name="stateNode">0.0</parameter>
         <parameter dimension="100" id="dR.t:3" name="stateNode">0.0</parameter>
@@ -46,10 +46,10 @@
 
     <distribution id="posterior" spec="util.CompoundDistribution">
         <distribution id="prior" spec="util.CompoundDistribution">
-            <distribution R0="@R0Ec.t:3" S0="@S0Ec.t:3" becomeUninfectiousRate="@becomeUninfectiousRateEc.t:3" contemp="true" dR="@dR.t:3" dS="@dS.t:3" id="BDSIRcontemp.t:3" origin="@originEc.t:3" rho="@rhoEc.t:3" spec="beast.phylodynamics.BDSIR" tree="@Tree.t:3">
+            <distribution reproductiveNumber="@reproductiveNumberEc.t:3" S0="@S0Ec.t:3" becomeUninfectiousRate="@becomeUninfectiousRateEc.t:3" contemp="true" dR="@dR.t:3" dS="@dS.t:3" id="BDSIRcontemp.t:3" origin="@originEc.t:3" rho="@rhoEc.t:3" spec="beast.phylodynamics.BDSIR" tree="@Tree.t:3">
 		        <parameter id="samplingEc.t:3" lower="0.0" name="samplingProportion" upper="1.0">0.0</parameter>
             </distribution>	
-            <prior id="R0PriorEc.t:3" name="distribution" x="@R0Ec.t:3">
+            <prior id="reproductiveNumberPriorEc.t:3" name="distribution" x="@reproductiveNumberEc.t:3">
                 <LogNormal id="LogNormalDistributionModel.0" name="distr">
                     <parameter id="RealParameter.0" lower="0.0" name="M" upper="0.0">0.0</parameter>
                     <parameter id="RealParameter.01" lower="0.0" name="S" upper="0.0">1.25</parameter>
@@ -113,9 +113,9 @@
     <operator S0="@S0Ec.t:3" dR="@dR.t:3" dS="@dS.t:3" death="@becomeUninfectiousRateEc.t:3" id="SIR_tree_operator.t:3" origin="@originEc.t:3" sampling="@samplingEc.t:3" spec="beast.phylodynamics.epidemiology.CompoundSIROperator" tree="@Tree.t:3" weight="5.0">
         <affectingOperator id="ScaleOperator.0" scaleFactor="0.9" spec="ScaleOperator" tree="@Tree.t:3" weight="5.0"/>
         <SIR Nsamples="101" Nt="10000" S0="@S0Ec.t:3" death="@becomeUninfectiousRateEc.t:3" id="SIR.t:3" origin="@originEc.t:3" sampling="@samplingEc.t:3" simulationType="SAL" spec="beast.phylodynamics.epidemiology.HybridSEIREpidemic">
-            <birth expression="R0Ec.t:3 S0Ec.t:3 / becomeUninfectiousRateEc.t:3 *" id="birthEc.t:3" spec="beast.math.statistic.RPNcalculator">
+            <birth expression="reproductiveNumberEc.t:3 S0Ec.t:3 / becomeUninfectiousRateEc.t:3 *" id="birthEc.t:3" spec="beast.math.statistic.RPNcalculator">
                 <parameter idref="becomeUninfectiousRateEc.t:3"/>
-                <parameter idref="R0Ec.t:3"/>
+                <parameter idref="reproductiveNumberEc.t:3"/>
                 <parameter idref="S0Ec.t:3"/>
             </birth>
         </SIR>
@@ -142,8 +142,8 @@
         <affectingOperator id="becomeUninfectiousRateOperatorEc.t:3" parameter="@becomeUninfectiousRateEc.t:3" scaleFactor="0.9" spec="ScaleOperator" weight="1.0"/>
     </operator>
 
-    <operator S0="@S0Ec.t:3" SIR="@SIR.t:3" birth="@birthEc.t:3" dR="@dR.t:3" dS="@dS.t:3" death="@becomeUninfectiousRateEc.t:3" id="SIR_R0_operatorEc.t:3" origin="@originEc.t:3" sampling="@samplingEc.t:3" spec="beast.phylodynamics.epidemiology.CompoundSIROperator" tree="@Tree.t:3" weight="3.0">
-        <affectingOperator id="R0OperatorEc.t:3" parameter="@R0Ec.t:3" scaleFactor="0.9" spec="ScaleOperator" weight="1.0"/>
+    <operator S0="@S0Ec.t:3" SIR="@SIR.t:3" birth="@birthEc.t:3" dR="@dR.t:3" dS="@dS.t:3" death="@becomeUninfectiousRateEc.t:3" id="SIR_reproductiveNumber_operatorEc.t:3" origin="@originEc.t:3" sampling="@samplingEc.t:3" spec="beast.phylodynamics.epidemiology.CompoundSIROperator" tree="@Tree.t:3" weight="3.0">
+        <affectingOperator id="reproductiveNumberOperatorEc.t:3" parameter="@reproductiveNumberEc.t:3" scaleFactor="0.9" spec="ScaleOperator" weight="1.0"/>
     </operator>
 
     <operator S0="@S0Ec.t:3" SIR="@SIR.t:3" birth="@birthEc.t:3" dR="@dR.t:3" dS="@dS.t:3" death="@becomeUninfectiousRateEc.t:3" id="SIR_S0_operatorEc.t:3" origin="@originEc.t:3" sampling="@samplingEc.t:3" spec="beast.phylodynamics.epidemiology.CompoundSIROperator" tree="@Tree.t:3" weight="3.0">
@@ -166,7 +166,7 @@
         <parameter idref="rhoEc.t:3" name="log"/>
         <parameter idref="samplingEc.t:3" name="log"/>
         <parameter idref="becomeUninfectiousRateEc.t:3" name="log"/>
-        <parameter idref="R0Ec.t:3" name="log"/>
+        <parameter idref="reproductiveNumberEc.t:3" name="log"/>
         <parameter idref="S0Ec.t:3" name="log"/>
         <parameter idref="dS.t:3" name="log"/>
         <parameter idref="dR.t:3" name="log"/>
