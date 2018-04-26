@@ -12,7 +12,7 @@ import test.beast.BEASTTestCase;
  * @author Alexei Drummond
  */
 public class VolzSIRTest extends BEASTTestCase {
-    String[] trees = new String[]{"(((A:1.0,B:1.0):1.0,C:2.0);", ""}; //more trees ?
+    String[] trees = new String[]{"((A:1.0,B:1.0):1.0,C:2.0);"}; //, "" more trees ?
     Alignment data;
     final double n_S0 = 100;
     final double beta = 0.02;
@@ -31,18 +31,23 @@ public class VolzSIRTest extends BEASTTestCase {
         TreeIntervals treeIntervals = new TreeIntervals();
         treeIntervals.initByName("tree", tree);
 
-        DeterministicCoalescentSIR cp = new DeterministicCoalescentSIR();
-        cp.initByName(
+        DeterministicCoalescentSIR detCoalSIR = new DeterministicCoalescentSIR();
+        detCoalSIR.initByName(
                 "n_S0", Double.toString(n_S0),
                 "beta", Double.toString(beta),
                 "gamma", Double.toString(gamma),
                 "origin", Double.toString(origin),
                 "integrationStepCount", 1000);
 
+        // TODO: failed because detCoalSIR is not inherited from PopulationFunction,
         Coalescent coal = new Coalescent();
-        coal.initByName("treeIntervals", treeIntervals, "populationModel", cp);
+        coal.initByName("treeIntervals", treeIntervals, "populationModel", detCoalSIR);
+//        SIRPopulationFunction popFunction = new SIRPopulationFunction();
+//        popFunction.initByName("volzSIR", detCoalSIR);
 
         double logL = coal.calculateLogP();
+        // TODO: calculateLogLikelihood not implemented
+//        double logL = detCoalSIR.calculateLogLikelihood(treeIntervals, popFunction);
         System.out.println("Coalescent(VolzSIR).logL=" + logL);
 
         Volz2009TreeDistribution volzCoalescent = new Volz2009TreeDistribution();
