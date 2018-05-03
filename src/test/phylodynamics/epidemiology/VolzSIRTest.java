@@ -9,6 +9,7 @@ import beast.phylodynamics.epidemiology.Volz2009TreeDistribution;
 import test.beast.BEASTTestCase;
 
 /**
+ * TODO it seems still in development, excluded in build.xml
  * @author Alexei Drummond
  */
 public class VolzSIRTest extends BEASTTestCase {
