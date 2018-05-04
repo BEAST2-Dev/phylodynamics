@@ -12,7 +12,8 @@
   </tree>
 
 	<BDSIR spec="beast.phylodynamics.BDSIR" id="birthDeath" tree="@tree" dS="@dS" dR="@dR" checkTreeConsistent="false">
-		<parameter name="origin" id="origin" value ="12.7808530307"/> 
+		<!--origin must > tree height(12.485382039003651)-->
+		<parameter name="origin" id="origin" value ="15"/>
 		<parameter name="reproductiveNumber" id="reproductiveNumber" value="2.5" lower="0." upper="10."/>
 		<parameter name="becomeUninfectiousRate" id="becomeUninfectiousRate" value="0.25" lower="0."/>
 		<parameter name="samplingProportion" id="samplingProportion" value="0.10" lower="0." upper="1."/>
