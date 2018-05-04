@@ -24,7 +24,7 @@ import java.util.List;
 @Description("Performs random tree generation for a given site model. ")
 public class CoalescentSimulator extends beast.core.Runnable {
     public Input<PopulationFunction> populationFunctionInput
-            = new Input<PopulationFunction>("populationFunction", "the population function", Input.Validate.REQUIRED);
+            = new Input<PopulationFunction>("populationFunction", "the population size function", Input.Validate.REQUIRED);
     public Input<Integer> ntaxaInput = new Input<Integer>("ntaxa", "the number of taxa", Input.Validate.REQUIRED);
     public Input<Integer> replicatesInput = new Input<Integer>("replicates", "the number of replicates", Input.Validate.REQUIRED);
     public Input<String> outputFileNameInput = new Input<String>(
