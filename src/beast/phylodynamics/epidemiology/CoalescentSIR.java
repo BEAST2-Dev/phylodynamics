@@ -1,6 +1,7 @@
 package beast.phylodynamics.epidemiology;
 
 import beast.core.CalculationNode;
+import beast.core.Description;
 import beast.core.Input;
 import beast.core.Loggable;
 import beast.core.parameter.RealParameter;
@@ -20,6 +21,7 @@ import java.util.List;
  * @author Alexei Drummond
  * @author Alex Popinga
  */
+@Description("A coalescent approach for SIR model")
 public abstract class CoalescentSIR extends CalculationNode implements Loggable {
 
     public Input<RealParameter> betaParameter = new Input<RealParameter>("beta",

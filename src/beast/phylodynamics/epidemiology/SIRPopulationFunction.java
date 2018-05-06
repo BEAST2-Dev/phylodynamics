@@ -17,7 +17,7 @@ import java.util.List;
 public class SIRPopulationFunction extends PopulationFunction.Abstract {
 
 
-    public Input<CoalescentSIR> volzSIR = new Input<CoalescentSIR>("volzSIR", "Volz parameters");
+    public Input<CoalescentSIR> volzSIR = new Input<CoalescentSIR>("volzSIR", "Volz parameters for coalescent SIR");
 
     public Input<Boolean> oldMethodInput = new Input<Boolean>(
             "oldMethod",

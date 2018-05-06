@@ -17,9 +17,9 @@
 	<property name="libBeast2" location="${beast2path}/lib" />
 	<property name="srcBeast2" location="${beast2path}/src" />
 	<property name="beast2classpath" location="${beast2path}/build" />
-    <property name="beastlabsclasspath" location="../BEASTLabs/build" />
+    <!--<property name="beastlabsclasspath" location="../BEASTLabs/build" />-->
     <property name="bdskyclasspath" location="../bdsky/build" />
-    <property name="masterclasspath" location="../MASTER/build" />
+    <!--<property name="masterclasspath" location="../MASTER/build" />-->
 	<property name="Add_on_dir" value="${release_dir}/add-on" />
 
     <import file="${beast2path}/build.xml" />
@@ -37,9 +37,9 @@
 		<fileset dir="${libBeast2}" includes="commons-math3-3.1.1.jar"/>
         <fileset dir="${libBeast2}" includes="antlr-runtime-4.7.jar"/>
         <pathelement path="${beast2classpath}"/>
-        <pathelement path="${beastlabsclasspath}"/>
+        <!--pathelement path="${beastlabsclasspath}"/-->
         <pathelement path="${bdskyclasspath}"/>
-        <pathelement path="${masterclasspath}"/>
+        <!--<pathelement path="${masterclasspath}"/>-->
 	</path>
 
 	<!-- start -->
@@ -89,7 +89,11 @@
 			<include name="beast/**/**" />
 			<!-- compile JUnit test classes -->
 			<include name="test/beast/**" />
+			<include name="test/phylodynamics/**" />
 		</javac>
+		<copy todir="${build}">
+			<fileset dir="${srcphylodynamics}" includes="test/phylodynamics/epidemiology/TestTrajectory.txt" />
+		</copy>
 		<echo message="Successfully compiled." />
 	</target>
 
@@ -153,11 +157,12 @@
 
 			<batchtest fork="yes" todir="${report}">
 				<fileset dir="${srcphylodynamics}">
-                    <include name="test/**/*Test.java"/>                                         
+                    <include name="test/**/*Test.java"/>
+					<exclude name="test/phylodynamics/epidemiology/**/VolzSIRTest.java"/>
 				</fileset>
 				<fileset dir="${srcBeast2}">
                     <include name="test/beast/integration/**/*Test.java"/>                                         
-                    <exclude name="test/beast/integration/**/ResumeTest.java"/>                                         
+                    <exclude name="test/beast/integration/**/ResumeTest.java"/>
 				</fileset>
 			</batchtest>
 		</junit>

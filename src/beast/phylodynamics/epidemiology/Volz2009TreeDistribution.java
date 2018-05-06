@@ -21,7 +21,8 @@ import org.apache.commons.math3.ode.nonstiff.ClassicalRungeKuttaIntegrator;
 @Description("Calculates the Volz-2009 probability of a beast.tree.")
 public class Volz2009TreeDistribution extends TreeDistribution {
 
-    public Input<DeterministicCoalescentSIR> volzSIRInput = new Input<DeterministicCoalescentSIR>("volzSIR", "Volz parameters", Input.Validate.REQUIRED);
+    public Input<DeterministicCoalescentSIR> volzSIRInput = new Input<DeterministicCoalescentSIR>("volzSIR",
+            "Volz parameters for deterministic coalescent SIR", Input.Validate.REQUIRED);
 
     TreeIntervals intervals;
 

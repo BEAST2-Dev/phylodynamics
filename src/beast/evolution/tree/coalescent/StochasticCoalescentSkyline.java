@@ -22,7 +22,7 @@ public class StochasticCoalescentSkyline extends TreeDistribution {
     public Input<RealParameter> infectedPopulationInput = new Input<RealParameter>("infectedPopulation", "infected population size at times eventTimes",
             Input.Validate.REQUIRED);
 
-    public Input<RealParameter> transmissionRateInput = new Input<RealParameter>("transmissionRate", "the transmission rate",
+    public Input<RealParameter> transmissionRateInput = new Input<RealParameter>("transmissionRate", "the transmission rate β",
             Input.Validate.REQUIRED);
 
     public Input<RealParameter> eventTimeInput = new Input<RealParameter>("eventTimes", "event times from first infection to present (i.e. in forward time)",
