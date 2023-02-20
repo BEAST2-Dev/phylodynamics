@@ -1,5 +1,5 @@
 <beast version='2.0'
-       namespace='beast.core:beast.core.parameter:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood:beast.phylodynamics.epidemiology'>
+       namespace='beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.inference.parameter:beast.base.evolution.alignment:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:beast.phylodynamics.epidemiology'>
 
     <taxonset spec='TaxonSet' id='taxonset'>
         <taxon spec='Taxon' id='A'/>
@@ -42,7 +42,7 @@
                  showLeafLabels="false"
                  lineThickness="1.25" rotateTree="ladderizeRight">
 
-        <tree spec='beast.evolution.tree.RandomTree'>
+        <tree spec='beast.base.evolution.tree.coalescent.RandomTree'>
 
             <taxonset idref='taxonset'/>
             <populationModel spec="VolzSIR" idref='VolzSIR'/>

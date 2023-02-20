@@ -1,7 +1,7 @@
 <beast version='2.0'
-       namespace='import beast.math.distributions.Prior:beast.util.TreeParser:beast.phylodynamics.epidemiology:master.beast:beast.core:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood:beast.core.parameter:beast.phylodynamics.epidemiology:beast.evolution.tree:beast.evolution.alignment'>
+       namespace='import beast.base.math.distributions.Prior:beast.base.util:beast.base.math.TreeParser:beast.phylodynamics.epidemiology:master.beast:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:beast.base.inference.parameter:beast.phylodynamics.epidemiology:beast.base.evolution.tree:beast.base.evolution.alignment'>
 
-   <alignment spec="beast.evolution.alignment.Alignment" id="HIV1_CL1" dataType="nucleotide">
+   <alignment spec="beast.base.evolution.alignment.Alignment" id="HIV1_CL1" dataType="nucleotide">
         <sequence id="seq_seq_00-100724" taxon="00-100724" totalcount="4" value="CCTCAAATCACTCTTTGGCAACGACCCCTCGTCACAATAAAGATAGGGGGGCAGCTAAAGGAAGCTCTCTTAGACACAGGAGCAGATAATACAGTATTAGAAGAAATAGATTTGCCAGGAAGATGGAAACCAAAAATGATAGGGGGAATTGGAGGTTTTATCAAAGTGAGACAGTATGATCAGATACCCATAGAAATCTGTGGACATAAAGCTATAGGTACAGTATTAGTAGGACCTACACCTGTCAACATAATTGGAAGAAATCTGTTGACTCAGCTTGGTTGCACTTTAAATTTTCCCATTAGTCCTATTGAAGCTGTACCAGTAAAATTGAAGCCAGGAATGGATGGCCCAAAAGTTAAACAATGGCCATTAACAGAAGAAAAAATAAAAGCATTAGTAGAAATTTGTACAGAACTGGAACAGGAGGGGAAAATTTCAAAAATTGGGCCTGAAAATCCATACAATACTCCAGTATTTGCCATAAAGAAAAAAAACAGTACTAAATGGAGAAAATTAGTAGATTTCAGAGAACTTAATAAGAGAACTCAAGACTTCTGGGAAGTTCAGTTAGGAATACCACATCCCGCAGGGTTAAAAAAGAAAAAATCAGTAACAGTATTGGATGTGGGTGATGCATACTTTTCAGTTCCCTTAGATAAAGACTTCAGAAAATATACTGCATTTACCATACCTAGTATAAACAATGAGACACCAGGGATTAGATATCAGTACAATGTGCTTCCACAGGGATGGAAAGGATCACCAGCAATATTCCAATGTAGCATGACAAAAATCTTAGAACCTTTCAGAAAACAAAATCCAGACATAGTGATCTGTCAATACATGGATGATTTGTATGTAGGATCTGATTTAGAAATAGGGCAGCATAGAACAAAAATAGAGGAACTGAGAGAACATCTGTGGAAGTGGGGATTTTACACACCAGACA"/>
         <sequence id="seq_seq_00-101582" taxon="00-101582" totalcount="4" value="CCTCAAATCACTCTTTGGCAGCGACCCATAGTCACAATAAAGATAGGGGGGCAACTAAAGGAAGCCCTATTAGATACAGGAGCAGATGATACAGTATTAGAAGACATGAATTTGCAGGGAAGATGGAAACCAAAAATGATAGGGGGAATTGGAGGTTTTATCAAAGTAAGGCAGTATGATCAGGTACCCATAGAAATCTGTGGACATAAAGCTATAGGTACAATATTAGTAGGACCTACACCTGTCAACATAATTGGAAGAAATCTGTTGACTCAGCTTGGTTGCACTTTAAATTTTCCCATTAGTCCTATTGAACCTGTACCAGTAAAATTAAAGCCAGGAATGGATGGCCCAAGAGTTAAACAATGGCCATTGACAGAAGAAAAAATAAAAGCATTAGTGGAAATTTGTACAGAAATGGAAAAGGAAGGAAAAATTTCAAAAATTGGGCCTGAAAATCCATATAATACTCCAGTATTCGCCATAAAGAAAAAGGACAGTACTAAATGGAGAAAATTAGTAGATTTCAGAGAACTTAATAAGAGAACTCAAGACTTCTGGGAAGTCCAGTTAGGAATACCACATCCCGCAGGGTTAAAAAAGAAAAAATCAGTAACAGTACTGGATGTGGGTGATGCATATTTTTCAGTTCCCTTACATGAAGACTTCAGAAAATATACTGCATTTACTATACCTAGTATAAACAATGAGACACCAGGGATTAGATATCAGTACAATGTGCTGCCACAGGGATGGAAAGGATCACCAGCAATATTCCAAAGTAGCATGACAAAAATCTTAGAACCTTTTAGAAAACAAAATCCAGACATAGTGATCTATCAATACATGGATGATTTGTATGTAGGATCTGACTTAGAAATAGGGCAGCATAGAACAAAAATAGAGGAACTGAGAAAACATCTGCTGGCGTGGGGATTTACCACACCAGACA"/>
         <sequence id="seq_seq_00-102130" taxon="00-102130" totalcount="4" value="CCTCAAATCACTCTTTGGCAACGACCCCTCGTCACAATAAAGATAGGGGGGCAACTAAAGGAAGCTCTATTAGATACAGGAGCAGATGATACAGTATTAGAAGACATGGATTTGCCAGGAAGATGGAAACCAAAAATGATAGGGGGGATTGGAGGTTTTATCAAAGTAAGACAGTATGAGCAGGTATCCATAGATATCTGTGGACATAAAGCTATAGGTACAGTATTAATAGGACCTACACCTGTCAACATAATTGGAAGAAATTTGTTGACTCAGATTGGTTGCACTTTAAATTTTCCCATTAGTCCTATTGAGACTGTACCAGTAAAATTAAAGCCAGGTATGGATGGCCCAAAAGTTAAACAATGGCCATTGACAGAAGAAAAAATAAAAGCATTAATAGAAATTTGTACAGAAATGGAAAAGGAAGGGAAAATTTCAAAAATTGGGCCTGAAAATCCATACAATACTCCAGTATTTGCCATAAAGAAAAAAGACAGTACTAAATGGAGAAAATTAGTAGATTTCAGAGAACTTAATAAGAGAACTCAAGACTTCTGGGAAGTTCAGTTAGGAATACCACATCCAGCAGGGTTAAAAAAGAAAAAATCAGTAACAGTACTGGATGTGGGTGATGCATATTTTTCAGTTCCCTTAGATAAAGACTTCAGAAAATATACTGCATTTACCATACCTAGTATAAACAATGAGACACCAGGGATTAGATATCAGTACAATGTGCTTCCACAGGGATGGAAAGGATCACCAGCAATATTTCAAAGTAGCATGACAAAAATCTTAGAACCTTTTAGAAAACAAAATCCAAATATAGTGATCTATCAATACATGGATGATTTGTATGTAGGATCTGACTTAGAAATAGGGCAGCATAGGACAAAAATAGAGGAACTGAGAGAACATTTGTTGAGGTGGGGATTTACCACACCAGACA"/>
@@ -45,14 +45,14 @@
         <sequence id="seq_seq_29422899" taxon="29422899" totalcount="4" value="CCTCAAATCACTCTTTGGCAGCGACCCCTCGTCACAATAAAGGTAGGGGGGCAACTAAAGGAAGCCCTATTAGATACAGGAGCAGATGATACAGTATTAGAAGACATGGATTTGCCAGGAAGATGGAAACCAAAAATGATAGGGGGAATTGGAGGTTTTATCAAAGTAAGACAGTATGAGCAGATAACCATAGAAATCTGTGGACATAAAGCTATAGGTACAGTATTAGTAGGACCTACACCTGTCAACATAATTGGAAGGAATCTGTTGACTCAGATTGGTTGCACTTTAAATTTTCCCATTAGTCCTATTGAAACTGTACCAGTAAAATTAAAGCCAGGAATGGACGGCCCAAAAGTTAAACAATGGCCATTGACAGAAGAAAAAGTAAAAGCATTAGTAGAAATTTGTACAGAAATGGAAAAGGAAGGGAAAATTTCAAAAATTGGGCCTGAAAATCCATACAATACTCCGGTGTTTGCCATAAAGAAAAAAGATGGTACTAAATGGAGAAAATTAGTAGATTTCAGAGAACTTAATAAAAGGACTCAAGACTTCTGGGAGATTCAATTAGGAATACCCCATCCCGCAGGGTTAAAAAAGAAAAAATCAGTAACAGTCCTGGATGTGGGTGATGCATATTTTTCAGTTCCCTTAGATCCAAACTTCAGAAAATATACTGCATTTACCATACCTAGTACAAACAATGAGACACCAGGGATTAGATATCAGTACAATGTACTCCCACAGGGATGGAAAGGATCACCAGCAATATTCCAATGTAGCATGACAAAAATTTTGGAGCCTTTTAGAAAACAAAATCCAGAGATAATTATCTATCAATACATGGATGATTTGTATGTAGGATCTGACTTAGAAATAGGGCAGCATAGAGCAAAAATAGAGGAACTGAGGCAACATTTGTTGAAGTGGGGATTTACCACCCCAGACA"/>
     </alignment>
 
-    <taxonset id="unknownTips1a" spec="beast.evolution.alignment.TaxonSet">
-        <taxon id="03-122985br" spec="beast.evolution.alignment.Taxon"/> <!-- 2003-->
+    <taxonset id="unknownTips1a" spec="beast.base.evolution.alignment.TaxonSet">
+        <taxon id="03-122985br" spec="beast.base.evolution.alignment.Taxon"/> <!-- 2003-->
     </taxonset>
-    <taxonset id="unknownTips1b" spec="beast.evolution.alignment.TaxonSet">
-        <taxon id="29422899" spec="beast.evolution.alignment.Taxon"/> <!-- 2001-->
+    <taxonset id="unknownTips1b" spec="beast.base.evolution.alignment.TaxonSet">
+        <taxon id="29422899" spec="beast.base.evolution.alignment.Taxon"/> <!-- 2001-->
     </taxonset>
 
-    <trait id="tipDates" spec='beast.evolution.tree.TraitSet' traitname='date-forward' units='year' value='
+    <trait id="tipDates" spec='beast.base.evolution.tree.TraitSet' traitname='date-forward' units='year' value='
 		00-100724 = 2000.0329,
 		00-101582 = 2000.0575,
 		00-102130 = 2000.0658,
@@ -94,7 +94,7 @@
 		03-106211 = 2003.1534,
 		03-122985br = 2003.5,
 		29422899 = 2001.5'>
-        <taxa spec='beast.evolution.alignment.TaxonSet' alignment='@HIV1_CL1'/>
+        <taxa spec='beast.base.evolution.alignment.TaxonSet' alignment='@HIV1_CL1'/>
     </trait>
 
    <siteModel gammaCategoryCount="4" id="SiteModel" proportionInvariant="@proportionInvariant" spec="SiteModel">
@@ -108,11 +108,11 @@
         </substModel>
     </siteModel>
 
-    <branchRateModel id="StrictClock" spec="beast.evolution.branchratemodel.StrictClockModel">
+    <branchRateModel id="StrictClock" spec="beast.base.evolution.branchratemodel.StrictClockModel">
         <parameter dimension="1" id="clock.rate" name="clock.rate" value="2e-3" lower="0." upper="1."/>
     </branchRateModel>
 
-    <tree spec="beast.util.ClusterTree" id="tree" clusterType="upgma" trait="@tipDates">
+    <tree spec="beast.base.evolution.tree.ClusterTree" id="tree" clusterType="upgma" trait="@tipDates">
         <taxa idref="HIV1_CL1"/>
     </tree>
 
@@ -126,27 +126,27 @@
 
     <!-- Parameter priors -->
     <input spec='CompoundDistribution' id='parameterPriors'>
-        <distribution spec='beast.math.distributions.Prior' x="@volz.n_S0">
-            <distr spec='beast.math.distributions.LogNormalDistributionModel' M="7" S="1"/>
+        <distribution spec='beast.base.inference.distribution.Prior' x="@volz.n_S0">
+            <distr spec='beast.base.inference.distribution.LogNormalDistributionModel' M="7" S="1"/>
         </distribution>
-        <distribution spec='beast.math.distributions.Prior' x="@volz.R0">
-            <distr spec="beast.math.distributions.LogNormalDistributionModel"  M="1" S="1"/>
+        <distribution spec='beast.base.inference.distribution.Prior' x="@volz.R0">
+            <distr spec="beast.base.inference.distribution.LogNormalDistributionModel"  M="1" S="1"/>
         </distribution>
-        <distribution spec='beast.math.distributions.Prior' x="@volz.gamma">
-            <distr spec='beast.math.distributions.LogNormalDistributionModel' M="-1" S="1"/>
+        <distribution spec='beast.base.inference.distribution.Prior' x="@volz.gamma">
+            <distr spec='beast.base.inference.distribution.LogNormalDistributionModel' M="-1" S="1"/>
         </distribution>
-        <distribution spec='beast.math.distributions.Prior' x="@volz.origin">
-            <distr spec="beast.math.distributions.Uniform"  lower="0" upper="100"/>
-        </distribution>
-
-        <distribution  x="@clock.rate" id="clockRatePrior" spec='beast.math.distributions.Prior'>
-            <distr spec='beast.math.distributions.Exponential' id='clockRatePrior.exp' mean="1." offset="0.0"/>
-        </distribution>
-        <distribution id="hky.frequencies.prior" spec="beast.math.distributions.Prior" x="@freqParameter">
-            <distr id="Uniform " lower="0.0" upper="1.0" spec="beast.math.distributions.Uniform" />
+        <distribution spec='beast.base.inference.distribution.Prior' x="@volz.origin">
+            <distr spec="beast.base.inference.distribution.Uniform"  lower="0" upper="100"/>
         </distribution>
 
-        <distribution id="jointTreeLikelihood" spec="util.CompoundDistribution">
+        <distribution  x="@clock.rate" id="clockRatePrior" spec='beast.base.inference.distribution.Prior'>
+            <distr spec='beast.base.inference.distribution.Exponential' id='clockRatePrior.exp' mean="1." offset="0.0"/>
+        </distribution>
+        <distribution id="hky.frequencies.prior" spec="beast.base.inference.distribution.Prior" x="@freqParameter">
+            <distr id="Uniform " lower="0.0" upper="1.0" spec="beast.base.inference.distribution.Uniform" />
+        </distribution>
+
+        <distribution id="jointTreeLikelihood" spec="beast.base.inference.CompoundDistribution">
             <distribution data="@HIV1_CL1" id="treeLikelihood" spec="TreeLikelihood" tree="@tree" siteModel="@SiteModel" branchRateModel="@StrictClock"/>
         </distribution>
     </input>
@@ -176,7 +176,7 @@
         <distribution spec="CompoundDistribution" id="posterior">
             <distribution idref="treeLikelihood"/>
             <distribution id="coalescent" spec="StochasticCoalescent" minTraj="20" minTrajSuccess="20">
-                <treeIntervals spec='TreeIntervals' id='TreeIntervals'>
+                <treeIntervals spec="beast.base.evolution.tree.TreeIntervals" id="beast.base.evolution.tree.TreeIntervals">
                     <tree idref="tree"/>
                 </treeIntervals>
 
@@ -252,7 +252,7 @@
             <log idref="volz.n_S0"/>
             <log idref="volz.origin"/>
             <log idref="volzSIR"/>
-            <log spec='beast.evolution.tree.TreeHeightLogger' tree='@tree'/>
+            <log spec='beast.base.evolution.tree.TreeHeightLogger' tree='@tree'/>
             <log idref="proportionInvariant"/>
             <log idref="clock.rate"/>
             <log idref="gammaShape"/>
@@ -265,7 +265,7 @@
         </logger>
 
         <logger fileName="StochCoalSIR_HIVcluster1.trees" id="treelog" logEvery="10000" mode="tree">
-            <log spec='beast.evolution.tree.TreeWithMetaDataLogger' tree='@tree'>
+            <log spec='beast.base.evolution.TreeWithMetaDataLogger' tree='@tree'>
                 <metadata idref="posterior"/>
             </log>
         </logger>
@@ -279,7 +279,7 @@
             <log idref="volz.n_S0"/>
             <log idref="volz.origin"/>
             <log idref="volzSIR"/>
-            <log spec='beast.evolution.tree.TreeHeightLogger' tree='@tree'/>
+            <log spec='beast.base.evolution.tree.TreeHeightLogger' tree='@tree'/>
             <log idref="proportionInvariant"/>
             <log idref="clock.rate"/>
             <log idref="gammaShape"/>

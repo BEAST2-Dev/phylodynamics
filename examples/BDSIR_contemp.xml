@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='Standard' beautistatus='' namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood" version="2.0">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='Standard' beautistatus='' namespace="beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.alignment:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood" version="2.0">
 
 
     <data id="3" name="alignment">
@@ -8,16 +8,16 @@
 	</data>
 
     
-<map name="Beta">beast.math.distributions.Beta</map>
-<map name="Exponential">beast.math.distributions.Exponential</map>
-<map name="InverseGamma">beast.math.distributions.InverseGamma</map>
-<map name="LogNormal">beast.math.distributions.LogNormalDistributionModel</map>
-<map name="Gamma">beast.math.distributions.Gamma</map>
-<map name="Uniform">beast.math.distributions.Uniform</map>
-<map name="prior">beast.math.distributions.Prior</map>
-<map name="LaplaceDistribution">beast.math.distributions.LaplaceDistribution</map>
-<map name="OneOnX">beast.math.distributions.OneOnX</map>
-<map name="Normal">beast.math.distributions.Normal</map>
+<map name="Beta">beast.base.inference.distribution.Beta</map>
+<map name="Exponential">beast.base.inference.distribution.Exponential</map>
+<map name="InverseGamma">beast.base.inference.distribution.InverseGamma</map>
+<map name="LogNormal">beast.base.inference.distribution.LogNormalDistributionModel</map>
+<map name="Gamma">beast.base.inference.distribution.Gamma</map>
+<map name="Uniform">beast.base.inference.distribution.Uniform</map>
+<map name="prior">beast.base.inference.distribution.Prior</map>
+<map name="LaplaceDistribution">beast.base.inference.distribution.LaplaceDistribution</map>
+<map name="OneOnX">beast.base.inference.distribution.OneOnX</map>
+<map name="Normal">beast.base.inference.distribution.Normal</map>
 
 
 <run chainLength="10000000" id="mcmc" spec="MCMC">
@@ -38,14 +38,14 @@
         <parameter dimension="4" id="freqParameter.s:3" lower="0.0" name="stateNode" upper="1.0">0.25</parameter>
     </state>
 
-    <init estimate="false" id="RandomTree.t:3" initial="@Tree.t:3" spec="beast.evolution.tree.RandomTree" taxa="@3">
+    <init estimate="false" id="RandomTree.t:3" initial="@Tree.t:3" spec="beast.base.evolution.tree.coalescent.RandomTree" taxa="@3">
         <populationModel id="ConstantPopulation0.t:3" spec="ConstantPopulation">
             <parameter id="randomPopSize.t:3" name="popSize">1.0</parameter>
         </populationModel>
     </init>
 
-    <distribution id="posterior" spec="util.CompoundDistribution">
-        <distribution id="prior" spec="util.CompoundDistribution">
+    <distribution id="posterior" spec="beast.base.inference.CompoundDistribution">
+        <distribution id="prior" spec="beast.base.inference.CompoundDistribution">
             <distribution reproductiveNumber="@reproductiveNumberEc.t:3" S0="@S0Ec.t:3" becomeUninfectiousRate="@becomeUninfectiousRateEc.t:3" contemp="true" dR="@dR.t:3" dS="@dS.t:3" id="BDSIRcontemp.t:3" origin="@originEc.t:3" rho="@rhoEc.t:3" spec="beast.phylodynamics.BDSIR" tree="@Tree.t:3">
 		        <parameter id="samplingEc.t:3" lower="0.0" name="samplingProportion" upper="1.0">0.0</parameter>
             </distribution>	
@@ -83,7 +83,7 @@
                 </Beta>
             </prior>
         </distribution>
-        <distribution id="likelihood" spec="util.CompoundDistribution">
+        <distribution id="likelihood" spec="beast.base.inference.CompoundDistribution">
             <distribution data="@3" id="treeLikelihood.3" spec="TreeLikelihood" tree="@Tree.t:3">
                 <siteModel id="SiteModel.s:3" spec="SiteModel">
                     <parameter estimate="false" id="mutationRate.s:3" name="mutationRate">1.0</parameter>
@@ -93,7 +93,7 @@
                         <frequencies frequencies="@freqParameter.s:3" id="estimatedFreqs.s:3" spec="Frequencies"/>
                     </substModel>
                 </siteModel>
-                <branchRateModel id="StrictClock.c:3" spec="beast.evolution.branchratemodel.StrictClockModel">
+                <branchRateModel id="StrictClock.c:3" spec="beast.base.evolution.branchratemodel.StrictClockModel">
                     <parameter estimate="false" id="clockRate.c:3" name="clock.rate">1.0</parameter>
                 </branchRateModel>
             </distribution>
@@ -113,7 +113,7 @@
     <operator S0="@S0Ec.t:3" dR="@dR.t:3" dS="@dS.t:3" death="@becomeUninfectiousRateEc.t:3" id="SIR_tree_operator.t:3" origin="@originEc.t:3" sampling="@samplingEc.t:3" spec="beast.phylodynamics.epidemiology.CompoundSIROperator" tree="@Tree.t:3" weight="5.0">
         <affectingOperator id="ScaleOperator.0" scaleFactor="0.9" spec="ScaleOperator" tree="@Tree.t:3" weight="5.0"/>
         <SIR Nsamples="101" Nt="10000" S0="@S0Ec.t:3" death="@becomeUninfectiousRateEc.t:3" id="SIR.t:3" origin="@originEc.t:3" sampling="@samplingEc.t:3" simulationType="SAL" spec="beast.phylodynamics.epidemiology.HybridSEIREpidemic">
-            <birth expression="reproductiveNumberEc.t:3 S0Ec.t:3 / becomeUninfectiousRateEc.t:3 *" id="birthEc.t:3" spec="beast.math.statistic.RPNcalculator">
+            <birth expression="reproductiveNumberEc.t:3 S0Ec.t:3 / becomeUninfectiousRateEc.t:3 *" id="birthEc.t:3" spec="beast.base.inference.util.RPNcalculator">
                 <parameter idref="becomeUninfectiousRateEc.t:3"/>
                 <parameter idref="reproductiveNumberEc.t:3"/>
                 <parameter idref="S0Ec.t:3"/>
@@ -159,7 +159,7 @@
         <log idref="likelihood"/>
         <log idref="prior"/>
         <log idref="treeLikelihood.3"/>
-        <log id="TreeHeight.t:3" spec="beast.evolution.tree.TreeHeightLogger" tree="@Tree.t:3"/>
+        <log id="TreeHeight.t:3" spec="beast.base.evolution.tree.TreeHeightLogger" tree="@Tree.t:3"/>
         <parameter idref="kappa.s:3" name="log"/>
         <log idref="BDSIRcontemp.t:3"/>
         <parameter idref="originEc.t:3" name="log"/>
@@ -181,7 +181,7 @@
     </logger>
 
     <logger fileName="BDSIR_contemp.trees" id="treelog.t:3" logEvery="1000" mode="tree">
-        <log id="TreeWithMetaDataLogger.t:3" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@Tree.t:3"/>
+        <log id="TreeWithMetaDataLogger.t:3" spec="beast.base.evolution.TreeWithMetaDataLogger" tree="@Tree.t:3"/>
     </logger>
 
 </run>

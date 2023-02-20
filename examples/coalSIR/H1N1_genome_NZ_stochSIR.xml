@@ -1,7 +1,7 @@
 <beast version='2.0'
-       namespace='import beast.math.distributions.Prior:beast.util.TreeParser:beast.phylodynamics.epidemiology:master.beast:beast.core:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood:beast.core.parameter:beast.phylodynamics.epidemiology:beast.evolution.tree:beast.evolution.alignment'>
+       namespace='import beast.base.math.distributions.Prior:beast.base.util:beast.base.math.TreeParser:beast.phylodynamics.epidemiology:master.beast:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:beast.base.inference.parameter:beast.phylodynamics.epidemiology:beast.base.evolution.tree:beast.base.evolution.alignment'>
 
-	<trait id="tipDates" spec="beast.evolution.tree.TraitSet" traitname="date-forward" units="year" value="
+	<trait id="tipDates" spec="beast.base.evolution.tree.TraitSet" traitname="date-forward" units="year" value="
 		30924=2001.425,
 		30962=2001.479,
 		30981=2001.52,
@@ -47,7 +47,7 @@
 		33109=2001.52,
 		34522=2001.49,
 		55237=2001.419">
-		<taxa spec="beast.evolution.alignment.TaxonSet" alignment="@alignment"/>
+		<taxa spec="beast.base.evolution.alignment.TaxonSet" alignment="@alignment"/>
 	</trait>
 	
 	<data id="alignment" dataType="nucleotide">
@@ -110,11 +110,11 @@
     </input>
     <parameter id="kappa" value="5.0" lower="0.0"/>
 
-    <branchRateModel id="StrictClock" spec="beast.evolution.branchratemodel.StrictClockModel">
+    <branchRateModel id="StrictClock" spec="beast.base.evolution.branchratemodel.StrictClockModel">
         <parameter dimension="1" id="clock.rate" name="clock.rate" value="5e-3" lower="0." upper="100"/>
     </branchRateModel>
 
-    <tree spec="beast.util.ClusterTree" id="tree" trait="@tipDates" >
+    <tree spec="beast.base.evolution.tree.ClusterTree" id="tree" trait="@tipDates" >
         <taxa idref="alignment"/>
     </tree>
 
@@ -128,25 +128,25 @@
 
     <!-- Parameter priors -->
     <input spec='CompoundDistribution' id='parameterPriors'>
-        <distribution spec='beast.math.distributions.Prior' x="@volz.n_S0">
-            <distr spec='beast.math.distributions.LogNormalDistributionModel' M="13" S="2"/>
+        <distribution spec='beast.base.inference.distribution.Prior' x="@volz.n_S0">
+            <distr spec='beast.base.inference.distribution.LogNormalDistributionModel' M="13" S="2"/>
         </distribution>
-        <distribution spec='beast.math.distributions.Prior' x="@volz.R0">
-            <distr spec="beast.math.distributions.LogNormalDistributionModel" M="0.2" S="1"/>
+        <distribution spec='beast.base.inference.distribution.Prior' x="@volz.R0">
+            <distr spec="beast.base.inference.distribution.LogNormalDistributionModel" M="0.2" S="1"/>
         </distribution>
-        <distribution spec='beast.math.distributions.Prior' x="@volz.gamma">
-            <distr spec='beast.math.distributions.LogNormalDistributionModel' M="5" S="1"/>
+        <distribution spec='beast.base.inference.distribution.Prior' x="@volz.gamma">
+            <distr spec='beast.base.inference.distribution.LogNormalDistributionModel' M="5" S="1"/>
         </distribution>
-        <distribution spec='beast.math.distributions.Prior' x="@volz.origin">
-            <distr spec="beast.math.distributions.Uniform" lower="0" upper="10"/>
-        </distribution>
-
-        <distribution  x="@clock.rate" id="clockRatePrior" spec='beast.math.distributions.Prior'>
-            <distr spec='beast.math.distributions.Exponential' id='clockRatePrior.exp' mean="1." offset="0.0"/>
+        <distribution spec='beast.base.inference.distribution.Prior' x="@volz.origin">
+            <distr spec="beast.base.inference.distribution.Uniform" lower="0" upper="10"/>
         </distribution>
 
-        <distribution id="hky.kappa.prior" spec="beast.math.distributions.Prior" x="@kappa">
-            <distr spec="beast.math.distributions.LogNormalDistributionModel" M="1.5" S="1.25"/>
+        <distribution  x="@clock.rate" id="clockRatePrior" spec='beast.base.inference.distribution.Prior'>
+            <distr spec='beast.base.inference.distribution.Exponential' id='clockRatePrior.exp' mean="1." offset="0.0"/>
+        </distribution>
+
+        <distribution id="hky.kappa.prior" spec="beast.base.inference.distribution.Prior" x="@kappa">
+            <distr spec="beast.base.inference.distribution.LogNormalDistributionModel" M="1.5" S="1.25"/>
         </distribution>
     </input>
 
@@ -166,7 +166,7 @@
         <distribution spec="CompoundDistribution" id="posterior">
             <distribution idref="treeLikelihood"/>
             <distribution id="coalescent" spec="StochasticCoalescent" minTraj="20" minTrajSuccess="20">
-                <treeIntervals spec='TreeIntervals' id='TreeIntervals'>
+                <treeIntervals spec="beast.base.evolution.tree.TreeIntervals" id="beast.base.evolution.tree.TreeIntervals">
                     <tree idref="tree"/>
                 </treeIntervals>
                 <populationModel spec="SIRPopulationFunction" id='popFunc'>
@@ -248,11 +248,11 @@
             <log idref="volz.n_S0"/>
             <log idref="volz.origin"/>
             <log idref="clock.rate"/>
-            <log spec='beast.evolution.tree.TreeHeightLogger' tree='@tree'/>
+            <log spec='beast.base.evolution.tree.TreeHeightLogger' tree='@tree'/>
         </logger>
 
         <logger fileName="StochSIR_influenza.trees" id="treelog" logEvery="10000" mode="tree">
-            <log spec='beast.evolution.tree.TreeWithMetaDataLogger' tree='@tree'>
+            <log spec='beast.base.evolution.TreeWithMetaDataLogger' tree='@tree'>
                 <metadata idref="posterior"/>
             </log>
         </logger>
@@ -266,7 +266,7 @@
             <log idref="volz.n_S0"/>
             <log idref="volz.origin"/>
             <log idref="clock.rate"/>
-            <log spec='beast.evolution.tree.TreeHeightLogger' tree='@tree'/>
+            <log spec='beast.base.evolution.tree.TreeHeightLogger' tree='@tree'/>
         </logger>
 
     </run>

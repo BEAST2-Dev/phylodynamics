@@ -1,5 +1,5 @@
 <beast version='2.0'
-       namespace='beast.core
+       namespace='beast.pkgmgmt:beast.base.core:beast.base.inference
                   :beast.core.util
                   :beast.evolution.operators
                   :beast.core.parameter
@@ -109,7 +109,7 @@
     
     <distribution spec="CompoundDistribution" id="posterior">
       <distribution id="coalescent" spec="StochasticCoalescent" minTraj="5" minTrajSuccess="0">
-        <treeIntervals spec='TreeIntervals' id='treeIntervals'>
+        <treeIntervals spec="beast.base.evolution.tree.TreeIntervals" id='treeIntervals'>
           <tree idref="tree"/>
         </treeIntervals>
         

@@ -1,11 +1,13 @@
 package test.phylodynamics.epidemiology;
 
-import beast.evolution.alignment.Alignment;
-import beast.evolution.tree.Tree;
-import beast.evolution.tree.coalescent.Coalescent;
-import beast.evolution.tree.coalescent.TreeIntervals;
-import beast.phylodynamics.epidemiology.DeterministicCoalescentSIR;
-import beast.phylodynamics.epidemiology.Volz2009TreeDistribution;
+import static org.junit.Assert.assertEquals;
+
+import beast.base.evolution.alignment.Alignment;
+import beast.base.evolution.tree.Tree;
+import beast.base.evolution.tree.coalescent.Coalescent;
+import phylodynamics.epidemiology.DeterministicCoalescentSIR;
+import phylodynamics.epidemiology.Volz2009TreeDistribution;
+import beast.base.evolution.tree.TreeIntervals;
 import test.beast.BEASTTestCase;
 
 /**
@@ -20,13 +22,15 @@ public class VolzSIRTest extends BEASTTestCase {
     final double gamma = 0.5;
     final double origin = 5;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        data = getFourTaxaNoData();
-    }
+//    @Override
+//    protected void setUp() throws Exception {
+//        super.setUp();
+//        data = getFourTaxaNoData();
+//    }
 
     public void testVolzSIR() throws Exception {
+        data = getFourTaxaNoData();
+
         // *********** 3 taxon **********
         Tree tree = getTree(data, trees[0]);
         TreeIntervals treeIntervals = new TreeIntervals();

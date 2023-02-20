@@ -6,13 +6,13 @@
 
 package test.phylodynamics.epidemiology;
 
-import beast.core.parameter.RealParameter;
-import beast.evolution.tree.coalescent.TreeIntervals;
-import beast.phylodynamics.epidemiology.SIRPopulationFunction;
-import beast.phylodynamics.epidemiology.StochasticCoalescent;
-import beast.phylodynamics.epidemiology.StochasticCoalescentSIR;
-import beast.util.Randomizer;
-import beast.util.TreeParser;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.evolution.tree.TreeIntervals;
+import beast.base.util.Randomizer;
+import phylodynamics.epidemiology.SIRPopulationFunction;
+import phylodynamics.epidemiology.StochasticCoalescent;
+import phylodynamics.epidemiology.StochasticCoalescentSIR;
+import beast.base.evolution.tree.TreeParser;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;

@@ -1,6 +1,6 @@
 <!-- Simulate an inheritance tree from the SIR epidemic model -->
 
-<beast version='2.0' namespace='master.beast:beast.core.parameter'>
+<beast version='2.0' namespace='master.beast:beast.base.inference.parameter'>
     <run spec='InheritanceTrajectory'
          samplePopulationSizes="true"
          verbosity="1"

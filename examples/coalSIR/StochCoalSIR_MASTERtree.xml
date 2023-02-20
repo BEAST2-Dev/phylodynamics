@@ -1,7 +1,7 @@
 <beast version='2.0'
-       namespace='import beast.math.distributions.Prior:beast.util.TreeParser:beast.phylodynamics.epidemiology:master.beast:beast.core:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood:beast.core.parameter:beast.phylodynamics.epidemiology:beast.evolution.tree:beast.evolution.alignment'>
+       namespace='import beast.base.math.distributions.Prior:beast.base.util:beast.base.math.TreeParser:beast.phylodynamics.epidemiology:master.beast:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:beast.base.inference.parameter:beast.phylodynamics.epidemiology:beast.base.evolution.tree:beast.base.evolution.alignment'>
 
-    <tree spec="beast.util.TreeParser" id="tree" adjustTipHeights="false" offset="1" newick="NEWICK"/>
+    <tree spec="beast.base.evolution.tree.TreeParser" id="tree" adjustTipHeights="false" offset="1" newick="NEWICK"/>
 
    <state id="state" storeEvery="1000">
         <stateNode spec="RealParameter" id="volz.n_S0" value="999"/>
@@ -14,7 +14,7 @@
 
         <distribution spec="CompoundDistribution" id="posterior">
             <distribution id="coalescent" spec="StochasticCoalescent" minTraj="1" minTrajSuccess="1">
-                <treeIntervals spec='TreeIntervals' id='TreeIntervals'>
+                <treeIntervals spec="beast.base.evolution.tree.TreeIntervals" id="beast.base.evolution.tree.TreeIntervals">
                     <tree idref="tree"/>
                 </treeIntervals>
                 
@@ -31,17 +31,17 @@
             
             <!-- Parameter priors -->
             <distribution spec='CompoundDistribution' id='parameterPriors'>
-                <distribution spec='beast.math.distributions.Prior' x="@volz.n_S0">
-                    <distr spec='beast.math.distributions.LogNormalDistributionModel' M="7" S="1"/>
+                <distribution spec='beast.base.inference.distribution.Prior' x="@volz.n_S0">
+                    <distr spec='beast.base.inference.distribution.LogNormalDistributionModel' M="7" S="1"/>
                 </distribution>
-                <distribution spec='beast.math.distributions.Prior' x="@volz.R0">
-                    <distr spec="beast.math.distributions.LogNormalDistributionModel"  M="1" S="1"/>
+                <distribution spec='beast.base.inference.distribution.Prior' x="@volz.R0">
+                    <distr spec="beast.base.inference.distribution.LogNormalDistributionModel"  M="1" S="1"/>
                 </distribution>
-                <distribution spec='beast.math.distributions.Prior' x="@volz.gamma">
-                    <distr spec='beast.math.distributions.LogNormalDistributionModel' M="-1" S="1"/>
+                <distribution spec='beast.base.inference.distribution.Prior' x="@volz.gamma">
+                    <distr spec='beast.base.inference.distribution.LogNormalDistributionModel' M="-1" S="1"/>
                 </distribution>
-                <distribution spec='beast.math.distributions.Prior' x="@volz.origin">
-                    <distr spec="beast.math.distributions.Uniform"  lower="0" upper="100"/>
+                <distribution spec='beast.base.inference.distribution.Prior' x="@volz.origin">
+                    <distr spec="beast.base.inference.distribution.Uniform"  lower="0" upper="100"/>
                 </distribution>
             </distribution>
             
