@@ -4,41 +4,41 @@
 <!-- tree priors -->
 <mergewith point='treePriorTemplates'> 
 
-        <subtemplate id='Phylodynamics: BirthDeathSIR (serial)' class='beast.phylodynamics.BDSIR' mainid='BDSIRserial.t:$(n)'       
-suppressInputs='beast.phylodynamics.BDSIR.intervalTimes,
-	beast.phylodynamics.BDSIR.birthRate,
-	beast.phylodynamics.BDSIR.deathRate,
-	beast.phylodynamics.BDSIR.samplingRate,
-	beast.phylodynamics.BDSIR.rho,
-	beast.phylodynamics.BDSIR.contemp,
-	beast.phylodynamics.BDSIR.S0,
-	beast.phylodynamics.BDSIR.dS,
-	beast.phylodynamics.BDSIR.dE,
-	beast.phylodynamics.BDSIR.dR,
-	beast.phylodynamics.BDSIR.isSeasonal,
-	beast.phylodynamics.BDSIR.intervalNumber,
-	beast.phylodynamics.BDSIR.tree,
-	beast.phylodynamics.BDSIR.checkTreeConsistent,
-	beast.phylodynamics.BDSIR.treeIntervals,
-	beast.phylodynamics.BDSIR.forceRateChange, 
-	beast.phylodynamics.BDSIR.conditionOnSurvival, 
-	beast.phylodynamics.BDSIR.reverseTimeArrays,
-	beast.phylodynamics.BDSIR.rhoSamplingTimes,
-	beast.phylodynamics.BDSIR.deathRateChangeTimes,
-	beast.phylodynamics.BDSIR.samplingRateChangeTimes,
-	beast.phylodynamics.BDSIR.birthRateTimesRelative,
-	beast.phylodynamics.BDSIR.deathRateTimesRelative,
-	beast.phylodynamics.BDSIR.samplingRateTimesRelative,
-	beast.phylodynamics.BDSIR.birthRateChangeTimes'>
+        <subtemplate id='Phylodynamics: BirthDeathSIR (serial)' class='phylodynamics.BDSIR' mainid='BDSIRserial.t:$(n)'       
+suppressInputs='phylodynamics.BDSIR.intervalTimes,
+	phylodynamics.BDSIR.birthRate,
+	phylodynamics.BDSIR.deathRate,
+	phylodynamics.BDSIR.samplingRate,
+	phylodynamics.BDSIR.rho,
+	phylodynamics.BDSIR.contemp,
+	phylodynamics.BDSIR.S0,
+	phylodynamics.BDSIR.dS,
+	phylodynamics.BDSIR.dE,
+	phylodynamics.BDSIR.dR,
+	phylodynamics.BDSIR.isSeasonal,
+	phylodynamics.BDSIR.intervalNumber,
+	phylodynamics.BDSIR.tree,
+	phylodynamics.BDSIR.checkTreeConsistent,
+	phylodynamics.BDSIR.treeIntervals,
+	phylodynamics.BDSIR.forceRateChange, 
+	phylodynamics.BDSIR.conditionOnSurvival, 
+	phylodynamics.BDSIR.reverseTimeArrays,
+	phylodynamics.BDSIR.rhoSamplingTimes,
+	phylodynamics.BDSIR.deathRateChangeTimes,
+	phylodynamics.BDSIR.samplingRateChangeTimes,
+	phylodynamics.BDSIR.birthRateTimesRelative,
+	phylodynamics.BDSIR.deathRateTimesRelative,
+	phylodynamics.BDSIR.samplingRateTimesRelative,
+	phylodynamics.BDSIR.birthRateChangeTimes'>
 <![CDATA[
 <!-- SIR simulator -->
-	<SIR spec="beast.phylodynamics.epidemiology.HybridSEIREpidemic" id="SIRserial.t:$(n)" origin="@originEs.t:$(n)" S0="@S0Es.t:$(n)" Nt="10000" Nsamples="101" 
+	<SIR spec="phylodynamics.epidemiology.HybridSEIREpidemic" id="SIRserial.t:$(n)" origin="@originEs.t:$(n)" S0="@S0Es.t:$(n)" Nt="10000" Nsamples="101" 
 				birth="@birthEs.t:$(n)" death="@deathEs.t:$(n)" sampling="@samplingEs.t:$(n)" simulationType="SAL" />
 	
 
 
 <!-- Sequential BDSIR model-->
-	<BDSIR spec="beast.phylodynamics.BDSIR" dS="@dSEs.t:$(n)" dR="@dREs.t:$(n)" id="BDSIRserial.t:$(n)" tree="@Tree.t:$(n)">
+	<BDSIR spec="phylodynamics.BDSIR" dS="@dSEs.t:$(n)" dR="@dREs.t:$(n)" id="BDSIRserial.t:$(n)" tree="@Tree.t:$(n)">
 		<parameter name="origin" id="originEs.t:$(n)" value="10" lower="0." upper="1000."/>  	
 		<parameter name="S0" id="S0Es.t:$(n)" value="300000" lower="0" upper="10000000"/> 		
 		<parameter name="reproductiveNumber" id="reproductiveNumberEs.t:$(n)" value="2" lower="0." dimension ="1" upper="10"/>
@@ -81,23 +81,23 @@ suppressInputs='beast.phylodynamics.BDSIR.intervalTimes,
 
     <plate var='p' range='origin,samplingProportion,becomeUninfectiousRate,reproductiveNumber,S0'>
 
-		<operator spec="beast.phylodynamics.epidemiology.CompoundSIROperator" id="SIR_$(p)_operatorEs.t:$(n)"  weight="3" tree="@Tree.t:$(n)" origin='@originEs.t:$(n)' birth="@birthEs.t:$(n)" death="@deathEs.t:$(n)" sampling="@samplingEs.t:$(n)" S0="@S0Es.t:$(n)" dS="@dSEs.t:$(n)" dR="@dREs.t:$(n)">
+		<operator spec="phylodynamics.epidemiology.CompoundSIROperator" id="SIR_$(p)_operatorEs.t:$(n)"  weight="3" tree="@Tree.t:$(n)" origin='@originEs.t:$(n)' birth="@birthEs.t:$(n)" death="@deathEs.t:$(n)" sampling="@samplingEs.t:$(n)" S0="@S0Es.t:$(n)" dS="@dSEs.t:$(n)" dR="@dREs.t:$(n)">
 			<SIR idref="SIRserial.t:$(n)"/>
 			<affectingOperator id='$(p)OperatorEs.t:$(n)' spec='ScaleOperator' scaleFactor=".9" weight="1" parameter="@$(p)Es.t:$(n)"/>
 		</operator> 
 	</plate>
 	
-		<operator spec="beast.phylodynamics.epidemiology.CompoundSIROperator" id="SIR_tree_operatorEs.t:$(n)"  weight="5" tree="@Tree.t:$(n)" origin='@originEs.t:$(n)' birth="@birthEs.t:$(n)" death="@deathEs.t:$(n)" sampling="@samplingEs.t:$(n)" S0="@S0Es.t:$(n)" dS="@dSEs.t:$(n)" dR="@dREs.t:$(n)">
+		<operator spec="phylodynamics.epidemiology.CompoundSIROperator" id="SIR_tree_operatorEs.t:$(n)"  weight="5" tree="@Tree.t:$(n)" origin='@originEs.t:$(n)' birth="@birthEs.t:$(n)" death="@deathEs.t:$(n)" sampling="@samplingEs.t:$(n)" S0="@S0Es.t:$(n)" dS="@dSEs.t:$(n)" dR="@dREs.t:$(n)">
 			<SIR idref="SIRserial.t:$(n)"/>
 			<affectingOperator spec='ScaleOperator' scaleFactor=".9" weight="5" tree="@Tree.t:$(n)"/>
 		</operator> 
 	
-		<operator spec="beast.phylodynamics.epidemiology.CompoundSIROperator" id="SIR_treeRoot_operatorEs.t:$(n)"  weight="5" tree="@Tree.t:$(n)" origin='@originEs.t:$(n)' birth="@birthEs.t:$(n)" death="@deathEs.t:$(n)" sampling="@samplingEs.t:$(n)" S0="@S0Es.t:$(n)" dS="@dSEs.t:$(n)" dR="@dREs.t:$(n)">
+		<operator spec="phylodynamics.epidemiology.CompoundSIROperator" id="SIR_treeRoot_operatorEs.t:$(n)"  weight="5" tree="@Tree.t:$(n)" origin='@originEs.t:$(n)' birth="@birthEs.t:$(n)" death="@deathEs.t:$(n)" sampling="@samplingEs.t:$(n)" S0="@S0Es.t:$(n)" dS="@dSEs.t:$(n)" dR="@dREs.t:$(n)">
 			<SIR idref="SIRserial.t:$(n)"/>
 			<affectingOperator spec='ScaleOperator' scaleFactor=".9" weight="1" rootOnly="true" tree="@Tree.t:$(n)"/>
 		</operator> 
 	
-		<operator spec="beast.phylodynamics.epidemiology.CompoundSIROperator" id="SIR_subtreeslide_operatorEs.t:$(n)"  weight="15" tree="@Tree.t:$(n)" origin='@originEs.t:$(n)' birth="@birthEs.t:$(n)" death="@deathEs.t:$(n)" sampling="@samplingEs.t:$(n)" S0="@S0Es.t:$(n)" dS="@dSEs.t:$(n)" dR="@dREs.t:$(n)">
+		<operator spec="phylodynamics.epidemiology.CompoundSIROperator" id="SIR_subtreeslide_operatorEs.t:$(n)"  weight="15" tree="@Tree.t:$(n)" origin='@originEs.t:$(n)' birth="@birthEs.t:$(n)" death="@deathEs.t:$(n)" sampling="@samplingEs.t:$(n)" S0="@S0Es.t:$(n)" dS="@dSEs.t:$(n)" dR="@dREs.t:$(n)">
 			<SIR idref="SIRserial.t:$(n)"/>
             <affectingOperator spec='SubtreeSlide' weight="1" gaussian="true" size="1.0" tree="@Tree.t:$(n)"/>
 		</operator> 

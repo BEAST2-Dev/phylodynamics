@@ -1,5 +1,5 @@
 <beast version='2.0'
-  namespace='beast.phylodynamics:beast.phylodynamics.epidemiology:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:beast.base.evolution.speciation:beast.base.inference.parameter'>
+  namespace='phylodynamics:phylodynamics.epidemiology:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:beast.base.evolution.speciation:beast.base.inference.parameter'>
 
 
   <tree spec='beast.base.evolution.tree.TreeParser' id='tree' IsLabelledNewick='true' adjustTipHeights='false'>
@@ -11,7 +11,7 @@
         </input>
   </tree>
 
-	<BDSIR spec="beast.phylodynamics.BDSIR" id="birthDeath" tree="@tree" dS="@dS" dR="@dR" checkTreeConsistent="false">
+	<BDSIR spec="phylodynamics.BDSIR" id="birthDeath" tree="@tree" dS="@dS" dR="@dR" checkTreeConsistent="false">
 		<!--origin must > tree height(12.485382039003651)-->
 		<parameter name="origin" id="origin" value ="15"/>
 		<parameter name="reproductiveNumber" id="reproductiveNumber" value="2.5" lower="0." upper="10."/>
