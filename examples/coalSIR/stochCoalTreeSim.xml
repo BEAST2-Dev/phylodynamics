@@ -1,9 +1,7 @@
 
-<beast version ='2.0' namespace ='
-	beast.evolution.tree
-	:beast.evolution.alignment
-	:beast.phylodynamics.epidemiology
-	:beast.core.parameter
+<beast version ='2.0' namespace ='beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:beast.base.evolution.speciation:beast.base.inference.parameter
+       :beast.base.evolution.alignment:beast.base.evolution.tree
+	:phylodynamics.epidemiology
 	:master
         :master.model
         :master.conditions
@@ -92,7 +90,7 @@
              maxHeight="30"
              replicates='10000'>
 
-          <randomTree spec='RandomTree' id="tree">
+          <randomTree spec='beast.base.evolution.tree.coalescent.RandomTree' id="tree">
             <taxonset idref="taxa"/>
             <trait idref="tipDates"/>
             <populationModel idref="popFun"/>

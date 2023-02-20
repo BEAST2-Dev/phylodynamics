@@ -1,5 +1,5 @@
 <beast version='2.0'
-       namespace='import beast.base.math.distributions.Prior:beast.base.util:beast.base.math.TreeParser:beast.phylodynamics.epidemiology:master.beast:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:beast.base.inference.parameter:beast.phylodynamics.epidemiology:beast.base.evolution.tree:beast.base.evolution.alignment'>
+       namespace='import beast.base.math.distributions.Prior:beast.base.util:beast.base.math.TreeParser:phylodynamics.epidemiology:master.beast:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:beast.base.inference.parameter:phylodynamics.epidemiology:beast.base.evolution.tree:beast.base.evolution.alignment'>
 
 	<trait id="tipDates" spec="beast.base.evolution.tree.TraitSet" traitname="date-forward" units="year" value="
 		30924=2001.425,
