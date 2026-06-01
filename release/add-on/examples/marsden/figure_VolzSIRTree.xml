@@ -1,0 +1,58 @@
+<beast version='2.0'
+       namespace='beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.inference.parameter:beast.base.evolution.alignment:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:beast.phylodynamics.epidemiology'>
+
+    <taxonset spec='TaxonSet' id='taxonset'>
+        <taxon spec='Taxon' id='A'/>
+        <taxon spec='Taxon' id='B'/>
+        <taxon spec='Taxon' id='C'/>
+        <taxon spec='Taxon' id='D'/>
+        <taxon spec='Taxon' id='E'/>
+        <taxon spec='Taxon' id='F'/>
+        <taxon spec='Taxon' id='G'/>
+        <taxon spec='Taxon' id='H'/>
+        <taxon spec='Taxon' id='I'/>
+        <taxon spec='Taxon' id='J'/>
+        <taxon spec='Taxon' id='K'/>
+        <taxon spec='Taxon' id='L'/>
+        <taxon spec='Taxon' id='M'/>
+        <taxon spec='Taxon' id='N'/>
+        <taxon spec='Taxon' id='O'/>
+        <taxon spec='Taxon' id='P'/>
+        <taxon spec='Taxon' id='Q'/>
+        <taxon spec='Taxon' id='R'/>
+        <taxon spec='Taxon' id='S'/>
+        <taxon spec='Taxon' id='T'/>
+        <taxon spec='Taxon' id='U'/>
+        <taxon spec='Taxon' id='V'/>
+        <taxon spec='Taxon' id='W'/>
+        <taxon spec='Taxon' id='X'/>
+        <taxon spec='Taxon' id='Y'/>
+    </taxonset>
+
+    <populationModel spec="VolzSIR" id='VolzSIR'
+                     integrationStepCount="1000"
+                     oldMethod="false">
+        <n_S0 spec="RealParameter" id="volz.n_S0" value="1000.0"/>
+        <beta spec="RealParameter" id="volz.beta" value="0.00075"/>
+        <gamma spec="RealParameter" id="volz.gamma" value="0.3"/>
+        <origin spec="RealParameter" id="volz.t0" value="30.0"/>
+    </populationModel>
+
+    <treeDrawing spec='beast.phylodynamics.epidemiology.VolzSIRTreeDrawing' id='treeDrawing' orientation="right"
+                 showLeafLabels="false"
+                 lineThickness="1.25" rotateTree="ladderizeRight">
+
+        <tree spec='beast.base.evolution.tree.coalescent.RandomTree'>
+
+            <taxonset idref='taxonset'/>
+            <populationModel spec="VolzSIR" idref='VolzSIR'/>
+        </tree>
+        <volzSIR spec="VolzSIR" idref='VolzSIR'/>
+    </treeDrawing>
+
+    <run spec='beast.app.draw.tree.TreeDrawingGrid' fileName="figure_VolzSIRTree.tex" width="300"
+         height="200" debug="false" pdflatexPath="/usr/texbin/pdflatex">
+        <treeDrawing idref="treeDrawing"/>
+    </run>
+</beast>
+

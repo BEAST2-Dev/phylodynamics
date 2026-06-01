@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='Standard' beautistatus='' namespace="beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.alignment:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood" version="2.0">
+
+
+    <data id="3" name="alignment">
+		<sequence id="seq_1" taxon="1" totalcount="4" value="ATTCTAGGCAAAAAG-AGCAATGCTGGAGGTATTACAATACCAGACTTCAAACTTTACTATAGAGCCATAATAACAAAAACCGC-TTGGTATTGGCACAAAAACAGACCAGAAGATCAATGGAAYAGAATAGAAGACCCAGAAATAGAACCAC-ATACCTATAGTCAACTTGTATTTGACAAAGGAGCCAAAGATATACAGTGGAACAAACACAGTCTATTCAATTATTGGTGCTGGCAAAACTGGGCAGCCACATGCAGAAAACTAAAAATTGACCCTAGCCTTTCACCATGCACAGGCATTAACTCAAAGTGGATCAAAGACCTCAACGTCAGACCAGAAACCGTGAAACTGCTACATGATAAAGTAGGAGAGACACTGGAACTCATAGGCACAGGGGAAAGATTCCTGAACAGAATCCCAGGGTCA-CAACAGATAGGAGAAAGACTCAATAAATGGGACTACCTAAAAATAAAAAGTTTCTGTACAGATAAAAACATAGT-CGCAAAAGTAGAGAGACAGCCAACCAACTGGGAAAAGATATTCACCAATAATACATCTGACAAATGCTTGAT--ATCCAGT-ATCTACAGGGAACTCAAGAAATTAATC"/>
+		<sequence id="seq_2" taxon="2" totalcount="4" value="ATTCTAGGCAAAAAGAAGCAATGCTGGTGGTATCACAATACCAGACTTCAAACTTTACTATAAAGCCATAATAACAAAAACTGC-TTGGTACTGGCACAAAAACAGACCAGAAGATCAGTGGAACAGAATAGAAGACCCAGATATAGAACCAC-ACAACTATAGGCAACTTRTATTTGACAAAGGAGCCAAAGATATACAATGGAACGAACACAGTCTATTCAATTATTGGTGCTGGCAAAACTGGAAAGCCACATGCAGAAAACTAAAAATTGACCCTAGCCTTTCGCCATGCACAAGCATTAACTCAAAGTGGATCAAAGACCTCAACGTCAGACCGGAAACCGTGAAACTGCTACATGATAATGTAGGAGAGACACTGGAAYTCATAGGCACAGGAAACAGATTCCTGAACAGAATCCCAGGGTCA-CAACAGATTGGAGAGAGACTCGACAAATGGGACTACCTAAAAATAAAAAGTTTCTGTACAGACAAAAACATAGT-CGCAAAAGTAGAGAGACAGCCAACCAACTGGGAAAAGATATTCACCAACAATGTATCTGACAAATGCTTAAT--ATCCAGC-ATCTACAGAGAACTCAAGAAACTAATC"/>
+		<sequence id="seq_3" taxon="3" totalcount="4" value="ATTCTAGGCAAAAAG-AGCAATGCTGGTGGTATCACAATACCAGACTTCAAACTTTACTATAAAGCCATAATAACAAAAACTGC-TTGGTACTGGCACAAAAACAGACCAGAAGATCAGTGGAACAGAATAGAAGACCCAGATATAGAACCAC-ACAACTATAGGCAACTTRTATTTGACAAAGGAGCCAAAGATATACAATGGAACGAACACAGTCTATTCAATTATTGGTGCTGGCAAAACTGGAAAGCCACATGCAGAAAACTAAAAATTGACCCTAGCCTTTCSCCATGCACAAGCATTAACTCAAAGTGGATCAAAGACCTCAACGTCAGACCGGAAACCGTGAAACTGCTACATGATAATGTAGGAGAGACACTGGAAYTCATAGGCACAGGAAACAGATTCCTGAACAGAATCCCAGGGTCA-CAACAGATTGGAGAGAGACTCGACAAATGGGACTACCTAAAAATAAAAAGTTTCTGTACAGACAAAAACATAGT-CGCAAAAGTAGAGAGACAGCCAACCAACTGGGAAAAGATATTCACCAACAATGTATCTGACAAATGCTTAAT--ATCCAGC-ATCTACAGAGAACTCAAGAAACTA-TC"/>
+	</data>
+
+    
+<map name="Beta">beast.base.inference.distribution.Beta</map>
+<map name="Exponential">beast.base.inference.distribution.Exponential</map>
+<map name="InverseGamma">beast.base.inference.distribution.InverseGamma</map>
+<map name="LogNormal">beast.base.inference.distribution.LogNormalDistributionModel</map>
+<map name="Gamma">beast.base.inference.distribution.Gamma</map>
+<map name="Uniform">beast.base.inference.distribution.Uniform</map>
+<map name="prior">beast.base.inference.distribution.Prior</map>
+<map name="LaplaceDistribution">beast.base.inference.distribution.LaplaceDistribution</map>
+<map name="OneOnX">beast.base.inference.distribution.OneOnX</map>
+<map name="Normal">beast.base.inference.distribution.Normal</map>
+
+
+<run chainLength="10000000" id="mcmc" spec="MCMC">
+    <state id="state" storeEvery="5000">
+        <tree id="Tree.t:3" name="stateNode">
+            <taxonset id="TaxonSet.3" spec="TaxonSet">
+                <data idref="3" name="alignment"/>
+            </taxonset>
+        </tree>
+        <parameter id="kappa.s:3" lower="0.0" name="stateNode">2.0</parameter>
+        <parameter id="originEc.t:3" lower="0.0" name="stateNode" upper="1000.0">10.0</parameter>
+        <parameter id="rhoEc.t:3" lower="0.0" name="stateNode" upper="1.0">0.1</parameter>
+        <parameter id="becomeUninfectiousRateEc.t:3" lower="0.0" name="stateNode" upper="10.0">1.0</parameter>
+        <parameter id="reproductiveNumberEc.t:3" lower="0.0" name="stateNode" upper="10.0">2.0</parameter>
+        <parameter id="S0Ec.t:3" lower="0.0" name="stateNode" upper="1.0E7">300000.0</parameter>
+        <parameter dimension="100" id="dS.t:3" name="stateNode">0.0</parameter>
+        <parameter dimension="100" id="dR.t:3" name="stateNode">0.0</parameter>
+        <parameter dimension="4" id="freqParameter.s:3" lower="0.0" name="stateNode" upper="1.0">0.25</parameter>
+    </state>
+
+    <init estimate="false" id="RandomTree.t:3" initial="@Tree.t:3" spec="beast.base.evolution.tree.coalescent.RandomTree" taxa="@3">
+        <populationModel id="ConstantPopulation0.t:3" spec="ConstantPopulation">
+            <parameter id="randomPopSize.t:3" name="popSize">1.0</parameter>
+        </populationModel>
+    </init>
+
+    <distribution id="posterior" spec="beast.base.inference.CompoundDistribution">
+        <distribution id="prior" spec="beast.base.inference.CompoundDistribution">
+            <distribution reproductiveNumber="@reproductiveNumberEc.t:3" S0="@S0Ec.t:3" becomeUninfectiousRate="@becomeUninfectiousRateEc.t:3" contemp="true" dR="@dR.t:3" dS="@dS.t:3" id="BDSIRcontemp.t:3" origin="@originEc.t:3" rho="@rhoEc.t:3" spec="phylodynamics.BDSIR" tree="@Tree.t:3">
+		        <parameter id="samplingEc.t:3" lower="0.0" name="samplingProportion" upper="1.0">0.0</parameter>
+            </distribution>	
+            <prior id="reproductiveNumberPriorEc.t:3" name="distribution" x="@reproductiveNumberEc.t:3">
+                <LogNormal id="LogNormalDistributionModel.0" name="distr">
+                    <parameter id="RealParameter.0" lower="0.0" name="M" upper="0.0">0.0</parameter>
+                    <parameter id="RealParameter.01" lower="0.0" name="S" upper="0.0">1.25</parameter>
+                </LogNormal>
+            </prior>
+            <prior id="S0_priorEc.t:3" name="distribution" x="@S0Ec.t:3">
+                <LogNormal id="LogNormalDistributionModel.01" name="distr">
+                    <parameter id="RealParameter.02" lower="0.0" name="M" upper="0.0">8.0</parameter>
+                    <parameter id="RealParameter.03" lower="0.0" name="S" upper="0.0">2.0</parameter>
+                </LogNormal>
+            </prior>
+            <prior id="becomeUninfectiousRatePriorEc.t:3" name="distribution" x="@becomeUninfectiousRateEc.t:3">
+                <LogNormal id="LogNormalDistributionModel.02" name="distr">
+                    <parameter id="RealParameter.04" lower="0.0" name="M" upper="0.0">0.0</parameter>
+                    <parameter id="RealParameter.05" lower="0.0" name="S" upper="0.0">1.0</parameter>
+                </LogNormal>
+            </prior>
+            <prior id="KappaPrior.s:3" name="distribution" x="@kappa.s:3">
+                <LogNormal id="LogNormalDistributionModel.03" name="distr">
+                    <parameter estimate="false" id="RealParameter.06" name="M">1.0</parameter>
+                    <parameter estimate="false" id="RealParameter.07" name="S">1.25</parameter>
+                </LogNormal>
+            </prior>
+            <prior id="origRootPriorEc.t:3" name="distribution" x="@originEc.t:3">
+                <Uniform id="Uniform.0" name="distr" upper="1000.0"/>
+            </prior>
+            <prior id="rhoPriorEc.t:3" name="distribution" x="@rhoEc.t:3">
+                <Beta id="Beta.0" name="distr">
+                    <parameter id="RealParameter.08" lower="0.0" name="alpha" upper="0.0">1.0</parameter>
+                    <parameter id="RealParameter.09" lower="0.0" name="beta" upper="0.0">1.0</parameter>
+                </Beta>
+            </prior>
+        </distribution>
+        <distribution id="likelihood" spec="beast.base.inference.CompoundDistribution">
+            <distribution data="@3" id="treeLikelihood.3" spec="TreeLikelihood" tree="@Tree.t:3">
+                <siteModel id="SiteModel.s:3" spec="SiteModel">
+                    <parameter estimate="false" id="mutationRate.s:3" name="mutationRate">1.0</parameter>
+                    <parameter estimate="false" id="gammaShape.s:3" name="shape">1.0</parameter>
+                    <parameter estimate="false" id="proportionInvariant.s:3" lower="0.0" name="proportionInvariant" upper="1.0">0.0</parameter>
+                    <substModel id="hky.s:3" kappa="@kappa.s:3" spec="HKY">
+                        <frequencies frequencies="@freqParameter.s:3" id="estimatedFreqs.s:3" spec="Frequencies"/>
+                    </substModel>
+                </siteModel>
+                <branchRateModel id="StrictClock.c:3" spec="beast.base.evolution.branchratemodel.StrictClockModel">
+                    <parameter estimate="false" id="clockRate.c:3" name="clock.rate">1.0</parameter>
+                </branchRateModel>
+            </distribution>
+        </distribution>
+    </distribution>
+
+    <operator id="UniformOperator.t:3" spec="Uniform" tree="@Tree.t:3" weight="30.0"/>
+
+    <operator id="narrow.t:3" spec="Exchange" tree="@Tree.t:3" weight="15.0"/>
+
+    <operator id="wide.t:3" isNarrow="false" spec="Exchange" tree="@Tree.t:3" weight="3.0"/>
+
+    <operator id="WilsonBalding.t:3" spec="WilsonBalding" tree="@Tree.t:3" weight="3.0"/>
+
+    <operator id="KappaScaler.s:3" parameter="@kappa.s:3" scaleFactor="0.5" spec="ScaleOperator" weight="0.1"/>
+
+    <operator S0="@S0Ec.t:3" dR="@dR.t:3" dS="@dS.t:3" death="@becomeUninfectiousRateEc.t:3" id="SIR_tree_operator.t:3" origin="@originEc.t:3" sampling="@samplingEc.t:3" spec="phylodynamics.epidemiology.CompoundSIROperator" tree="@Tree.t:3" weight="5.0">
+        <affectingOperator id="ScaleOperator.0" scaleFactor="0.9" spec="ScaleOperator" tree="@Tree.t:3" weight="5.0"/>
+        <SIR Nsamples="101" Nt="10000" S0="@S0Ec.t:3" death="@becomeUninfectiousRateEc.t:3" id="SIR.t:3" origin="@originEc.t:3" sampling="@samplingEc.t:3" simulationType="SAL" spec="phylodynamics.epidemiology.HybridSEIREpidemic">
+            <birth expression="reproductiveNumberEc.t:3 S0Ec.t:3 / becomeUninfectiousRateEc.t:3 *" id="birthEc.t:3" spec="beast.base.inference.util.RPNcalculator">
+                <parameter idref="becomeUninfectiousRateEc.t:3"/>
+                <parameter idref="reproductiveNumberEc.t:3"/>
+                <parameter idref="S0Ec.t:3"/>
+            </birth>
+        </SIR>
+        <birth idref="birthEc.t:3"/>
+    </operator>
+
+    <operator S0="@S0Ec.t:3" SIR="@SIR.t:3" birth="@birthEc.t:3" dR="@dR.t:3" dS="@dS.t:3" death="@becomeUninfectiousRateEc.t:3" id="SIR_treeRoot_operator.t:3" origin="@originEc.t:3" sampling="@samplingEc.t:3" spec="phylodynamics.epidemiology.CompoundSIROperator" tree="@Tree.t:3" weight="5.0">
+        <affectingOperator id="ScaleOperator.01" rootOnly="true" scaleFactor="0.9" spec="ScaleOperator" tree="@Tree.t:3" weight="1.0"/>
+    </operator>
+
+    <operator S0="@S0Ec.t:3" SIR="@SIR.t:3" birth="@birthEc.t:3" dR="@dR.t:3" dS="@dS.t:3" death="@becomeUninfectiousRateEc.t:3" id="SIR_subtreeslide_operator.t:3" origin="@originEc.t:3" sampling="@samplingEc.t:3" spec="phylodynamics.epidemiology.CompoundSIROperator" tree="@Tree.t:3" weight="15.0">
+        <affectingOperator id="SubtreeSlide.0" spec="SubtreeSlide" tree="@Tree.t:3" weight="1.0"/>
+    </operator>
+
+    <operator S0="@S0Ec.t:3" SIR="@SIR.t:3" birth="@birthEc.t:3" dR="@dR.t:3" dS="@dS.t:3" death="@becomeUninfectiousRateEc.t:3" id="SIR_origin_operatorEc.t:3" origin="@originEc.t:3" sampling="@samplingEc.t:3" spec="phylodynamics.epidemiology.CompoundSIROperator" tree="@Tree.t:3" weight="3.0">
+        <affectingOperator id="originOperatorEc.t:3" parameter="@originEc.t:3" scaleFactor="0.9" spec="ScaleOperator" weight="1.0"/>
+    </operator>
+
+    <operator S0="@S0Ec.t:3" SIR="@SIR.t:3" birth="@birthEc.t:3" dR="@dR.t:3" dS="@dS.t:3" death="@becomeUninfectiousRateEc.t:3" id="SIR_rho_operatorEc.t:3" origin="@originEc.t:3" sampling="@samplingEc.t:3" spec="phylodynamics.epidemiology.CompoundSIROperator" tree="@Tree.t:3" weight="3.0">
+        <affectingOperator id="rhoOperatorEc.t:3" parameter="@rhoEc.t:3" scaleFactor="0.9" spec="ScaleOperator" weight="1.0"/>
+    </operator>
+
+    <operator S0="@S0Ec.t:3" SIR="@SIR.t:3" birth="@birthEc.t:3" dR="@dR.t:3" dS="@dS.t:3" death="@becomeUninfectiousRateEc.t:3" id="SIR_becomeUninfectiousRate_operatorEc.t:3" origin="@originEc.t:3" sampling="@samplingEc.t:3" spec="phylodynamics.epidemiology.CompoundSIROperator" tree="@Tree.t:3" weight="3.0">
+        <affectingOperator id="becomeUninfectiousRateOperatorEc.t:3" parameter="@becomeUninfectiousRateEc.t:3" scaleFactor="0.9" spec="ScaleOperator" weight="1.0"/>
+    </operator>
+
+    <operator S0="@S0Ec.t:3" SIR="@SIR.t:3" birth="@birthEc.t:3" dR="@dR.t:3" dS="@dS.t:3" death="@becomeUninfectiousRateEc.t:3" id="SIR_reproductiveNumber_operatorEc.t:3" origin="@originEc.t:3" sampling="@samplingEc.t:3" spec="phylodynamics.epidemiology.CompoundSIROperator" tree="@Tree.t:3" weight="3.0">
+        <affectingOperator id="reproductiveNumberOperatorEc.t:3" parameter="@reproductiveNumberEc.t:3" scaleFactor="0.9" spec="ScaleOperator" weight="1.0"/>
+    </operator>
+
+    <operator S0="@S0Ec.t:3" SIR="@SIR.t:3" birth="@birthEc.t:3" dR="@dR.t:3" dS="@dS.t:3" death="@becomeUninfectiousRateEc.t:3" id="SIR_S0_operatorEc.t:3" origin="@originEc.t:3" sampling="@samplingEc.t:3" spec="phylodynamics.epidemiology.CompoundSIROperator" tree="@Tree.t:3" weight="3.0">
+        <affectingOperator id="S0OperatorEc.t:3" parameter="@S0Ec.t:3" scaleFactor="0.9" spec="ScaleOperator" weight="1.0"/>
+    </operator>
+
+    <operator delta="0.01" id="FrequenciesExchanger.s:3" spec="DeltaExchangeOperator" weight="0.1">
+        <parameter idref="freqParameter.s:3"/>
+    </operator>
+
+    <logger fileName="BDSIR_contemp.log" id="tracelog" logEvery="1000" model="@posterior" sanitiseHeaders="true" sort="smart">
+        <log idref="posterior"/>
+        <log idref="likelihood"/>
+        <log idref="prior"/>
+        <log idref="treeLikelihood.3"/>
+        <log id="TreeHeight.t:3" spec="beast.base.evolution.tree.TreeHeightLogger" tree="@Tree.t:3"/>
+        <parameter idref="kappa.s:3" name="log"/>
+        <log idref="BDSIRcontemp.t:3"/>
+        <parameter idref="originEc.t:3" name="log"/>
+        <parameter idref="rhoEc.t:3" name="log"/>
+        <parameter idref="samplingEc.t:3" name="log"/>
+        <parameter idref="becomeUninfectiousRateEc.t:3" name="log"/>
+        <parameter idref="reproductiveNumberEc.t:3" name="log"/>
+        <parameter idref="S0Ec.t:3" name="log"/>
+        <parameter idref="dS.t:3" name="log"/>
+        <parameter idref="dR.t:3" name="log"/>
+        <parameter idref="freqParameter.s:3" name="log"/>
+    </logger>
+
+    <logger id="screenlog" logEvery="1000">
+        <log idref="posterior"/>
+        <log arg="@posterior" id="ESS.0" spec="util.ESS"/>
+        <log idref="likelihood"/>
+        <log idref="prior"/>
+    </logger>
+
+    <logger fileName="BDSIR_contemp.trees" id="treelog.t:3" logEvery="1000" mode="tree">
+        <log id="TreeWithMetaDataLogger.t:3" spec="beast.base.evolution.TreeWithMetaDataLogger" tree="@Tree.t:3"/>
+    </logger>
+
+</run>
+
+</beast>

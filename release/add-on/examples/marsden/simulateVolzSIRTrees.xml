@@ -1,0 +1,17 @@
+<beast version='2.0'
+       namespace='beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.inference.parameter:beast.base.evolution.alignment:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:beast.phylodynamics.epidemiology'>
+
+    <run spec="beast.phylodynamics.epidemiology.CoalescentSimulator" id="coalgen"
+         ntaxa='100' replicates="100" outputFileName="volzSir.trees">
+
+        <populationFunction spec="VolzSIR" id='VolzSIR'
+                            integrationStepCount="1000"
+                            oldMethod="false">
+            <n_S0 spec="RealParameter" id="volz.n_S0" value="1000.0"/>
+            <beta spec="RealParameter" id="volz.beta" value="0.00075"/>
+            <gamma spec="RealParameter" id="volz.gamma" value="0.3"/>
+            <origin spec="RealParameter" id="volz.t0" value="30.0"/>
+        </populationFunction>
+    </run>
+</beast>
+

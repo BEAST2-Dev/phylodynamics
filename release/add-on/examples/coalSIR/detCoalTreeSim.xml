@@ -1,0 +1,111 @@
+
+<beast version ='2.0' namespace ='beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:beast.base.evolution.speciation:beast.base.inference.parameter
+       :beast.base.evolution.alignment:beast.base.evolution.tree
+	:phylodynamics.epidemiology
+	:master
+        :master.steppers
+        :master.model
+        :master.conditions
+        :master.outputs'>
+
+	<taxonset id='taxa' spec='TaxonSet'>
+		<taxon id='t1' spec='Taxon'/>
+		<taxon id='t2' spec='Taxon'/>
+		<taxon id='t3' spec='Taxon'/>
+		<taxon id='t4' spec='Taxon'/>
+		<taxon id='t5' spec='Taxon'/>
+		<taxon id='t6' spec='Taxon'/>
+		<taxon id='t7' spec='Taxon'/>
+		<taxon id='t8' spec='Taxon'/>
+		<taxon id='t9' spec='Taxon'/>
+		<taxon id='t10' spec='Taxon'/>
+		<taxon id='t11' spec='Taxon'/>
+		<taxon id='t12' spec='Taxon'/>
+		<taxon id='t13' spec='Taxon'/>
+		<taxon id='t14' spec='Taxon'/>
+		<taxon id='t15' spec='Taxon'/>
+		<taxon id='t16' spec='Taxon'/>
+		<taxon id='t17' spec='Taxon'/>
+		<taxon id='t18' spec='Taxon'/>
+		<taxon id='t19' spec='Taxon'/>
+		<taxon id='t20' spec='Taxon'/>
+	</taxonset>
+
+	<trait id='tipDates' spec='TraitSet' traitname='date-backward'>
+          t1=0,
+          t2=1,
+          t3=2,
+          t4=3,
+          t5=4,
+          t6=5,
+          t7=6,
+          t8=7,
+          t9=8,
+          t10=9,
+          t11=10,
+          t12=11,
+          t13=12,
+          t14=13,
+          t15=14,
+          t16=15,
+          t17=16,
+          t18=17,
+          t19=18,
+          t20=19
+          <taxa idref='taxa'/>
+	</trait>
+
+	<populationFunction spec='PopulationFunctionFromMaster' id='popFun'
+                            origin="30"
+                            popSizeExpression="I/(2*0.00075*S)"
+                            simulationTime="30"
+                            popSizeStart="1.0"
+                            verbosity="0">
+
+          <stepper spec='RateEquationStepper' stepSize="0.01"/>
+          
+          <model spec='Model' id='model'>
+            <population spec='Population' id='S' populationName='S'/>
+            <population spec='Population' id='I' populationName='I'/>
+            <population spec='Population' id='R' populationName='R'/>
+            
+            <reaction spec='Reaction' reactionName="Infection" rate="0.00075">
+              S + I -> 2I
+            </reaction>
+            <reaction spec='Reaction' reactionName="Recovery" rate="0.3">
+              I -> R
+            </reaction>
+          </model>
+          
+          <initialState spec='InitState'>
+            <populationSize spec='PopulationSize' population='@S' size='999'/>
+            <populationSize spec='PopulationSize' population='@I' size='1'/>
+          </initialState>
+
+          <populationEndCondition spec='PopulationEndCondition' population="@I"
+                                  threshold="0" exceedCondition="false" isRejection="true"/>
+
+          <!--output spec='JsonOutput' fileName='$(filebase).json'/-->
+
+        </populationFunction>
+
+	<run spec='CoalescentSimulatorBasic'
+             maxHeight="30"
+             replicates='10000'>
+
+          <randomTree spec='beast.base.evolution.tree.coalescent.RandomTree' id="tree">
+            <taxonset idref="taxa"/>
+            <trait idref="tipDates"/>
+            <populationModel idref="popFun"/>
+          </randomTree>
+
+          <logger logEvery="1" fileName="$(filebase).trees">
+            <log idref="tree"/>
+          </logger>
+
+          <logger logEvery="1" fileName="$(filebase).log">
+            <log spec="TreeHeightLogger" tree="@tree"/>
+          </logger>
+
+        </run>
+</beast>

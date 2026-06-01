@@ -34,6 +34,7 @@
 		<fileset dir="${libBeast2}" includes="beagle.jar"/>
 		<fileset dir="${libBeast2}" includes="commons-math3-3.6.1.jar"/>
         <fileset dir="${libBeast2}" includes="antlr-runtime-4.10.1.jar"/>
+	<fileset dir="${basedir}/../BeastFX/locallib" includes="*.jar"/> <!--< Add BeastFX/locallib />-->
         <pathelement path="${beast2classpath}"/>
         <pathelement path="${bdskyclasspath}"/>
 	</path>

@@ -1,0 +1,37 @@
+<!-- Simulate an inheritance tree from the SIR epidemic model -->
+
+<beast version='2.0' namespace='master.beast:beast.base.inference.parameter'>
+    <run spec='InheritanceTrajectory'
+         samplePopulationSizes="true"
+         verbosity="1"
+         simulationTime='2.5'>
+
+        <model spec='InheritanceModel' id='model'>
+            <population spec='Population' id='S' populationName='S'/>
+            <population spec='Population' id='I' populationName='I'/>
+            <population spec='Population' id='R' populationName='R'/>
+
+            <reaction spec='InheritanceReaction' reactionName="Infection" rate="0.005">
+                S + I -> 2I
+            </reaction>
+            <reaction spec='InheritanceReaction' reactionName="Recovery" rate="2">
+                I -> R
+            </reaction>
+        </model>
+
+        <initialState spec='InitState'>
+            <populationSize spec='PopulationSize' population='@S' size='999'/>
+            <lineageSeed spec='Individual' population='@I'/>
+        </initialState>
+
+        <!-- Simulation will terminate when no lineages remain -->
+        <lineageEndCondition spec='LineageEndCondition' nLineages="0"/>
+
+        <postProcessor spec='LineageSampler' nSamples="245" samplingTime="2.5" cleanSingleChildNodes="true"/>
+
+        <output spec='NewickOutput' fileName='SIRTreeSampled_output.newick'/>
+        <output spec='NexusOutput' fileName='SIRTreeSampled_output.nexus'/>
+        <output spec='JsonOutput' fileName='SIRTreeSampled_output.json'/>
+    </run>
+</beast>
+

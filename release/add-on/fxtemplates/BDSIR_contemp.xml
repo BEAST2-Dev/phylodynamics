@@ -1,0 +1,154 @@
+<beast version='2.0'
+       namespace='beast.app.beauti:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.branchratemodel:beast.base.evolution.speciation:beast.phylodynamics:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:beast.evolution:beast.base.inference.distribution'>
+
+<!-- tree priors -->
+<mergewith point='treePriorTemplates'> 
+
+        <subtemplate id='Phylodynamics: BirthDeathSIR (contemp)' class='phylodynamics.BDSIR' mainid='BDSIRcontemp.t:$(n)'       
+suppressInputs='phylodynamics.BDSIR.intervalTimes,
+	phylodynamics.BDSIR.birthRate,
+	phylodynamics.BDSIR.deathRate,
+	phylodynamics.BDSIR.samplingRate,
+	phylodynamics.BDSIR.samplingProportion,	
+	phylodynamics.BDSIR.contemp,
+	phylodynamics.BDSIR.S0,
+	phylodynamics.BDSIR.dS,
+	phylodynamics.BDSIR.dE,
+	phylodynamics.BDSIR.dR,
+	phylodynamics.BDSIR.isSeasonal,
+	phylodynamics.BDSIR.intervalNumber,
+	phylodynamics.BDSIR.tree,
+	phylodynamics.BDSIR.checkTreeConsistent,
+	phylodynamics.BDSIR.treeIntervals,
+	phylodynamics.BDSIR.forceRateChange, 
+	phylodynamics.BDSIR.conditionOnSurvival, 
+	phylodynamics.BDSIR.reverseTimeArrays,
+	phylodynamics.BDSIR.rhoSamplingTimes,
+	phylodynamics.BDSIR.deathRateChangeTimes,
+	phylodynamics.BDSIR.samplingRateChangeTimes,
+	phylodynamics.BDSIR.birthRateTimesRelative,
+	phylodynamics.BDSIR.deathRateTimesRelative,
+	phylodynamics.BDSIR.samplingRateTimesRelative,
+	phylodynamics.BDSIR.birthRateChangeTimes'>
+<![CDATA[
+<!-- SIR simulator -->
+	<SIR spec="phylodynamics.epidemiology.HybridSEIREpidemic" id="SIR.t:$(n)" origin="@originEc.t:$(n)" S0="@S0Ec.t:$(n)" Nt="10000" Nsamples="101" 
+				birth="@birthEc.t:$(n)" death="@becomeUninfectiousRateEc.t:$(n)" sampling="@samplingEc.t:$(n)" simulationType="SAL" />
+	
+
+
+<!-- Sequential BDSIR model-->
+	<BDSIR spec="phylodynamics.BDSIR" dS="@dS.t:$(n)" dR="@dR.t:$(n)" id="BDSIRcontemp.t:$(n)" tree="@Tree.t:$(n)" contemp="true">
+		<parameter name="origin" id="originEc.t:$(n)" value="10" lower="0." upper="1000."/>  	
+		<parameter name="S0" id="S0Ec.t:$(n)" value="300000" lower="0" upper="10000000"/> 		
+		<parameter name="reproductiveNumber" id="reproductiveNumberEc.t:$(n)" value="2" lower="0." dimension ="1" upper="10"/>
+		<parameter name="becomeUninfectiousRate" id="becomeUninfectiousRateEc.t:$(n)" value="1." lower="0." upper="10." dimension ="1"/>
+		<parameter name="rho" id="rhoEc.t:$(n)" value="0.1" lower="0." upper="1." dimension ="1"/> 
+		<parameter name="samplingProportion" id="samplingEc.t:$(n)" value="0." lower="0." upper="1." dimension ="1"/> 
+	</BDSIR>
+
+	<distribution  id='originPriorEc.t:$(n)' x="@originEc.t:$(n)" spec='beast.base.inference.distribution.Prior'>
+		<distr spec='beast.base.inference.distribution.Uniform' lower="0." upper="1000."/>
+	</distribution>
+	<distribution id="S0_priorEc.t:$(n)" spec="beast.base.inference.distribution.Prior" x="@S0Ec.t:$(n)">
+		<distr spec="beast.base.inference.distribution.LogNormalDistributionModel" M="8." S="2." offset="0."/>
+	</distribution>
+	<distribution id="rhoPriorEc.t:$(n)" spec="beast.base.inference.distribution.Prior" x="@rhoEc.t:$(n)">
+		<distr spec="beast.base.inference.distribution.Beta" alpha="1." beta="1." offset="0."/>
+	</distribution>
+	<distribution id="becomeUninfectiousRatePriorEc.t:$(n)" spec="beast.base.inference.distribution.Prior" x="@becomeUninfectiousRateEc.t:$(n)">
+		<distr spec='beast.base.inference.distribution.LogNormalDistributionModel' M="0." S="1." offset="0.0" meanInRealSpace="false"/>
+	</distribution>
+	<distribution id="reproductiveNumberPriorEc.t:$(n)" spec="beast.base.inference.distribution.Prior" x="@reproductiveNumberEc.t:$(n)">
+		<distr spec='beast.base.inference.distribution.LogNormalDistributionModel' M="0." S="1.25" offset="0.0" meanInRealSpace="false"/>
+	</distribution>
+
+	<RPNcalculator spec="beast.base.inference.util.RPNcalculator" id="birthEc.t:$(n)" expression="reproductiveNumberEc.t:$(n) S0Ec.t:$(n) / becomeUninfectiousRateEc.t:$(n) *"> 
+		<parameter idref="becomeUninfectiousRateEc.t:$(n)"/>
+		<parameter idref="reproductiveNumberEc.t:$(n)"/>        
+		<parameter idref="S0Ec.t:$(n)"/>        
+	</RPNcalculator>
+
+	<parameter name="dS" id="dS.t:$(n)" value="0" dimension="100"/>
+	<parameter name="dR" id="dR.t:$(n)" value="0" dimension="100"/>		
+
+    <plate var='p' range='origin,rho,becomeUninfectiousRate,reproductiveNumber,S0'>
+
+		<operator spec="phylodynamics.epidemiology.CompoundSIROperator" id="SIR_$(p)_operatorEc.t:$(n)"  weight="3" tree="@Tree.t:$(n)" origin='@originEc.t:$(n)' birth="@birthEc.t:$(n)" death="@becomeUninfectiousRateEc.t:$(n)" sampling="@samplingEc.t:$(n)" S0="@S0Ec.t:$(n)" dS="@dS.t:$(n)" dR="@dR.t:$(n)">
+			<SIR idref="SIR.t:$(n)"/>
+			<affectingOperator id='$(p)OperatorEc.t:$(n)' spec='ScaleOperator' scaleFactor=".9" weight="1" parameter="@$(p)Ec.t:$(n)"/>
+		</operator> 
+	</plate>
+
+		<operator spec="phylodynamics.epidemiology.CompoundSIROperator" id="SIR_tree_operator.t:$(n)"  weight="5" tree="@Tree.t:$(n)" origin='@originEc.t:$(n)' birth="@birthEc.t:$(n)" death="@becomeUninfectiousRateEc.t:$(n)" sampling="@samplingEc.t:$(n)" S0="@S0Ec.t:$(n)" dS="@dS.t:$(n)" dR="@dR.t:$(n)">
+			<SIR idref="SIR.t:$(n)"/>
+			<affectingOperator spec='ScaleOperator' scaleFactor=".9" weight="5" tree="@Tree.t:$(n)"/>
+		</operator> 
+	
+		<operator spec="phylodynamics.epidemiology.CompoundSIROperator" id="SIR_treeRoot_operator.t:$(n)"  weight="5" tree="@Tree.t:$(n)" origin='@originEc.t:$(n)' birth="@birthEc.t:$(n)" death="@becomeUninfectiousRateEc.t:$(n)" sampling="@samplingEc.t:$(n)" S0="@S0Ec.t:$(n)" dS="@dS.t:$(n)" dR="@dR.t:$(n)">
+			<SIR idref="SIR.t:$(n)"/>
+			<affectingOperator spec='ScaleOperator' scaleFactor=".9" weight="1" rootOnly="true" tree="@Tree.t:$(n)"/>
+		</operator> 
+	
+		<operator spec="phylodynamics.epidemiology.CompoundSIROperator" id="SIR_subtreeslide_operator.t:$(n)"  weight="15" tree="@Tree.t:$(n)" origin='@originEc.t:$(n)' birth="@birthEc.t:$(n)" death="@becomeUninfectiousRateEc.t:$(n)" sampling="@samplingEc.t:$(n)" S0="@S0Ec.t:$(n)" dS="@dS.t:$(n)" dR="@dR.t:$(n)">
+			<SIR idref="SIR.t:$(n)"/>
+            <affectingOperator spec='SubtreeSlide' weight="1" gaussian="true" size="1.0" tree="@Tree.t:$(n)"/>
+		</operator> 
+	
+	<!-- standard tree operators -->	
+	
+	<operator id='BDSIR_contempUniformOperator.t:$(n)' spec='Uniform' weight="30" tree="@Tree.t:$(n)"/>
+	<operator id='BDSIR_contempnarrow.t:$(n)' spec='Exchange' isNarrow='true' weight="15" tree="@Tree.t:$(n)"/>
+	<operator id='BDSIR_contempwide.t:$(n)' spec='Exchange' isNarrow='false' weight="3" tree="@Tree.t:$(n)"/>
+	<operator id='BDSIR_contempWilsonBalding.t:$(n)' spec='WilsonBalding' weight="3" tree="@Tree.t:$(n)"/>
+	
+]]>
+
+            
+            <connect srcID='BDSIRcontemp.t:$(n)' targetID='prior' inputName='distribution' if='inposterior(BDSIRcontemp.t:$(n)) and inlikelihood(Tree.t:$(n)) and Tree.t:$(n)/estimate=true'/>
+
+            <connect srcID='origRootPriorEc.t:$(n)' targetID='prior' inputName='distribution' if='inposterior(BDSIRcontemp.t:$(n)) and originEc.t:$(n)/estimate=true'>prior on originEc.t:$(n)</connect>
+            <connect srcID='S0_priorEc.t:$(n)' targetID='prior' inputName='distribution' if='inposterior(BDSIRcontemp.t:$(n)) and S0Ec.t:$(n)/estimate=true'>prior on S0Ec.t:$(n)</connect>
+            <connect srcID='rhoPriorEc.t:$(n)' targetID='prior' inputName='distribution' if='inposterior(BDSIRcontemp.t:$(n)) and rhoEc.t:$(n)/estimate=true'>prior on rhoEc.t:$(n)</connect>
+            <connect srcID='becomeUninfectiousRatePriorEc.t:$(n)' targetID='prior' inputName='distribution' if='inposterior(BDSIRcontemp.t:$(n)) and becomeUninfectiousRateEc.t:$(n)/estimate=true'>prior on becomeUninfectiousRateEc.t:$(n)</connect>
+            <connect srcID='reproductiveNumberPriorEc.t:$(n)' targetID='prior' inputName='distribution' if='inposterior(BDSIRcontemp.t:$(n)) and reproductiveNumberEc.t:$(n)/estimate=true'>prior on reproductiveNumberEc.t:$(n)</connect>
+
+            <connect srcID='SIR_tree_operator.t:$(n)' targetID='mcmc' inputName='operator'     if='inposterior(BDSIRcontemp.t:$(n)) and Tree.t:$(n)/estimate=true'/>
+            <!--connect srcID='treeScaler.t:$(n)' targetID='mcmc' inputName='operator' if='inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true and nooperator(SIR_tree_operator.t:$(n))' /-->
+
+            <connect srcID='SIR_treeRoot_operator.t:$(n)' targetID='mcmc' inputName='operator'     if='inposterior(BDSIRcontemp.t:$(n)) and Tree.t:$(n)/estimate=true'/>
+            <!--connect srcID='treeRootScaler.t:$(n)' targetID='mcmc' inputName='operator' if='inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true and nooperator(SIR_treeRoot_operator.t:$(n))' /-->
+
+            <connect srcID='SIR_subtreeslide_operator.t:$(n)' targetID='mcmc' inputName='operator'     if='inposterior(BDSIRcontemp.t:$(n)) and Tree.t:$(n)/estimate=true'/>
+            <!--connect srcID='SubtreeSlide.t:$(n)' targetID='mcmc' inputName='operator' if='inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true and nooperator(SIR_subtreeslide_operator.t:$(n))' /-->
+
+            <connect srcID='BDSIR_contempUniformOperator.t:$(n)'           targetID='mcmc' inputName='operator' if='inposterior(BDSIRcontemp.t:$(n)) and inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true'>Draws new internal node heights uniformally for tree t:$(n)</connect>
+            <connect srcID='BDSIR_contempSubtreeSlide.t:$(n)'              targetID='mcmc' inputName='operator' if='inposterior(BDSIRcontemp.t:$(n)) and inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true'>Performs subtree slide rearrangement of tree t:$(n)</connect>
+            <connect srcID='BDSIR_contempnarrow.t:$(n)'                    targetID='mcmc' inputName='operator' if='inposterior(BDSIRcontemp.t:$(n)) and inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true'>Narrow exchange performs local rearrangement of tree t:$(n)</connect>
+            <connect srcID='BDSIR_contempwide.t:$(n)'                      targetID='mcmc' inputName='operator' if='inposterior(BDSIRcontemp.t:$(n)) and inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true'>Wide exchange performs global rearrangement of tree t:$(n)</connect>
+            <connect srcID='BDSIR_contempWilsonBalding.t:$(n)'             targetID='mcmc' inputName='operator' if='inposterior(BDSIRcontemp.t:$(n)) and inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true'>Performs Wilson-Balding global rearrangement of tree t:$(n)</connect>
+
+    <plate var='p' range='origin,rho,becomeUninfectiousRate,reproductiveNumber,S0'>
+
+            <connect srcID='SIR_$(p)_operatorEc.t:$(n)' targetID='mcmc' inputName='operator'     if='inposterior(BDSIRcontemp.t:$(n)) and $(p)Ec.t:$(n)/estimate=true'/>
+
+    </plate>
+
+            <connect srcID='BDSIRcontemp.t:$(n)' targetID='tracelog' inputName='log' if='inposterior(BDSIRcontemp.t:$(n))'/>
+            <plate var='p' range='origin,rho,sampling,becomeUninfectiousRate,reproductiveNumber,S0'>
+                    <connect srcID='$(p)Ec.t:$(n)' targetID='state' inputName='stateNode' if='inposterior(BDSIRcontemp.t:$(n)) and $(p)Ec.t:$(n)/estimate=true'/>
+                    <connect srcID='$(p)Ec.t:$(n)' targetID='tracelog' inputName='log' if='inposterior(BDSIRcontemp.t:$(n)) and $(p)Ec.t:$(n)/estimate=true'/>
+            </plate>
+            <plate var='p' range='dS,dR'>
+                    <connect srcID='$(p).t:$(n)' targetID='state' inputName='stateNode' if='inposterior(BDSIRcontemp.t:$(n))'/>
+			</plate>
+            <plate var='p' range='birth,dS,dR'>
+	            <connect srcID='$(p).t:$(n)' targetID='tracelog' inputName='log' if='inposterior(BDSIRcontemp.t:$(n))'/>
+			</plate>
+	</subtemplate>
+</mergewith>
+
+</beast>
+
+
+

@@ -1,0 +1,49 @@
+<!-- Generate a simulated compartmental population size history using
+     an implementation of the SIR epidemiological model. -->
+
+<beast version='2.0' namespace='master.beast:beast.base.inference.parameter'>
+  <run spec='EnsembleSummary'
+       nTraj="1000"
+       nSamples="1001"
+       simulationTime='2.5'>
+
+    <!--<stepper spec='RateEquationStepper' stepSize="0.1"/>-->
+
+    <model spec='Model' id='model'>
+      <population spec='Population' id='S' populationName='S'/>
+      <population spec='Population' id='I' populationName='I'/>
+      <population spec='Population' id='R' populationName='R'/>
+      
+      <reaction spec='Reaction' reactionName="Infection" rate="0.005">
+	S + I -> 2I
+      </reaction>
+      <reaction spec='Reaction' reactionName="Recovery" rate="2.0">
+	I -> R
+      </reaction>
+    </model>
+    
+    <initialState spec='InitState'>
+      <populationSize spec='PopulationSize' population='@S' size='1000'/>
+      <populationSize spec='PopulationSize' population='@I' size='1'/>
+    </initialState>
+
+    <populationEndCondition spec="PopulationEndCondition"
+			    threshold="0" isRejection="true" exceedCondition="false">
+      <population idref="I"/>
+    </populationEndCondition>
+
+    <moment spec='Moment'
+	    momentName='I'
+	    factorial='true'>
+      <factor idref="I"/>
+    </moment>
+
+    <moment spec='Moment'
+	    momentName='S'
+	    factorial='true'>
+      <factor idref="S"/>
+    </moment>
+
+    <output spec='JsonOutput' fileName='SIR_output.json'/>
+  </run>
+</beast>

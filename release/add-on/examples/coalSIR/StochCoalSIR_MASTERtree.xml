@@ -1,0 +1,92 @@
+<beast version='2.0'
+       namespace='import beast.base.math.distributions.Prior:beast.base.util:beast.base.math.TreeParser:phylodynamics.epidemiology:master.beast:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:beast.base.inference.parameter:phylodynamics.epidemiology:beast.base.evolution.tree:beast.base.evolution.alignment'>
+
+    <tree spec="beast.base.evolution.tree.TreeParser" id="tree" adjustTipHeights="false" offset="1" newick="NEWICK"/>
+
+   <state id="state" storeEvery="1000">
+        <stateNode spec="RealParameter" id="volz.n_S0" value="999"/>
+        <stateNode spec="RealParameter" id="volz.R0" value="2.5"/>
+        <stateNode spec="RealParameter" id="volz.gamma" value="0.30"/>
+        <stateNode spec="RealParameter" id="volz.origin" value="ORIGIN"/>
+    </state>
+
+    <run spec="MCMC" id="mcmc" chainLength="100000000">
+
+        <distribution spec="CompoundDistribution" id="posterior">
+            <distribution id="coalescent" spec="StochasticCoalescent" minTraj="1" minTrajSuccess="1">
+                <treeIntervals spec="beast.base.evolution.tree.TreeIntervals" id="beast.base.evolution.tree.TreeIntervals">
+                    <tree idref="tree"/>
+                </treeIntervals>
+                
+                <populationModel spec="SIRPopulationFunction" id='popFunc'>
+                    <volzSIR spec="StochasticCoalescentSIR" id="volzSIR" integrationStepCount='1001'
+                             numSamplesFromTrajectory='1001'>
+                        <R0 idref="volz.R0"/>
+                        <gamma idref="volz.gamma"/>
+                        <n_S0 idref="volz.n_S0"/>
+                        <origin idref="volz.origin"/>
+                    </volzSIR>
+                </populationModel>
+            </distribution>
+            
+            <!-- Parameter priors -->
+            <distribution spec='CompoundDistribution' id='parameterPriors'>
+                <distribution spec='beast.base.inference.distribution.Prior' x="@volz.n_S0">
+                    <distr spec='beast.base.inference.distribution.LogNormalDistributionModel' M="7" S="1"/>
+                </distribution>
+                <distribution spec='beast.base.inference.distribution.Prior' x="@volz.R0">
+                    <distr spec="beast.base.inference.distribution.LogNormalDistributionModel"  M="1" S="1"/>
+                </distribution>
+                <distribution spec='beast.base.inference.distribution.Prior' x="@volz.gamma">
+                    <distr spec='beast.base.inference.distribution.LogNormalDistributionModel' M="-1" S="1"/>
+                </distribution>
+                <distribution spec='beast.base.inference.distribution.Prior' x="@volz.origin">
+                    <distr spec="beast.base.inference.distribution.Uniform"  lower="0" upper="100"/>
+                </distribution>
+            </distribution>
+            
+        </distribution>
+
+
+    <!-- OPERATORS! :D -->
+    
+      <operator id='S0' spec='ScaleOperator' scaleFactor="0.8" optimise="false" weight="1">
+            <parameter idref="volz.n_S0"/>
+      </operator>    
+        
+      <operator id='origin' spec='ScaleOperator' scaleFactor="0.8" optimise="false" weight="1">
+          <parameter idref="volz.origin"/>
+      </operator>
+
+      <operator id='R0' spec='ScaleOperator' scaleFactor="0.8" optimise="false" weight="1">
+          <parameter idref="volz.R0"/>
+      </operator>
+
+      <operator id='gamma' spec='ScaleOperator' scaleFactor="0.8" optimise="false" weight="1">
+          <parameter idref="volz.gamma"/>
+       </operator>
+
+
+        <logger logEvery="1000" fileName="StochCoalSIR_MASTERtree.log">
+   	        <model idref='posterior'/>
+            <log idref="posterior"/>
+            <log idref="volz.n_S0"/>
+            <log idref="volz.R0"/>
+            <log idref="volz.gamma"/>
+            <log idref="volz.origin"/>
+            <log idref="volzSIR"/>
+        </logger>
+
+        <logger logEvery="1000">
+            <model idref='posterior'/>
+            <log idref="posterior"/>
+            <log idref="volz.n_S0"/>
+            <log idref="volz.R0"/>
+            <log idref="volz.gamma"/>
+            <log idref="volz.origin"/>
+            <log idref="volzSIR"/>
+        </logger>
+
+    </run>
+
+</beast>
