@@ -18,7 +18,7 @@
 	<property name="srcBeast2" location="${beast2path}/src" />
 	<property name="beast2classpath" location="${beast2path}/build" />
     <!--<property name="beastlabsclasspath" location="../BEASTLabs/build" />-->
-    <property name="bdskyclasspath" location="../bdsky/build" />
+    <property name="bdmmprimeclasspath" location="../BDMM-Prime/build" />
     <!--<property name="masterclasspath" location="../MASTER/build" />-->
 	<property name="Add_on_dir" value="${release_dir}/add-on" />
 
@@ -36,7 +36,7 @@
         <fileset dir="${libBeast2}" includes="antlr-runtime-4.10.1.jar"/>
 	<fileset dir="${basedir}/../BeastFX/locallib" includes="*.jar"/> <!--< Add BeastFX/locallib />-->
         <pathelement path="${beast2classpath}"/>
-        <pathelement path="${bdskyclasspath}"/>
+        <pathelement path="${bdmmprimeclasspath}"/>
 	</path>
 
 	<!-- start -->
