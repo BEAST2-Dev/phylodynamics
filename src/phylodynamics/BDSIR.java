@@ -5,7 +5,8 @@ import beast.base.core.Description;
 import beast.base.core.Function;
 import beast.base.core.Input;
 import beast.base.inference.parameter.RealParameter;
-import bdsky.evolution.speciation.BirthDeathSkylineModel;
+import bdmmprime.distribution.BirthDeathMigrationDistribution;
+import phylodynamics.parameterization.BDSIRParameterization;
 import beast.base.evolution.tree.TreeInterface;
 
 import java.util.Arrays;
@@ -20,7 +21,7 @@ import java.util.Arrays;
         + "dynamics from viral sequences with the birth–death SIR model. "
         + "Denise Kuehnert, Tanja Stadler, Timothy Vaughan, and Alexei Drummond, "
         + "J. R. Soc. Interface, 11:20131106 (2014). ")
-public class BDSIR extends BirthDeathSkylineModel {
+public class BDSIR extends BirthDeathMigrationDistribution {
 
 
     public Input<Function> S0_input =
@@ -37,15 +38,22 @@ public class BDSIR extends BirthDeathSkylineModel {
 
     public Input<Boolean> isSeasonal = new Input<Boolean>("isSeasonal", "Is this a SeasonalSIRSEpidemic? default false", false);
 
+    // bdsky's equivalent origin, reproductiveNumber, becomeUnifectiousRate and samplingProportion now declared in BDSIRParameterization.
+
     Double S0;
     Double[] dS;
     Double[] dE;
     Double[] dR;
 
-    int dim;
-    double T;
+    public int dim;
+    public double T;
     int ntaxa;
 
+    public double[] birth;
+    int birthChanges;
+    public boolean treeConsistent = true;
+
+    private BDSIRParameterization bdsirParameterization;
 
     @Override
     public void initAndValidate() {
@@ -56,30 +64,36 @@ public class BDSIR extends BirthDeathSkylineModel {
         dim = dS.length;
 
         birthChanges = dim - 1;
+        birth = new double[dim];
+
+        bdsirParameterization = (BDSIRParameterization) parameterizationInput.get();
+        bdsirParameterization.setBDSIR(this);
+
+        // T for building interval boundaries
+        T = bdsirParameterization.processLengthInput.get().getArrayValue();
+
+        bdsirParameterization.initAndValidate();
         super.initAndValidate();
 
-        if (transform) {
-            if (reproductiveNumberInput.get().getDimension() != 1 && !isSeasonal.get())// || becomeUninfectiousRate.get().getDimension() != 1 || samplingProportion.get().getDimension() != 1)
-                throw new RuntimeException("R0, becomeUninfectiousRate and samplingProportion have to be 1-dimensional!");
-        } else {
-            if (birthRate.get().getDimension() != 1 && !isSeasonal.get())//  || death.length != 1 || psi.length != 1)
-                throw new RuntimeException("Birth, death and sampling rate have to be 1-dimensional!");
-        }
+        //if (transform) {
+        //    if (reproductiveNumberInput.get().getDimension() != 1 && !isSeasonal.get())// || becomeUninfectiousRate.get().getDimension() != 1 || samplingProportion.get().getDimension() != 1)
+        //        throw new RuntimeException("R0, becomeUninfectiousRate and samplingProportion have to be 1-dimensional!");
+        // } else {
+        //    if (birthRate.get().getDimension() != 1 && !isSeasonal.get())//  || death.length != 1 || psi.length != 1)
+        //        throw new RuntimeException("Birth, death and sampling rate have to be 1-dimensional!");
+        //}
 
         // todo: add check that intervaltimes make sense (removed for BDSIR in bdsky to allow seasonality)
 
-        T = origin.get().getArrayValue();
+        T = bdsirParameterization.processLengthInput.get().getArrayValue();
         ntaxa = treeInput.get().getLeafNodeCount();
 
     }
 
 
-    @Override
     public Double updateRatesAndTimes(TreeInterface tree) {
 
-        super.updateRatesAndTimes(tree);
-
-        T = origin.get().getArrayValue();
+        T = bdsirParameterization.processLengthInput.get().getArrayValue();
         ntaxa = tree.getLeafNodeCount();
 
         S0 = (S0_input.get().getArrayValue());
@@ -91,9 +105,7 @@ public class BDSIR extends BirthDeathSkylineModel {
 
         dR = m_dR.get().getValues();
 
-
         double cumS = S0 - 1;
-
 
         double time;
 
@@ -101,12 +113,12 @@ public class BDSIR extends BirthDeathSkylineModel {
         double I = 1.;
         double R = 0.;
 
-
         int season = (!isSeasonal.get()) ? 0 : getSeason(T);
         int initialSeason = season;
 
+        birth[0] = bdsirParameterization.ReInput.get().getValuesAtTime(0)[0] * bdsirParameterization.becomeUninfectiousRateInput.get().getValuesAtTime(0)[0];
         if (isSeasonal.get())
-            birth[1] = transform ? (reproductiveNumberInput.get().getArrayValue(1) * becomeUninfectiousRate.get().getArrayValue()) : birthRate.get().getArrayValue(1);
+            birth[1] = bdsirParameterization.ReInput.get().getValuesAtTime(0)[1] * bdsirParameterization.becomeUninfectiousRateInput.get().getValuesAtTime(0)[1];
 
         birthSIR[0] = birth[season] / S0 * cumS;
         for (int i = 0; i < dim - 1; i++) {
@@ -138,34 +150,54 @@ public class BDSIR extends BirthDeathSkylineModel {
      */
     public void adjustBirthRates(double[] birthSIR) {
 
-        for (int i = 0; i < totalIntervals; i++) {
-            birth[i] = birthSIR[birthChanges > 0 ? index(times[i], birthRateChangeTimes) : 0];
+        // for (int i = 0; i < totalIntervals; i++) {
+        //    birth[i] = birthSIR[birthChanges > 0 ? index(times[i], birthRateChangeTimes) : 0];
+        // for (int i = 0; i < bdsirParameterization.getTotalIntervalCount(); i++) {
+        //birth[i] = birthSIR[birthChanges > 0 ? bdsirParameterization.getIntervalIndex(bdsirParameterization.getBirthRateChangeTimes()[i]) : 0];
+        for (int i = 0; i < dim; i++) {
+            birth[i] = birthSIR[birthChanges > 0 ? i : 0];
+
         }
     }
 
+    @Override
+    public double calculateTreeLogLikelihood(TreeInterface tree) {
+        return super.calculateTreeLogLikelihood(tree);
+    }
+
+    // The method was earlier present in bdsky
+    public int lineageCountAtTime(double time, TreeInterface tree) {
+        int count = 1;
+        int tipCount = tree.getLeafNodeCount();
+        for (int i = tipCount; i < tipCount + tree.getInternalNodeCount(); i++) {
+            if (tree.getNode(i).getHeight() > time) count += 1;
+        }
+        for (int i = 0; i < tipCount; i++) {
+            if (tree.getNode(i).getHeight() >= time) count -= 1;
+        }
+        return count;
+    }
 
     int getSeason(double time) {   // this assumes that the second minus first change time entry in the xml defines the length of a season
 
-        double seasonLength = birthRateChangeTimesInput.get().getValue(1) - birthRateChangeTimesInput.get().getValue(0);
+        double seasonLength = bdsirParameterization.getBirthRateChangeTimes()[1] - bdsirParameterization.getBirthRateChangeTimes()[0];
 
-        double t = (time - birthRateChangeTimesInput.get().getValue(0));
+        double t = (time - bdsirParameterization.getBirthRateChangeTimes()[0]);
 
         return (int) Math.floor(1 + t / seasonLength) % 2;
 
     }
 
 
-    @Override
-    public Boolean isBDSIR() {
-        return true;
-    }
+    //public Boolean isBDSIR() {
+    //    return true;
+    //}
 
     public Boolean isSeasonalBDSIR() {
         return isSeasonal.get();
     }
 
-
-    public int getSIRdimension() {
-        return dim;
-    }
+    //public int getSIRdimension() {
+    //    return dim;
+    //}
 }
