@@ -1,9 +1,10 @@
-<package name='phylodynamics' version='1.5.0'>
-	<depends on='BEAST.base' atleast='2.7.0'/>
-	<depends on='BDSKY' atleast='1.5.0'/>
+<package name='phylodynamics' version='1.6.0'>
+    <depends on='BEAST.base' atleast='2.7.0'/>
+    <depends on='BDMM-Prime' atleast='2.7.2'/>
 
     <service type="beast.base.core.BEASTInterface">
         <provider classname="phylodynamics.BDSIR"/>
+        <provider classname="phylodynamics.parameterization.BDSIRParameterization"/>
         <provider classname="phylodynamics.epidemiology.CoalescentSimulator"/>
         <provider classname="phylodynamics.epidemiology.CoalescentSimulatorBasic"/>
         <provider classname="phylodynamics.epidemiology.CompoundSIROperator"/>

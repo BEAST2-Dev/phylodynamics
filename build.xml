@@ -1,10 +1,10 @@
 <!-- Build phylodynamics. It is also used by Hudson phylodynamics project. JUnit test is available for this build. -->
 <project basedir="." default="build_jar_all_phylodynamics" name="BUILD_phylodynamics">
 	<description>
-	    Build phylodynamics. 
-            Also used by Hudson phylodynamics project. 
-	    JUnit test is available for this build.
-	    $Id: build_phylodynamics.xml $
+		Build phylodynamics.
+		Also used by Hudson phylodynamics project.
+		JUnit test is available for this build.
+		$Id: build_phylodynamics.xml $
 	</description>
 
 	<!-- set global properties for this build -->
@@ -17,80 +17,80 @@
 	<property name="libBeast2" location="${beast2path}/lib" />
 	<property name="srcBeast2" location="${beast2path}/src" />
 	<property name="beast2classpath" location="${beast2path}/build" />
-    <!--<property name="beastlabsclasspath" location="../BEASTLabs/build" />-->
-    <property name="bdskyclasspath" location="../bdsky/build" />
-    <!--<property name="masterclasspath" location="../MASTER/build" />-->
+	<!--<property name="beastlabsclasspath" location="../BEASTLabs/build" />-->
+	<property name="bdmmprimeclasspath" location="../BDMM-Prime/build" />
+	<!--<property name="masterclasspath" location="../MASTER/build" />-->
 	<property name="Add_on_dir" value="${release_dir}/add-on" />
 
-    <import file="${beast2path}/build.xml" />
+	<import file="${beast2path}/build.xml" />
 
 	<property name="main_class_BEAST" value="beast.app.BeastMCMC" />
 	<property name="report" value="${buildphylodynamics}/junitreport"/>
 
 	<path id="classpath">
-        <pathelement path="${buildphylodynamics}"/>
+		<pathelement path="${buildphylodynamics}"/>
 		<fileset dir="${libBeast2}/junit" includes="junit-*.jar"/>
-        <fileset dir="${lib}" includes="colt.jar"/>
+		<fileset dir="${lib}" includes="colt.jar"/>
 		<fileset dir="${libBeast2}" includes="beagle.jar"/>
 		<fileset dir="${libBeast2}" includes="commons-math3-3.6.1.jar"/>
-        <fileset dir="${libBeast2}" includes="antlr-runtime-4.10.1.jar"/>
-	<fileset dir="${basedir}/../BeastFX/locallib" includes="*.jar"/> <!--< Add BeastFX/locallib />-->
-        <pathelement path="${beast2classpath}"/>
-        <pathelement path="${bdskyclasspath}"/>
+		<fileset dir="${libBeast2}" includes="antlr-runtime-4.10.1.jar"/>
+		<fileset dir="${basedir}/../BeastFX/locallib" includes="*.jar"/> <!--< Add BeastFX/locallib />-->
+		<pathelement path="${beast2classpath}"/>
+		<pathelement path="${bdmmprimeclasspath}"/>
 	</path>
 
 	<!-- start -->
 	<target name="initphylodynamics">
 		<echo message="${ant.project.name}: ${ant.file}" />
-		
-		<available file="./version.xml" property="versionAvailable"/>
-        <fail unless="versionAvailable">
-              ** Required file version.xml does not exist. **
-        </fail>
 
-        <!-- Read package name and version from xml file -->
-        <xmlproperty file="./version.xml" prefix="fromVersionFile" />
-        <property name="phylodynamicsVersion" value="${fromVersionFile.package(version)}" />
+		<available file="./version.xml" property="versionAvailable"/>
+		<fail unless="versionAvailable">
+			** Required file version.xml does not exist. **
+		</fail>
+
+		<!-- Read package name and version from xml file -->
+		<xmlproperty file="./version.xml" prefix="fromVersionFile" />
+		<property name="phylodynamicsVersion" value="${fromVersionFile.package(version)}" />
 	</target>
 
 	<target name="cleanphylodynamics">
-    	<delete dir="${buildphylodynamics}" />
+		<delete dir="${buildphylodynamics}" />
 	</target>
 
 	<!-- clean previous build, and then compile Java source code, and Juint test -->
 	<target name="build_all_phylodynamics" depends="cleanphylodynamics,compile-allphylodynamics,junitphylodynamics"
-        description="Clean and Build all run-time stuff">
+	        description="Clean and Build all run-time stuff">
 	</target>
 
 	<!-- clean previous build, compile Java source code, and Junit test, and make the beast.jar and beauti.jar -->
 	<target name="build_jar_all_phylodynamics" depends="cleanphylodynamics,compile-allphylodynamics,junitphylodynamics,dist_all_phylodynamics"
-        description="Clean and Build all run-time stuff">
+	        description="Clean and Build all run-time stuff">
 	</target>
 
 
 	<!-- No JUnit Test, clean previous build, compile Java source code, and make the phylodynamics.jar and beauti.jar -->
 	<target name="build_jar_all_phylodynamics_NoJUnitTest" depends="cleanphylodynamics,compile-allphylodynamics,dist_all_phylodynamics"
-        description="Clean and Build all run-time stuff">
+	        description="Clean and Build all run-time stuff">
 	</target>
 
 	<!-- compile Java source code -->
 	<target name="compile-allphylodynamics" depends="initphylodynamics,compile-all">
 
 
-	    <!-- Capture the path as a delimited property using the refid attribute -->
-	    <property name="myclasspath" refid="classpath"/>
-	    <!-- Emit the property to the ant console -->
-	    <echo message="Classpath = ${myclasspath}"/>
+		<!-- Capture the path as a delimited property using the refid attribute -->
+		<property name="myclasspath" refid="classpath"/>
+		<!-- Emit the property to the ant console -->
+		<echo message="Classpath = ${myclasspath}"/>
 
 		<mkdir dir="${buildphylodynamics}" />
 
 		<!-- Compile the java code from ${srcphylodynamics} into ${buildphylodynamics} /bin -->
-		<javac srcdir="${srcphylodynamics}" destdir="${buildphylodynamics}" classpathref="classpath" 
+		<javac srcdir="${srcphylodynamics}" destdir="${buildphylodynamics}" classpathref="classpath"
 		       fork="true"
 		       memoryinitialsize="256m"
 		       memorymaximumsize="256m"
-			   includeAntRuntime='false'
-			   source="1.8"
+		       includeAntRuntime='false'
+		       source="1.8"
 		       target="1.8">
 			<include name="phylodynamics/**/**" />
 			<!-- compile JUnit test classes -->
@@ -114,7 +114,7 @@
 				<include name="phylodynamics/**/*.png" />
 				<include name="phylodynamics/**/*.xsl" />
 			</fileset>
-        </jar>
+		</jar>
 		<jar jarfile="${distphylodynamics}/phylodynamics.addon.jar">
 			<manifest>
 				<attribute name="Built-By" value="${user.name}" />
@@ -131,7 +131,7 @@
 		<java jar="${distphylodynamics}/phylodynamics.jar" fork="true" />
 	</target>
 
-	
+
 	<!-- JUnit test -->
 	<target name="junitphylodynamics">
 		<mkdir dir="${report}" />
@@ -145,19 +145,19 @@
 
 			<batchtest fork="yes" todir="${report}">
 				<fileset dir="${srcphylodynamics}">
-                    <include name="test/**/*Test.java"/>
+					<include name="test/**/*Test.java"/>
 					<exclude name="test/phylodynamics/epidemiology/**/VolzSIRTest.java"/>
 				</fileset>
 				<fileset dir="${srcBeast2}">
-                    <include name="test/beast/integration/**/*Test.java"/>                                         
-                    <exclude name="test/beast/integration/**/ResumeTest.java"/>
+					<include name="test/beast/integration/**/*Test.java"/>
+					<exclude name="test/beast/integration/**/ResumeTest.java"/>
 				</fileset>
 			</batchtest>
 		</junit>
 		<echo message="JUnit test finished." />
 	</target>
-    
-    <target name="junitreport">
+
+	<target name="junitreport">
 		<junitreport todir="${report}">
 			<fileset dir="${report}" includes="*.xml"/>
 			<report format="frames" todir="${report}"/>
@@ -198,7 +198,7 @@
 			<fileset dir="${Add_on_dir}">
 				<include name="**/*" />
 			</fileset>
-        </jar>
+		</jar>
 		<echo message="Add-on version release ${phylodynamicsVersion} is finished." />
 	</target>
 
