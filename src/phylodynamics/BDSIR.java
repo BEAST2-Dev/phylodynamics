@@ -63,7 +63,7 @@ public class BDSIR extends BirthDeathMigrationDistribution {
         super.initAndValidate();
 
         /*if (bdsirParameterization.ReInput.get() != null && bdsirParameterization.becomeUninfectiousRateInput.get() != null && bdsirParameterization.samplingProportionInput.get() != null) {
-            if (bdsirParameterization.ReInput.get != 1 && !bdsirParameterization.isSeasonal.get())// || becomeUninfectiousRate.get().getDimension() != 1 || samplingProportion.get().getDimension() != 1)
+            if (bdsirParameterization.ReInput. != 1 && !bdsirParameterization.isSeasonal.get())// || becomeUninfectiousRate.get().getDimension() != 1 || samplingProportion.get().getDimension() != 1)
             {
                 throw new RuntimeException("R0, becomeUninfectiousRate and samplingProportion have to be 1-dimensional!");
             } else {
@@ -141,14 +141,8 @@ public class BDSIR extends BirthDeathMigrationDistribution {
      * @param birthSIR
      */
     public void adjustBirthRates(double[] birthSIR) {
-        //System.out.println("totalIntervals: " + totalIntervals + "      dim: " + dim);
-        //System.out.println("ReInput.get().getChangeTimes():" + java.util.Arrays.toString(bdsirParameterization.ReInput.get().getChangeTimes()));
-        //System.out.println("getDeathRateChangeTimes():" + java.util.Arrays.toString(bdsirParameterization.getDeathRateChangeTimes()));
-        //System.out.println("getBirthRateChangeTimes():" + java.util.Arrays.toString(bdsirParameterization.getBirthRateChangeTimes()));
-
         for (int i = 0; i < totalIntervals; i++) {
             birth[i] = birthSIR[birthChanges > 0 ? index(times[i], bdsirParameterization.ReInput.get().getChangeTimes()) : 0];
-            //System.out.println("birth[" + times[i] + "]: " + birth[i] );
         }
     }
 

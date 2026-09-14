@@ -238,7 +238,7 @@ public class BDSIRTest {
 
         bdsirParam.initByName(
                 "processLength", new RealParameter("50."),
-                "Re", new SkylineVectorParameter(new RealParameter("16.6666666666666667 33.33333333333333337"), new RealParameter("2.0 2.2 2.3")),
+                "Re", new SkylineVectorParameter(new RealParameter("16.6666666666666667 33.33333333333333337"), new RealParameter("2.0 2.0 2.0")), // only uses Re[0] for BDSIR
                 "becomeUninfectiousRate", new SkylineVectorParameter(new RealParameter("25"), new RealParameter("0.2 0.3")),
                 "samplingProportion", new SkylineVectorParameter(new RealParameter("25"), new RealParameter("1.0 0.10")),
                 "removalProb", new SkylineVectorParameter(null, new RealParameter("1.0")),
