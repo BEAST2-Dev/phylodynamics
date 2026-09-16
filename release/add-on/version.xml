@@ -1,4 +1,4 @@
-<package name='phylodynamics' version='1.6.0'>
+<package name='phylodynamics' version='1.6.1'>
     <depends on='BEAST.base' atleast='2.7.0'/>
     <depends on='BDMM-Prime' atleast='2.7.2'/>
 
