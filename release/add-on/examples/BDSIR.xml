@@ -11,13 +11,24 @@
         </input>
   </tree>
 
-	<BDSIR spec="phylodynamics.BDSIR" id="birthDeath" tree="@tree" dS="@dS" dR="@dR" checkTreeConsistent="false">
+	<BDSIR spec="phylodynamics.BDSIR" id="birthDeath" tree="@tree">
 		<!--origin must > tree height(12.485382039003651)-->
-		<parameter name="origin" id="origin" value ="15"/>
-		<parameter name="reproductiveNumber" id="reproductiveNumber" value="2.5" lower="0." upper="10."/>
-		<parameter name="becomeUninfectiousRate" id="becomeUninfectiousRate" value="0.25" lower="0."/>
-		<parameter name="samplingProportion" id="samplingProportion" value="0.10" lower="0." upper="1."/>
-		<parameter name="S0" id="S0" value="1000" lower="1"/>
+		<parameterization id="bdsirParameterization" spec="phylodynamics.parameterization.BDSIRParameterization" dS="@dS" dR="@dR" checkTreeConsistent="false">
+			<parameter name="processLength" id="origin" value ="15"/>
+			<Re spec="bdmmprime.parameterization.SkylineVectorParameter">
+				<parameter name="skylineValues" id="reproductiveNumber" value="2.5" lower="0." upper="10."/>
+			</Re>
+			<becomeUninfectiousRate spec="bdmmprime.parameterization.SkylineVectorParameter">
+				<parameter name="skylineValues" id="becomeUninfectiousRate" value="0.25" lower="0."/>
+			</becomeUninfectiousRate>
+			<samplingProportion spec="bdmmprime.parameterization.SkylineVectorParameter">
+				<parameter name="skylineValues" id="samplingProportion" value="0.10" lower="0." upper="1."/>
+			</samplingProportion>
+			<parameter name="S0" id="S0" value="1000" lower="1"/>
+			<removalProb spec="bdmmprime.parameterization.SkylineVectorParameter">
+				<parameter name="skylineValues" id="removalProb" value="0.1"/>
+			</removalProb>
+		</parameterization>
 	</BDSIR>
 
 	<SIR spec="HybridSEIREpidemic" id="SIR" S0="@S0" Nt="10001" Nsamples="101" origin="@origin" birth="@birth" death="@death" sampling="@sampling" simulationType="SAL"/>
