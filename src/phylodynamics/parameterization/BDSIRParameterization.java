@@ -36,6 +36,17 @@ public class BDSIRParameterization extends EpiParameterization{
         super.initAndValidate();
     }
 
+    @Override
+    public double[] getBirthRateChangeTimes () {
+        double[] changeTimes = new double[Math.max(m_dS.get().getDimension() - 1, 0)];
+        for (int i = 0; i<changeTimes.length; i++)
+            changeTimes[i] = (getTotalProcessLength() / m_dS.get().getDimension()) * (i+1);
+        return changeTimes;
+        //return super.getBirthRateChangeTimes();
+        //not using super.getBirthRateChangeTimes() because in bdsky, BirthRateChangeTimes is calculated using origin and dim.
+        //super,getBirthRateChangeTimes() may generate a different different array based on the changeTimes for ReInput and becomeUninfectiousRateInput
+    }
+
 
     @Override
     public double[] getBirthRateValues(double time) {
@@ -44,6 +55,7 @@ public class BDSIRParameterization extends EpiParameterization{
 
         if (time == intervalEndTimes[0]) { // to avoid updateRatesAndTimes running intervalEndTimes.len times
             Double result = bdsir.updateRatesAndTimes(bdsir.treeInput.get());
+            bdsir.treeConsistent = (result != Double.NEGATIVE_INFINITY);
         }
         return new double[]{bdsir.birth[bdsir.index(time, bdsir.times)]};
     }
