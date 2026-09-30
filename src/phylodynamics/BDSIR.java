@@ -2,12 +2,10 @@ package phylodynamics;
 
 import beast.base.core.Citation;
 import beast.base.core.Description;
-import beast.base.core.Function;
-import beast.base.core.Input;
-import beast.base.inference.parameter.RealParameter;
 import bdmmprime.distribution.BirthDeathMigrationDistribution;
 import phylodynamics.parameterization.BDSIRParameterization;
 import beast.base.evolution.tree.TreeInterface;
+import org.apache.commons.math.special.Gamma; // not needed
 
 import java.util.Arrays;
 
@@ -40,6 +38,7 @@ public class BDSIR extends BirthDeathMigrationDistribution {
     public double[] birthSIR;
     int birthChanges;
     public boolean treeConsistent = true;
+    public double[] BRchangeTimes;
 
     private BDSIRParameterization bdsirParameterization;
 
@@ -82,6 +81,7 @@ public class BDSIR extends BirthDeathMigrationDistribution {
     public Double updateRatesAndTimes(TreeInterface tree) {
 
         T = bdsirParameterization.processLengthInput.get().getArrayValue();
+
         ntaxa = tree.getLeafNodeCount();
 
         S0 = (bdsirParameterization.S0_input.get().getArrayValue());
@@ -91,6 +91,7 @@ public class BDSIR extends BirthDeathMigrationDistribution {
         totalIntervals = bdsirParameterization.getTotalIntervalCount();
         dim = dS.length;
         birthChanges = dim -1;
+        BRchangeTimes = bdsirParameterization.getBirthRateChangeTimes();
         dE = (bdsirParameterization.m_dE.get() != null) ? bdsirParameterization.m_dE.get().getValues() : (new Double[dS.length]);
         if (dE[0] == null) Arrays.fill(dE, 0.);
 
@@ -142,7 +143,7 @@ public class BDSIR extends BirthDeathMigrationDistribution {
      */
     public void adjustBirthRates(double[] birthSIR) {
         for (int i = 0; i < totalIntervals; i++) {
-            birth[i] = birthSIR[birthChanges > 0 ? index(times[i], bdsirParameterization.ReInput.get().getChangeTimes()) : 0];
+            birth[i] = birthSIR[birthChanges > 0 ? index(times[i], BRchangeTimes) : 0];
         }
     }
 
@@ -157,6 +158,14 @@ public class BDSIR extends BirthDeathMigrationDistribution {
 
     @Override
     public double calculateTreeLogLikelihood(TreeInterface tree) {
+        treeConsistent = (updateRatesAndTimes(tree) != Double.NEGATIVE_INFINITY);
+        /*
+        //Gives the same result as BDSKY´s calculateTreeLogLikelihood, comment lines with assert in BDSIRTest when using this or update accordingly
+        double logP = super.calculateTreeLogLikelihood(tree);
+        int internalNodeCount = tree.getLeafNodeCount() - ((beast.base.evolution.tree.Tree) tree).getDirectAncestorNodeCount() - 1;
+        logP -= Math.log(2) * internalNodeCount;
+        logP += Gamma.logGamma(tree.getLeafNodeCount() + 1);
+        return logP;*/
         return super.calculateTreeLogLikelihood(tree);
     }
 
@@ -176,8 +185,8 @@ public class BDSIR extends BirthDeathMigrationDistribution {
 
     int getSeason(double time) {   // this assumes that the second minus first change time entry in the xml defines the length of a season
 
-        double seasonLength = bdsirParameterization.getBirthRateChangeTimes()[1] - bdsirParameterization.getBirthRateChangeTimes()[0];
-        double t = (time - bdsirParameterization.getBirthRateChangeTimes()[0]);
+        double seasonLength = BRchangeTimes[1] - BRchangeTimes[0];
+        double t = (time - BRchangeTimes[0]);
         return (int) Math.floor(1 + t / seasonLength) % 2;
 
     }

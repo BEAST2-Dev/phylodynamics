@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='Standard' beautistatus='' namespace="beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.alignment:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood" version="2.0">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='Standard' beautistatus='' namespace="beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.alignment:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.parameter:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood" version="2.0">
 
 
     <data id="3" name="alignment">
@@ -27,16 +27,20 @@
                 <data idref="3" name="alignment"/>
             </taxonset>
         </tree>
-        <parameter id="kappa.s:3" lower="0.0" name="stateNode">2.0</parameter>
-        <parameter id="originEc.t:3" lower="0.0" name="stateNode" upper="1000.0">10.0</parameter>
-        <parameter id="rhoEc.t:3" lower="0.0" name="stateNode" upper="1.0">0.1</parameter>
-        <parameter id="becomeUninfectiousRateEc.t:3" lower="0.0" name="stateNode" upper="10.0">1.0</parameter>
-        <parameter id="reproductiveNumberEc.t:3" lower="0.0" name="stateNode" upper="10.0">2.0</parameter>
-        <parameter id="S0Ec.t:3" lower="0.0" name="stateNode" upper="1.0E7">300000.0</parameter>
+        <parameter id="kappa.s:3" spec="parameter.RealParameter" lower="0.0" name="stateNode">2.0</parameter>
+        <parameter id="originEc.t:3" spec="parameter.RealParameter" lower="0.0" name="stateNode" upper="1000.0">10.0</parameter>
+        <parameter id="rhoSamplingProbTimesEpi.t:3" spec="parameter.RealParameter" name="stateNode">0.0</parameter>
+        <parameter id="rhoEc.t:3"  name="stateNode" upper="1.0">0.1</parameter>
+        <parameter id="becomeUninfectiousRateEc.t:3" spec="parameter.RealParameter" lower="0.0" name="stateNode" upper="10.0">1.0</parameter>
+        <parameter id="reproductiveNumberEc.t:3" spec="parameter.RealParameter" lower="0.0" name="stateNode" upper="10.0">2.0</parameter>
+        <parameter id="S0Ec.t:3" spec="parameter.RealParameter" lower="0.0" name="stateNode" upper="1.0E7">300000.0</parameter>
         <parameter dimension="100" id="dS.t:3" name="stateNode">0.0</parameter>
         <parameter dimension="100" id="dR.t:3" name="stateNode">0.0</parameter>
         <parameter dimension="4" id="freqParameter.s:3" lower="0.0" name="stateNode" upper="1.0">0.25</parameter>
     </state>
+
+
+
 
     <init estimate="false" id="RandomTree.t:3" initial="@Tree.t:3" spec="beast.base.evolution.tree.coalescent.RandomTree" taxa="@3">
         <populationModel id="ConstantPopulation0.t:3" spec="ConstantPopulation">
@@ -44,11 +48,27 @@
         </populationModel>
     </init>
 
+
     <distribution id="posterior" spec="beast.base.inference.CompoundDistribution">
         <distribution id="prior" spec="beast.base.inference.CompoundDistribution">
-            <distribution reproductiveNumber="@reproductiveNumberEc.t:3" S0="@S0Ec.t:3" becomeUninfectiousRate="@becomeUninfectiousRateEc.t:3" contemp="true" dR="@dR.t:3" dS="@dS.t:3" id="BDSIRcontemp.t:3" origin="@originEc.t:3" rho="@rhoEc.t:3" spec="phylodynamics.BDSIR" tree="@Tree.t:3">
+            <distribution id="BDSIRcontemp.t:3" spec="phylodynamics.BDSIR" tree="@Tree.t:3">
+                <parameterization id="bdsirParameterizationEc.t:3" spec="phylodynamics.parameterization.BDSIRParameterization" processLength="@originEc.t:3" S0="@S0Ec.t:3" dS="@dS.t:3" dR="@dR.t:3">
+                    <Re spec="bdmmprime.parameterization.SkylineVectorParameter" skylineValues="@reproductiveNumberEc.t:3"/>
+                    <becomeUninfectiousRate spec="bdmmprime.parameterization.SkylineVectorParameter" skylineValues="@becomeUninfectiousRateEc.t:3"/>
+                    <samplingProportion spec="bdmmprime.parameterization.SkylineVectorParameter">
+                        <parameter id="samplingEc.t:3" lower="0.0" name="skylineValues" upper="1.0">0.0</parameter>
+                    </samplingProportion>
+                    <removalProb spec="bdmmprime.parameterization.SkylineVectorParameter">
+                        <parameter name="skylineValues" id="removalProbEc.t:3" value="1.0"/>
+                    </removalProb>
+                    <rhoSampling spec="bdmmprime.parameterization.TimedParameter" processLength="@originEc.t:3" times="@rhoSamplingProbTimesEpi.t:3" timesAreAges="true" values="@rhoEc.t:3"/>
+                </parameterization>
+            </distribution>
+
+
+            <!--distribution reproductiveNumber="@reproductiveNumberEc.t:3" S0="@S0Ec.t:3" becomeUninfectiousRate="@becomeUninfectiousRateEc.t:3" contemp="true" dR="@dR.t:3" dS="@dS.t:3" id="BDSIRcontemp.t:3" origin="@originEc.t:3" rho="@rhoEc.t:3" spec="phylodynamics.BDSIR" tree="@Tree.t:3">
 		        <parameter id="samplingEc.t:3" lower="0.0" name="samplingProportion" upper="1.0">0.0</parameter>
-            </distribution>	
+            </distribution-->
             <prior id="reproductiveNumberPriorEc.t:3" name="distribution" x="@reproductiveNumberEc.t:3">
                 <LogNormal id="LogNormalDistributionModel.0" name="distr">
                     <parameter id="RealParameter.0" lower="0.0" name="M" upper="0.0">0.0</parameter>
@@ -163,7 +183,6 @@
         <parameter idref="kappa.s:3" name="log"/>
         <log idref="BDSIRcontemp.t:3"/>
         <parameter idref="originEc.t:3" name="log"/>
-        <parameter idref="rhoEc.t:3" name="log"/>
         <parameter idref="samplingEc.t:3" name="log"/>
         <parameter idref="becomeUninfectiousRateEc.t:3" name="log"/>
         <parameter idref="reproductiveNumberEc.t:3" name="log"/>

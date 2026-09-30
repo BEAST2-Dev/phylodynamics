@@ -53,7 +53,18 @@
 
     <distribution id="posterior" spec="beast.base.inference.CompoundDistribution">
         <distribution id="prior" spec="beast.base.inference.CompoundDistribution">
-            <distribution reproductiveNumber="@reproductiveNumberEs.t:3" S0="@S0Es.t:3" becomeUninfectiousRate="@becomeUninfectiousRateEs.t:3" dR="@dREs.t:3" dS="@dSEs.t:3" id="BDSIRserial.t:3" origin="@originEs.t:3" samplingProportion="@samplingProportionEs.t:3" spec="phylodynamics.BDSIR" tree="@Tree.t:3"/>
+
+            <distribution id="BDSIRserial.t:3" spec="phylodynamics.BDSIR" tree="@Tree.t:3">
+                <parameterization id="bdsirParameterizationEs.t:3" spec="phylodynamics.parameterization.BDSIRParameterization" processLength="@originEs.t:3" S0="@S0Es.t:3" dS="@dSEs.t:3" dR="@dREs.t:3">
+                    <Re spec="bdmmprime.parameterization.SkylineVectorParameter" skylineValues="@reproductiveNumberEs.t:3"/>
+                    <becomeUninfectiousRate spec="bdmmprime.parameterization.SkylineVectorParameter" skylineValues="@becomeUninfectiousRateEs.t:3"/>
+                    <samplingProportion spec="bdmmprime.parameterization.SkylineVectorParameter" skylineValues="@samplingProportionEs.t:3"/>
+                    <removalProb spec="bdmmprime.parameterization.SkylineVectorParameter">
+                        <parameter name="skylineValues" id="removalProb" value="1.0"/>
+                    </removalProb>
+                </parameterization>
+            </distribution>
+
             <prior id="reproductiveNumberPriorEs.t:3" name="distribution" x="@reproductiveNumberEs.t:3">
                 <LogNormal id="LogNormalDistributionModel.0" name="distr">
                     <parameter id="RealParameter.0" lower="0.0" name="M" upper="0.0">0.0</parameter>
